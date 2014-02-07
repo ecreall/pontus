@@ -22,12 +22,12 @@ class BaseIndex(Page):
         content = u'<div class="accordion" id="accordion">'
         for actionclass in actions:
 
-            action = queryWorkItem(actionclass.processid, actionclass.id, self.request, self.context, actionclass.condition)
+            action = queryWorkItem(actionclass.process_id, actionclass.node_id, self.request, self.context) # actionclass.condition: est vérifier par le validate() de l'action
             if (not (action is None) ):
-                view = getMultiAdapter((self.context, self.request), name= actionclass.view.name)
+                view = getMultiAdapter((self.context, self.request), name=actionclass.view_name)
                 view.update()
                 # nous pouvons ajouter des balises pour délimiter les vues
-                content = (content + view.content() )
+                content += view.content()
         
         if (not content ):
             raise Forbidden

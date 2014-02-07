@@ -49,10 +49,11 @@ class MultipleFormView(object):
 
         for f in self.viewsinstances:
             form, reqts = f._build_form()
-            allreqts['js'].extend(reqts['js'])
-            allreqts['css'].extend(reqts['css'])
-            allforms[form.formid]= (f, form)
-            form.counter = counter
+            if form.condition():
+                allreqts['js'].extend(reqts['js'])
+                allreqts['css'].extend(reqts['css'])
+                allforms[form.formid]= (f, form)
+                form.counter = counter
 
         html = []
         validated = None
@@ -82,6 +83,8 @@ class MultipleFormView(object):
                             formview.request.sdiapi.flash(snippet, 'danger',
                                                       allow_duplicate=True)
                             html.append(form.render(validated))
+                            # faire le rendue des autres forms
+                            # externaliser la construction de la vue globlae dans une méthode
                     break
 
         if not html:

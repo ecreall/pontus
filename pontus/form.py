@@ -5,6 +5,11 @@ class FormView(FormView):
 
     chmod = []
 
+    # Il faut partir de l'idée que toute est étape et non l'inverse.
+    # Une étape a une condition permettant de la validé. True par défaut
+    def condition(self):
+        return True
+
     def _get(self, form, node):
         for child in form.children:
             if child.name == node:
