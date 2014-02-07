@@ -10,13 +10,13 @@ from omegsi.layout import Page
  
 
 
-class EntityIndex(Page):
+class BaseIndex(Page):
 
-#    il faut voir avec les name et le context dans SD
+#    il faut voir avec le name et le context dans SD
 #    name(u'index')
 #    context(Ipropositiondaction)
      actions = []
-#    actions = [Action1, Action2]
+
 
     def render(self, ):
         content = u'<div class="accordion" id="accordion">'
@@ -35,6 +35,12 @@ class EntityIndex(Page):
         return (content + '</div>' )
 
 
+
+# exemple
+
+#class MonIndex(BaseIndex):
+#
+#    actions = [Action1, Action2]
 
 
 
