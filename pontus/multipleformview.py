@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import itertools
 import inspect
 import sys
@@ -42,6 +43,39 @@ class MultipleFormView(object):
         self.request = request
         self.viewsinstances = [f(self.context,self.request) for f in self.views]
 
+    def _html(self, allforms, currentform = None, exception = None ,validated = None):
+        html = []
+        tabnav = []
+        tabcontent = []
+        tabnav.append('<ul  id="' + self.multipleformid + '_multipleform" class="nav nav-pills">')
+        tabcontent.append('<div  id="' + self.multipleformid + '_multipleformContent" class="tab-content">')
+        if currentform is None and allforms:
+            currentform = allforms.keys()[0]
+
+        for formid in allforms:
+            form = allforms[formid][1]
+            view = allforms[formid][0]
+            if currentform == formid:
+                renderer = ''
+                if validated is not None:
+                    renderer = form.render(validated)
+                elif exception is not None:
+                    renderer = exception.render()
+                else:
+                    renderer = form.render()
+
+                tabcontent.append('<div id="' + formid + '" class="tab-pane fade in active">' + renderer + '</div>')
+                tabnav.append('<li class="active"><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
+            else:
+                tabcontent.append('<div id="' + formid + '" class="tab-pane fade">' + form.render() + '</div>')
+                tabnav.append('<li class=""><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
+
+        tabnav.append('</ul>')
+        tabcontent.append('</div>')
+        html.extend(tabnav)
+        html.extend(tabcontent)
+        return html
+
     def __call__(self):
         counter = itertools.count()
         allforms = {}
@@ -49,7 +83,7 @@ class MultipleFormView(object):
 
         for f in self.viewsinstances:
             form, reqts = f._build_form()
-            if form.condition():
+            if f.condition():
                 allreqts['js'].extend(reqts['js'])
                 allreqts['css'].extend(reqts['css'])
                 allforms[form.formid]= (f, form)
@@ -74,7 +108,7 @@ class MultipleFormView(object):
                         fail = getattr(formview, '%s_failure' % button.name, None)
                         if fail is None:
                             fail = formview.failure
-                        html.append(e.render())
+                        html = self._html(allforms, posted_formid, e, validated)
                     else:
                         try:
                             html = success_method(validated)
@@ -82,33 +116,12 @@ class MultipleFormView(object):
                             snippet = '<div class="error">Failed: %s</div>' % e
                             formview.request.sdiapi.flash(snippet, 'danger',
                                                       allow_duplicate=True)
-                            html.append(form.render(validated))
-                            # faire le rendue des autres forms
-                            # externaliser la construction de la vue globlae dans une méthode
+                            html = self._html(allforms, posted_formid, None, validated)
+
                     break
-
+        
         if not html:
-            tabnav = []
-            tabcontent = []
-            tabnav.append('<ul  id="' + self.multipleformid + '_multipleform" class="nav nav-pills">')
-            tabcontent.append('<div  id="' + self.multipleformid + '_multipleformContent" class="tab-content">')
-            isfirst = True
-            for formid in allforms:
-                statuscontent = 'tab-pane fade'
-                statusnav = ''
-                if isfirst:
-                    statuscontent = 'tab-pane fade in active'
-                    statusnav = 'active'
-                    isfirst = False
-                form = allforms[formid][1]
-                view = allforms[formid][0]
-                tabnav.append('<li class="' + statusnav + '"><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
-                tabcontent.append('<div id="' + formid + '" class="' + statuscontent + '">' + form.render() + '</div>')
-
-            tabnav.append('</ul>')
-            tabcontent.append('</div>')
-            html.extend(tabnav)
-            html.extend(tabcontent)
+            html = self._html(allforms, posted_formid, None, validated)
 
         code, start, end = get_code(1)
         if isinstance(html, list):
