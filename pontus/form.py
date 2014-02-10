@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
-from substanced.form import FormView
+from substanced.form import FormView as FV, FormError
+from pontus.wizard import Step
+import deform.exception
 
 
-class FormView(FormView):
+# Il faut partir de l'idée que toute est étape et non l'inverse.
+# Une étape a une condition permettant de la validé. True par défaut
+class FormView(FV, Step):
 
     chmod = []
 
-    # Il faut partir de l'idée que toute est étape et non l'inverse.
-    # Une étape a une condition permettant de la validé. True par défaut
-    def condition(self):
-        return True
+    def __init__(self, context, request, wizard = None, index = 0):
+        super(FormView, self).__init__(context = context, request = request)
+        self.wizard = wizard
+        self.index = index
+        self.esucces = False
+        
 
     def _get(self, form, node):
         for child in form.children:
@@ -28,5 +34,45 @@ class FormView(FormView):
                 else:
                     self._chmod(node.children[0], m[1])
 
+    def __call__(self):
+        self._setSchemaStepIndex()
+        form, reqts = self._build_form()
+        result = None
+        for button in form.buttons:
+            if button.name in self.request.POST:
+                success_method = getattr(self, '%s_success' % button.name)
+                try:
+                    controls = self.request.POST.items()
+                    validated = form.validate(controls)
+                except deform.exception.ValidationFailure as e:
+                    fail = getattr(self, '%s_failure' % button.name, None)
+                    if fail is None:
+                        fail = self.failure
+                    result = fail(e)
+                else:
+                    try:
+                        result = success_method(validated)
+                        self.esucces = True
+                    except FormError as e:
+                        snippet = '<div class="error">Failed: %s</div>' % e
+                        self.request.sdiapi.flash(snippet, 'danger',
+                                                  allow_duplicate=True)
+                        result = {'form': form.render(validated)}
+
+                break
+
+        if result is None:
+            result = self.show(form)
+
+        if isinstance(result, dict):
+            result['js_links'] = reqts['js']
+            result['css_links'] = reqts['css']
+
+        return result
+
     def before(self, form):
         self._chmod(form, self.chmod)
+
+    def _setSchemaStepIndex(self):
+        self.schema.children[len(self.schema.children)-1].default = str(self.index)
+        

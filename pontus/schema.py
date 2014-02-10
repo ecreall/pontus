@@ -1,11 +1,12 @@
 import inspect
-
+import deform.widget
 import colander
 from substanced.schema import Schema
 from zope.interface.interface import TAGGED_DATA
 
 
 class Schema(Schema):
+   
 
     def deserialize(self, cstruct=colander.null):
         appstruct = super(Schema, self).deserialize(cstruct)
@@ -60,3 +61,21 @@ def omit(schema, mask, isinternal=False):
                 omit(node.children[0], m[1], True)
 
     return new_schema
+
+
+def toStep(schema):
+    """Return a new schema without the fields listed in mask.
+    """
+
+    stepIndex = colander.SchemaNode(
+        colander.String(),
+        name = '__stepindex__',
+        widget=deform.widget.HiddenWidget()
+        )
+
+    schema.children.append(stepIndex)
+
+    return schema
+
+
+

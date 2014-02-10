@@ -4,8 +4,10 @@ import inspect
 import sys
 import deform
 import deform.form
+from deform.field import Field
 import deform.exception
 from substanced.form import FormError
+from pontus.wizard import Step
 
 
 try:
@@ -34,14 +36,15 @@ def get_code(level):
     return highlight(code, PythonLexer(), formatter), start, end
 
 
-class MultipleFormView(object):
+class MultipleFormView(Step):
 
     views = ()
     multipleformid = ''
-    def __init__(self, context, request):
+    def __init__(self, context, request, wizard = None, index = 0):
+        super(MultipleFormView, self).__init__(wizard, index)
         self.context = context
         self.request = request
-        self.viewsinstances = [f(self.context,self.request) for f in self.views]
+        self.viewsinstances = [f(context = self.context,request = self.request, wizard = wizard, index = index) for f in self.views]
 
     def _html(self, allforms, currentform = None, exception = None ,validated = None):
         html = []
@@ -80,8 +83,8 @@ class MultipleFormView(object):
         counter = itertools.count()
         allforms = {}
         allreqts={'js': [], 'css': []}
-
         for f in self.viewsinstances:
+            f._setSchemaStepIndex()
             form, reqts = f._build_form()
             if f.condition():
                 allreqts['js'].extend(reqts['js'])
@@ -112,6 +115,7 @@ class MultipleFormView(object):
                     else:
                         try:
                             html = success_method(validated)
+                            self.esucces = True
                         except FormError as e:
                             snippet = '<div class="error">Failed: %s</div>' % e
                             formview.request.sdiapi.flash(snippet, 'danger',

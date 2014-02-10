@@ -41,6 +41,3 @@ class BaseIndex(Page):
 #class MonIndex(BaseIndex):
 #
 #    actions = [Action1, Action2]
-
-
-
