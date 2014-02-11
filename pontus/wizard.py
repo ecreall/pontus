@@ -22,10 +22,8 @@ class Wizard(object):
         self.context = context
         self.request = request
         self.stepsinstances = []
-        i = 0
-        for step in self.steps:
+        for i, step in enumerate(self.steps):
             self.stepsinstances.append(step(self.context, self.request, self, i))
-            i+=1
 
     def __call__(self):
         posted_stepid = 0
