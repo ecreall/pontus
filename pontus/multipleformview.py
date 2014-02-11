@@ -4,9 +4,11 @@ import inspect
 import sys
 import deform
 import deform.form
-from deform.field import Field
 import deform.exception
+from deform.field import Field
+
 from substanced.form import FormError
+
 from pontus.wizard import Step
 from pontus.form import FormView
 
@@ -41,12 +43,12 @@ class MultipleFormView(Step):
 
     views = ()
     multipleformid = ''
+
     def __init__(self, context, request, wizard = None, index = 0):
         super(MultipleFormView, self).__init__(wizard, index)
         self.context = context
         self.request = request
-        self.viewsinstances = [f(context = self.context,request = self.request, wizard = wizard, index = index) for f in self.views]
-
+        self.viewsinstances = [f(self.context, self.request, wizard, index) for f in self.views]
 
     def _build_form(self):
         allforms = {}
@@ -54,10 +56,10 @@ class MultipleFormView(Step):
         allreqts={'js': [], 'css': []}
         counter = itertools.count()
         for f in self.viewsinstances:
-            if isinstance(f, FormView):
-                f._setSchemaStepIndex()
-                form, reqts = f._build_form()
-                if f.condition():
+            if f.condition():
+                if isinstance(f, FormView):
+                    f._setSchemaStepIndexNode()
+                    form, reqts = f._build_form()
                     allreqts['js'].extend(reqts['js'])
                     allreqts['css'].extend(reqts['css'])
                     form.formid = self.multipleformid+'_'+form.formid
@@ -65,20 +67,20 @@ class MultipleFormView(Step):
                     allforms[form.formid]= (f, form)
                     form.counter = counter
 
-            else:
-                forms, multiforms, reqts = f._build_form()
-                allreqts['js'].extend(reqts['js'])
-                allreqts['css'].extend(reqts['css'])
-                f.multipleformid = self.multipleformid+'_'+f.multipleformid
-                allMultiforms[f.multipleformid]= f
-                for submf in multiforms:
-                    multiforms[submf].multipleformid = self.multipleformid+'_'+multiforms[submf].multipleformid
-                    allMultiforms[multiforms[submf].multipleformid]= multiforms[submf]
+                else:
+                    forms, multiforms, reqts = f._build_form()
+                    allreqts['js'].extend(reqts['js'])
+                    allreqts['css'].extend(reqts['css'])
+                    f.multipleformid = self.multipleformid+'_'+f.multipleformid
+                    allMultiforms[f.multipleformid]= f
+                    for submf in multiforms:
+                        multiforms[submf].multipleformid = self.multipleformid+'_'+multiforms[submf].multipleformid
+                        allMultiforms[multiforms[submf].multipleformid]= multiforms[submf]
 
-                for subf in forms:
-                    forms[subf][1].formid = self.multipleformid+'_'+forms[subf][1].formid
-                    forms[subf][0].formid = forms[subf][1].formid
-                    allforms[forms[subf][1].formid]= (forms[subf][0], forms[subf][1])
+                    for subf in forms:
+                        forms[subf][1].formid = self.multipleformid+'_'+forms[subf][1].formid
+                        forms[subf][0].formid = forms[subf][1].formid
+                        allforms[forms[subf][1].formid]= (forms[subf][0], forms[subf][1])
 
         return allforms, allMultiforms, allreqts
 
@@ -110,8 +112,7 @@ class MultipleFormView(Step):
         tabcontent = []
         allsubforms = self._getAllsubforms(allforms)
         allsubmultiforms = self._getAllsubmultiforms(allmultiforms)
-        #import pdb; pdb.set_trace()
-        tabnav.append('<ul  id="' + self.multipleformid + '_multipleform" class="nav nav-pills">')
+        tabnav.append('<ul  id="' + self.multipleformid + '_multipleform" class="nav nav-tabs ">')
         tabcontent.append('<div  id="' + self.multipleformid + '_multipleformContent" class="tab-content">')
         nocurrentform = False
         currentmultform = None
@@ -127,7 +128,6 @@ class MultipleFormView(Step):
                     break                    
 
         for item in self.viewsinstances:
-            #import pdb; pdb.set_trace()
             if isinstance(item, FormView) and item.formid in allsubforms:
                 formid = item.formid
                 form = allsubforms[formid][1]
@@ -159,7 +159,6 @@ class MultipleFormView(Step):
                 else:
                     tabcontent.append('<div id="' + formid + '" class="tab-pane fade">' + ''.join(view._html(allforms, allmultiforms, None, exception ,validated)) + '</div>')
                     tabnav.append('<li class=""><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
-
 
         tabnav.append('</ul>')
         tabcontent.append('</div>')

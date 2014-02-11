@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-from substanced.form import FormView as FV, FormError
-from pontus.wizard import Step
 import deform.exception
 import deform.widget
 import colander
+
 from substanced.schema import Schema
+from substanced.form import FormView as FV, FormError
+
+from pontus.wizard import Step, STEPID
 
 # Il faut partir de l'idée que toute est étape et non l'inverse.
 # Une étape a une condition permettant de la validé. True par défaut
@@ -13,10 +15,8 @@ class FormView(FV, Step):
     chmod = []
 
     def __init__(self, context, request, wizard = None, index = 0):
-        super(FormView, self).__init__(context = context, request = request)
-        self.wizard = wizard
-        self.index = index
-        self.esucces = False
+        FV.__init__(self, context, request)
+        Step.__init__(self, wizard, index)
         
 
     def _get(self, form, node):
@@ -37,7 +37,7 @@ class FormView(FV, Step):
                     self._chmod(node.children[0], m[1])
 
     def __call__(self):
-        self._setSchemaStepIndex()
+        self._setSchemaStepIndexNode()
         form, reqts = self._build_form()
         result = None
         for button in form.buttons:
@@ -75,11 +75,11 @@ class FormView(FV, Step):
     def before(self, form):
         self._chmod(form, self.chmod)
 
-    def _setSchemaStepIndex(self):
-        if not (self.schema.children[len(self.schema.children)-1].name == '__stepindex__'):
+    def _setSchemaStepIndexNode(self):
+        if not (self.schema.children[len(self.schema.children)-1].name == STEPID):
             stepIndexNode = colander.SchemaNode(
                 colander.String(),
-                name = '__stepindex__',
+                name = STEPID,
                 widget=deform.widget.HiddenWidget(),
                 default = str(self.index)
                 )
