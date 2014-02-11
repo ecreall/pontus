@@ -2,7 +2,9 @@
 from substanced.form import FormView as FV, FormError
 from pontus.wizard import Step
 import deform.exception
-
+import deform.widget
+import colander
+from substanced.schema import Schema
 
 # Il faut partir de l'idée que toute est étape et non l'inverse.
 # Une étape a une condition permettant de la validé. True par défaut
@@ -74,5 +76,15 @@ class FormView(FV, Step):
         self._chmod(form, self.chmod)
 
     def _setSchemaStepIndex(self):
-        self.schema.children[len(self.schema.children)-1].default = str(self.index)
+        if not (self.schema.children[len(self.schema.children)-1].name == '__stepindex__'):
+            stepIndexNode = colander.SchemaNode(
+                colander.String(),
+                name = '__stepindex__',
+                widget=deform.widget.HiddenWidget(),
+                default = str(self.index)
+                )
+            self.schema.children.append(stepIndexNode)
+        else:
+            self.schema.children[len(self.schema.children)-1].default = str(self.index)
+        
         

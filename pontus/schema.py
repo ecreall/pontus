@@ -61,21 +61,3 @@ def omit(schema, mask, isinternal=False):
                 omit(node.children[0], m[1], True)
 
     return new_schema
-
-
-def toStep(schema):
-    """Return a new schema without the fields listed in mask.
-    """
-
-    stepIndex = colander.SchemaNode(
-        colander.String(),
-        name = '__stepindex__',
-        widget=deform.widget.HiddenWidget()
-        )
-
-    schema.children.append(stepIndex)
-
-    return schema
-
-
-
