@@ -39,6 +39,21 @@ def get_code(level):
     return highlight(code, PythonLexer(), formatter), start, end
 
 
+def buildMultiformTree(views, context, request, wizard, index):
+    reslut = []
+    for view in views:
+        if isinstance(view, tuple):
+            mf = MultipleFormView(context, request, wizard, index)
+            mf.title = view[0]
+            mf.multipleformid = mf.title.replace(' ','-')
+            mf.viewsinstances = buildMultiformTree(view[1], context, request, wizard, index)
+            reslut.append(mf)
+        else:
+            reslut.append(view(context, request, wizard, index))
+    
+    return reslut
+               
+
 class MultipleFormView(Step):
 
     views = ()
@@ -48,7 +63,8 @@ class MultipleFormView(Step):
         super(MultipleFormView, self).__init__(wizard, index)
         self.context = context
         self.request = request
-        self.viewsinstances = [f(self.context, self.request, wizard, index) for f in self.views]
+        self.viewsinstances = buildMultiformTree(self.views, self.context, self.request, wizard, index)
+#        self.viewsinstances = [f(self.context, self.request, wizard, index) for f in self.views]
 
     def _build_form(self):
         allforms = {}
