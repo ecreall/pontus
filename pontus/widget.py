@@ -1,4 +1,4 @@
-from deform.widget import SequenceWidget, MappingWidget
+from deform.widget import SequenceWidget, MappingWidget, RichTextWidget
 
 
 class TableWidget(SequenceWidget):
@@ -13,6 +13,11 @@ class LineWidget(MappingWidget):
     template = 'pontus:templates/mapping.pt'
     item_template = 'pontus:templates/mapping_item.pt'
     readonly_template = 'pontus:templates/readonly/mapping.pt'
-    readonly_item_template = 'pontus:templates/readonly/mapping_item.pt'  
+    readonly_item_template = 'pontus:templates/readonly/mapping_item.pt'
+
+
+class RichTextWidget(RichTextWidget):
+  
+    template = 'pontus:templates/richtext.pt' 
 
 
