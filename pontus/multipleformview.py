@@ -112,12 +112,8 @@ class MultipleFormView(Step):
         tabcontent = []
         allsubforms = self._getAllsubforms(allforms)
         allsubmultiforms = self._getAllsubmultiforms(allmultiforms)
-        tabnav.append('<ul  id="' + self.multipleformid + '_multipleform" class="nav nav-tabs ">')
-        tabcontent.append('<div  id="' + self.multipleformid + '_multipleformContent" class="tab-content">')
-        nocurrentform = False
         currentmultform = None
         if currentform is None:
-            nocurrentform = True
             for item in self.viewsinstances:
                 if isinstance(item, FormView) and item.formid in allsubforms:
                     currentform = item.formid
@@ -127,13 +123,19 @@ class MultipleFormView(Step):
                     currentmultform = item.multipleformid
                     break                    
 
+        tabnav.append('<ul  id="' + self.multipleformid + '_multipleform" class="nav nav-tabs ">')
+        tabcontent.append('<div  id="' + self.multipleformid + '_multipleformContent" class="tab-content">')
         for item in self.viewsinstances:
+            itemid = None
+            view = None
+            renderer = None
+            statcontent = None
+            statnav =  None
             if isinstance(item, FormView) and item.formid in allsubforms:
-                formid = item.formid
-                form = allsubforms[formid][1]
-                view = allsubforms[formid][0]
-                if currentform == formid:
-                    renderer = ''
+                itemid = item.formid
+                form = allsubforms[itemid][1]
+                view = allsubforms[itemid][0]
+                if currentform == itemid:
                     if validated is not None:
                         renderer = form.render(validated)
                     elif exception is not None:
@@ -141,24 +143,31 @@ class MultipleFormView(Step):
                     else:
                         renderer = form.render()
 
-                    tabcontent.append('<div id="' + formid + '" class="tab-pane fade in active">' + renderer + '</div>')
-                    tabnav.append('<li class="active"><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
+                    statcontent = 'in active'
+                    statnav = 'active'
                 else:
-                    tabcontent.append('<div id="' + formid + '" class="tab-pane fade">' + form.render() + '</div>')
-                    tabnav.append('<li class=""><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
-
+                    renderer = form.render()
+                    statcontent = ''
+                    statnav = ''
             elif isinstance(item, MultipleFormView) and item.multipleformid in allsubmultiforms: 
-                formid = item.multipleformid
-                view = allsubmultiforms[formid]
-                if not nocurrentform and currentform is not None and view._isin(currentform, True):
-                    tabcontent.append('<div id="' + formid + '" class="tab-pane fade in active">' + ''.join(view._html(allforms, allmultiforms, currentform, exception ,validated)) + '</div>')
-                    tabnav.append('<li class="active"><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
-                elif nocurrentform and currentmultform is not None and currentmultform == formid :
-                    tabcontent.append('<div id="' + formid + '" class="tab-pane fade in active">' + ''.join(view._html(allforms, allmultiforms, None, exception ,validated)) + '</div>')
-                    tabnav.append('<li class="active"><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
+                itemid = item.multipleformid
+                view = allsubmultiforms[itemid]
+                if (currentform is not None and view._isin(currentform, True)):
+                    renderer = ''.join(view._html(allforms, allmultiforms, currentform, exception ,validated))
+                    statcontent = 'in active'
+                    statnav = 'active'
+                elif (currentmultform is not None and currentmultform == itemid):
+                    renderer = ''.join(view._html(allforms, allmultiforms, None, None ,None))
+                    statcontent = 'in active'
+                    statnav = 'active'
                 else:
-                    tabcontent.append('<div id="' + formid + '" class="tab-pane fade">' + ''.join(view._html(allforms, allmultiforms, None, exception ,validated)) + '</div>')
-                    tabnav.append('<li class=""><a data-toggle="tab" href="#' + formid + '">' + view.title + '</a></li>')
+                    renderer = ''.join(view._html(allforms, allmultiforms, None, None ,None))
+                    statcontent = ''
+                    statnav = ''
+                    
+            if itemid is not None:
+                tabcontent.append('<div id="' + itemid + '" class="tab-pane fade '+statcontent+'">' + renderer + '</div>')
+                tabnav.append('<li class="'+statnav+'"><a data-toggle="tab" href="#' + itemid + '">' + view.title + '</a></li>')
 
         tabnav.append('</ul>')
         tabcontent.append('</div>')
