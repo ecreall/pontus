@@ -3,14 +3,14 @@
 from zope.component import getMultiAdapter
 from zope.security.interfaces import Forbidden
 
-from com.ecreall.omegsi.library.indexes import queryWorkItem
-from grok import context, name
-from omegsi.layout import Page
+from dace.indexes import queryWorkItem
+#from grok import context, name
+#from omegsi.layout import Page
 
  
 
 
-class BaseIndex(Page):
+class BaseIndex(object)#(Page):
 
 #    il faut voir avec le name et le context dans SD
 #    name(u'index')
