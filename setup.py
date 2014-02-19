@@ -29,6 +29,9 @@ setup(name='pontus',
       install_requires=requires,
       tests_require=requires,
       test_suite="pontus",
+      extras_require = dict(
+          test=[],
+      ),
       entry_points="""\
       """,
       )
