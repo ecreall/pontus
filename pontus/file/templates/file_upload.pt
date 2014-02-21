@@ -1,0 +1,26 @@
+<div class="deformFileupload"
+     tal:define="oid oid|field.oid;
+                 css_class css_class|field.widget.css_class;
+                 style style|field.widget.style">
+
+  ${field.start_mapping()}
+
+  <div class="deformReplaces" tal:condition="cstruct.get('uid')">
+
+    <input type="hidden" name="uid" value="${cstruct['uid']}"
+           id="${oid}-uid"/>
+    <input type="hidden" name="oid" value="${cstruct['oid']}"
+           id="${oid}-oid"/>
+    <span tal:content="cstruct.get('filename')"
+          id="${oid}-filename"/>
+
+  </div>
+
+  <input type="file" name="upload" 
+         tal:attributes="class css_class;
+                         style style;"
+         id="${oid}"/>
+
+  ${field.end_mapping()}
+
+</div>
