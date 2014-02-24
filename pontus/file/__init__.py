@@ -6,14 +6,16 @@ from deform.i18n import _
 from substanced.file import File as FL
 from substanced.util import get_oid
 from dace.util import get_obj
+from dace.object import Object
 
 
 USE_MAGIC = object()
 
 
-class File(FL):
+class File(Object,FL):
 
     def __init__(self, stream, mimetype, title, preview_url, uid):
+        Object.__init__(self)
         FL.__init__(self, stream, mimetype, title)
         self.preview_url = preview_url
         self.uid = uid
@@ -55,7 +57,6 @@ class FileData(object):
     def serialize(self, node, value):
         if value is colander.null:
             return colander.null
-
         value = value.getdata()
         if not hasattr(value, 'get'):
             mapping = {'value':repr(value)}
@@ -100,11 +101,12 @@ class FileData(object):
                 stream.seek(0)
             else:
                 stream = None
-        
+
         if oid is not None:
             myfile = get_obj(oid)
         else :
-            return File(stream, mimetype, name, preview_url, uid)
+            _file = File(stream, mimetype, name, preview_url, uid)
+            return _file
 
         myfile.setdata(value)
         return myfile
