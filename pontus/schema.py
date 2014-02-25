@@ -8,8 +8,8 @@ from pontus.visual import VisualElement
 
 class Schema(VisualElement,SH):
 
-    def __init__(self, descreption='',label=''):
-        VisualElement.__init__(self, descreption, label)
+    def __init__(self, description='',label=''):
+        VisualElement.__init__(self, description, label)
         SH.__init__(self)
 
     def deserialize(self, cstruct=colander.null):

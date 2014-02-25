@@ -5,10 +5,10 @@ from .interfaces import IVisualElement
 
 class VisualElement(object):
     implements(IVisualElement)
-    descreption = NotImplemented
+    description = NotImplemented
     label = NotImplemented
 
-    def __init__(self, descreption='', label=''):
+    def __init__(self, description='', label=''):
         super(VisualElement, self).__init__()
-        self.descreption = descreption
+        self.description = description
         self.label = label
