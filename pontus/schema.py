@@ -1,12 +1,16 @@
 import inspect
 import deform.widget
 import colander
-from substanced.schema import Schema
+from substanced.schema import Schema as SH
 from zope.interface.interface import TAGGED_DATA
+from pontus.file import ObjectData
+from pontus.visual import VisualElement
 
+class Schema(VisualElement,SH):
 
-class Schema(Schema):
-   
+    def __init__(self, descreption='',label=''):
+        VisualElement.__init__(self, descreption, label)
+        SH.__init__(self)
 
     def deserialize(self, cstruct=colander.null):
         appstruct = super(Schema, self).deserialize(cstruct)
@@ -16,6 +20,11 @@ class Schema(Schema):
                 invariant(self, appstruct)
 
         return appstruct
+
+
+def edit(schema, factory):
+    schema.typ = ObjectData(factory)
+    return schema
 
 
 def select(schema, mask):
@@ -38,6 +47,30 @@ def select(schema, mask):
                 sequencenode.children = []
                 sequencenode.add(select(node.children[0], m[1]))
                 new_schema.add(sequencenode)
+    return new_schema
+
+
+def flatten(schemes):
+    if len(schemes)==0:
+        return None
+    
+    new_schema = schemes[0].clone()
+    for schema in schemes[1:]:
+        clone = schema.clone()
+        new_schema.children.extend(clone.children)
+
+    return new_schema
+
+
+def schemes_sum(schemes):
+    if len(schemes)==0:
+        return None
+    
+    new_schema = Schema()
+    for schema in schemes:
+        clone = schema.clone()
+        clone.name = clone.label
+        new_schema.add(clone)
 
     return new_schema
 

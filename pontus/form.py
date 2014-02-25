@@ -7,18 +7,19 @@ from substanced.schema import Schema
 from substanced.form import FormView as FV, FormError
 
 from pontus.wizard import Step, STEPID
+from pontus.visual import VisualElement
 
 # Il faut partir de l'idée que toute est étape et non l'inverse.
 # Une étape a une condition permettant de la validé. True par défaut
-class FormView(FV, Step):
+class FormView(VisualElement, Step, FV):
 
     chmod = []
 
-    def __init__(self, context, request, wizard = None, index = 0):
+    def __init__(self, context, request, wizard = None, index = 0, descreption='',label=''):
         FV.__init__(self, context, request)
         Step.__init__(self, wizard, index)
+        VisualElement.__init__(self, descreption, label)
         
-
     def _get(self, form, node):
         for child in form.children:
             if child.name == node:

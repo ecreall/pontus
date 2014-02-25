@@ -14,103 +14,131 @@ USE_MAGIC = object()
 
 class File(Object,FL):
 
-    def __init__(self, stream, mimetype, title, preview_url, uid):
+    def __init__(self, fp, mimetype, filename, preview_url, uid, **kwargs):
         Object.__init__(self)
-        FL.__init__(self, stream, mimetype, title)
+        if fp:
+            fp.seek(0)
+        else:
+            fp = None
+        mimetype = mimetype or USE_MAGIC
+        FL.__init__(self, fp, mimetype, filename)
         self.preview_url = preview_url
         self.uid = uid
+
+    @property
+    def fp(self):
+        return self.blob.open('r')
+
+    @property
+    def filename(self):
+        return self.title
         
-    def getdata(self):
+    def get_data(self, node):
         result = {}
         result['filename'] = self.title
         result['uid'] = self.uid
         result['mimetype'] = self.mimetype
         result['preview_url'] = self.preview_url
-        result['oid'] = str(get_oid(self))
         result['size'] = self.get_size()
         result['fp'] = self.blob.open('r')
         return result
 
-    def setdata(self, data):
-        self.title = data['filename']
-        self.uid = data['uid']
-        self.preview_url = data['preview_url']
-        mimetype = data['mimetype']
-        if mimetype is USE_MAGIC:
-            self.mimetype = 'application/octet-stream'
-        else:
-            self.mimetype = mimetype or 'application/octet-stream'
+    def __setattr__(self, name, value):
+        if name == 'mimetype':
+            if value is USE_MAGIC:
+                super(File,self).__setattr__('mimetype', 'application/octet-stream')
+            else:
+                val = value or 'application/octet-stream'
+                super(File,self).__setattr__('mimetype', val)
 
-        stream = data['fp']
-        if stream is not None:
-            if mimetype is USE_MAGIC:
+        elif name == 'fp':
+            if self.mimetype is USE_MAGIC:
                 hint = USE_MAGIC
             else:
                 hint = None
+
             self.blob = Blob()
-            self.upload(stream, mimetype_hint=hint)
+            self.upload(value, mimetype_hint=hint)
+        elif name == 'filename':
+            self.title = value
+        else:
+            super(File,self).__setattr__(name, value)
 
 
-class FileData(object):
 
+class ObjectData(colander.Mapping):
 
-    def serialize(self, node, value):
-        if value is colander.null:
-            return colander.null
-        value = value.getdata()
-        if not hasattr(value, 'get'):
-            mapping = {'value':repr(value)}
-            raise colander.Invalid(
-                node,
-                _('${value} is not a dictionary', mapping=mapping)
-                )
-        for n in ('filename', 'uid'):
-            if not n in value:
-                mapping = {'value':repr(value), 'key':n}
-                raise colander.Invalid(
-                    node,
-                    _('${value} has no ${key} key', mapping=mapping)
-                    )
-        result = deform.widget.filedict(value)
-        # provide a value for these entries even if None
-        result['mimetype'] = value.get('mimetype')
-        result['size'] = value.get('size')
-        result['fp'] = value.get('fp')
-        result['oid'] = value.get('oid')
-        result['preview_url'] = value.get('preview_url')
+    __specialObjects = (File,)
+
+    def __init__(self, factory, unknown='ignore'):
+        colander.Mapping.__init__(self, unknown)
+        self.factory = factory
+  
+    def serialize(self, node, appstruct):
+        obj = None
+        if  appstruct is not colander.null and not isinstance(appstruct, dict):
+            obj = appstruct
+            appstruct = obj.get_data(node)
+
+        result = None
+        if not (self.factory in self.__specialObjects):
+            result = colander.Mapping.serialize(self, node, appstruct)
+            if result is colander.null:
+                return result
+        else:
+            if appstruct is colander.null:
+                return  appstruct  
+
+        if result is None:
+            result = appstruct
+        
+        if isinstance(result, dict) and obj is not None:
+            result['oid'] = str(get_oid(obj))
+        
         return result
 
-    def deserialize(self, node, value):
-        myfile = None
-        mimetype = None
-        stream = None
-        name = None
-        uid = None
+
+    def deserialize(self, node, cstruct):
+        result = None
+        if not (self.factory in self.__specialObjects):
+            result = colander.Mapping.deserialize(self, node, cstruct)
+            if result is colander.null or cstruct is colander.null:
+                return result
+        else:
+            if cstruct is colander.null:
+                return  cstruct 
+
+        if result is None:
+            result = cstruct
+        import pdb; pdb.set_trace()
         oid = None
-        preview_url = None
-        if value:
-            mimetype = value.get('mimetype') or USE_MAGIC
-            name = value.get('filename')
-            stream =value.get('fp')
-            uid = value.get('uid')
-            if value.get('oid') is not None and not (value.get('oid')==''):
-                oid = int(value.get('oid'))
-
-            preview_url = value.get('preview_url')
-            if stream:
-                stream.seek(0)
-            else:
-                stream = None
-
+        if result and result.get('oid') is not None and not (result.get('oid')==''):
+                oid = int(result.get('oid'))
+        
+        obj = None
         if oid is not None:
-            myfile = get_obj(oid)
+            obj = get_obj(oid)
         else :
-            _file = File(stream, mimetype, name, preview_url, uid)
-            return _file
+            obj = self.factory(**result)
+            #result['__object__'] = obj
+            #return result
+            return obj
+        
+        for name, val in result.items():
+            if getattr(obj, name, None) is not None:
+                existing_val = getattr(obj, name, None)
+                new_val = result[name]
+                if existing_val != new_val:
+                    setattr(obj, name, new_val)
+        #result['__object__'] = obj
+        #return result
+        return obj
 
-        myfile.setdata(value)
-        return myfile
 
-
-    def cstruct_children(self, node, cstruct): # pragma: no cover
-        return []
+    def cstruct_children(self, node, cstruct):
+        result = []
+        if not (self.factory in self.__specialObjects):
+            result = colander.Mapping.cstruct_children(self, node, cstruct)
+            if result is colander.null or cstruct is colander.null:
+                return result
+        return result
