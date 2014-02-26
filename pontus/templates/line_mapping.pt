@@ -1,0 +1,13 @@
+<tal:def tal:define="title title|field.title;
+                     oid oid|field.oid;
+                     description description|field.description;
+                     errormsg errormsg|field.errormsg;
+                     item_template item_template|field.widget.item_template"
+         i18n:domain="deform">
+       ${field.start_mapping()}
+       <input tal:condition="cstruct.has_key('__objectid__')" type="hidden" name="__objectid__" value="${cstruct['__objectid__']}" id="${oid}-__objectid__"/>
+      <td tal:repeat="child field.children">
+           <div tal:replace="structure child.render_template(item_template)" />
+      </td>
+      ${field.end_mapping()}     
+</tal:def>

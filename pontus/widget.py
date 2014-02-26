@@ -1,5 +1,23 @@
-from deform.widget import SequenceWidget, MappingWidget, RichTextWidget, FileUploadWidget
+from deform.widget import SequenceWidget, MappingWidget as MW, RichTextWidget, FileUploadWidget
 from colander import null
+from pontus.file import __ObjectIndex__
+
+
+class MappingWidget(MW):
+
+    template = 'pontus:templates/mapping.pt'
+    item_template = 'pontus:templates/mapping_item.pt'
+    readonly_template = 'pontus:templates/readonly/mapping.pt'
+    readonly_item_template = 'pontus:templates/readonly/mapping_item.pt'
+
+    def deserialize(self, field, pstruct):
+        data = super(MappingWidget, self).deserialize(field, pstruct)
+        if data is null:
+            return null
+
+        data[__ObjectIndex__] = pstruct.get(__ObjectIndex__)
+        return data
+
 
 class TableWidget(SequenceWidget):
   
@@ -11,10 +29,10 @@ class TableWidget(SequenceWidget):
 
 class LineWidget(MappingWidget):
   
-    template = 'pontus:templates/mapping.pt'
-    item_template = 'pontus:templates/mapping_item.pt'
-    readonly_template = 'pontus:templates/readonly/mapping.pt'
-    readonly_item_template = 'pontus:templates/readonly/mapping_item.pt'
+    template = 'pontus:templates/line_mapping.pt'
+    item_template = 'pontus:templates/line_mapping_item.pt'
+    readonly_template = 'pontus:templates/readonly/line_mapping.pt'
+    readonly_item_template = 'pontus:templates/readonly/line_mapping_item.pt'
 
 
 class RichTextWidget(RichTextWidget):
@@ -28,8 +46,8 @@ class MemoryTmpStore(dict):
 
 
 class FileWidget(FileUploadWidget):
+
     template = 'pontus:file/templates/file_upload.pt'
-    #readonly_template = 'pontus:file/templates/readonly/file_upload.pt'
 
     def __init__(self, **kw):
         tmpstro= MemoryTmpStore()
@@ -40,5 +58,5 @@ class FileWidget(FileUploadWidget):
         if data is null:
             return null
 
-        data['oid'] = pstruct.get('oid')
+        data[__ObjectIndex__] = pstruct.get(__ObjectIndex__)
         return data

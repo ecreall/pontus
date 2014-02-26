@@ -12,13 +12,6 @@
      tal:omit-tag="structural"
      i18n:domain="deform">
 
-  <label for="${oid}"
-         class="control-label ${required and 'required' or ''}"
-         tal:condition="not structural"
-         id="req-${oid}"
-         >
-    ${title}
-  </label>
 
   <div tal:define="input_prepend field.widget.input_prepend | None;
                    input_append field.widget.input_append  | None"
@@ -26,7 +19,7 @@
        class="input-group">
     <span class="input-group-addon"
           tal:condition="input_prepend">${input_prepend}</span
-    ><span tal:replace="structure field.serialize(cstruct).strip()"
+    ><span tal:replace="structure field.serialize(cstruct, readonly=True).strip()"
     /><span class="input-group-addon"
             tal:condition="input_append">${input_append}</span>
   </div>

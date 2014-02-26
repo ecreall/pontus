@@ -10,7 +10,7 @@ from dace.object import Object
 
 
 USE_MAGIC = object()
-
+__ObjectIndex__ = '__objectid__'
 
 class File(Object,FL):
 
@@ -65,7 +65,6 @@ class File(Object,FL):
             super(File,self).__setattr__(name, value)
 
 
-
 class ObjectData(colander.Mapping):
 
     __specialObjects = (File,)
@@ -73,12 +72,16 @@ class ObjectData(colander.Mapping):
     def __init__(self, factory, unknown='ignore'):
         colander.Mapping.__init__(self, unknown)
         self.factory = factory
+        self.context = None
   
     def serialize(self, node, appstruct):
-        obj = None
+        _object = None
         if  appstruct is not colander.null and not isinstance(appstruct, dict):
-            obj = appstruct
-            appstruct = obj.get_data(node)
+            if node.widget is None:
+                self.context  = appstruct
+
+            _object = appstruct
+            appstruct = _object.get_data(node)
 
         result = None
         if not (self.factory in self.__specialObjects):
@@ -88,15 +91,12 @@ class ObjectData(colander.Mapping):
         else:
             if appstruct is colander.null:
                 return  appstruct  
-
-        if result is None:
             result = appstruct
-        
-        if isinstance(result, dict) and obj is not None:
-            result['oid'] = str(get_oid(obj))
-        
-        return result
 
+        if _object is not None:
+            result[__ObjectIndex__] = get_oid(_object)
+
+        return result
 
     def deserialize(self, node, cstruct):
         result = None
@@ -110,30 +110,25 @@ class ObjectData(colander.Mapping):
 
         if result is None:
             result = cstruct
-        import pdb; pdb.set_trace()
-        oid = None
-        if result and result.get('oid') is not None and not (result.get('oid')==''):
-                oid = int(result.get('oid'))
-        
-        obj = None
-        if oid is not None:
-            obj = get_obj(oid)
-        else :
-            obj = self.factory(**result)
-            #result['__object__'] = obj
-            #return result
-            return obj
+
+        _object = None
+        if isinstance(result, dict) and result.get(__ObjectIndex__) is not None:
+            _object = get_obj(int(result.get(__ObjectIndex__)))
+        elif self.context is not None:
+            _object = self.context
+            
+        if _object is None:
+            _object = self.factory(**result)
+            return _object
         
         for name, val in result.items():
-            if getattr(obj, name, None) is not None:
-                existing_val = getattr(obj, name, None)
+            if getattr(_object, name, None) is not None:
+                existing_val = getattr(_object, name, None)
                 new_val = result[name]
                 if existing_val != new_val:
-                    setattr(obj, name, new_val)
-        #result['__object__'] = obj
-        #return result
-        return obj
+                    setattr(_object, name, new_val)
 
+        return _object
 
     def cstruct_children(self, node, cstruct):
         result = []

@@ -1,10 +1,22 @@
 <tal:def tal:define="title title|field.title;
                      description description|field.description;
-                     item_template item_template|field.widget.item_template"
+                     errormsg errormsg|field.errormsg;
+                     item_template item_template|field.widget.readonly_item_template"
          i18n:domain="deform">
+  
+  <div class="panel panel-default" title="${description}">
+    <div class="panel-heading">${title}</div>
+    <div class="panel-body">
 
-      <td tal:repeat="child field.children">
-           <div tal:replace="structure child.render_template(item_template)" />
-      </td>
-   
+      <div tal:condition="description">
+        ${description}
+      </div>
+
+      <div tal:repeat="child field.children"
+           tal:replace="structure child.render_template(item_template)" >
+      </div>     
+
+    </div>
+  </div>
+
 </tal:def>

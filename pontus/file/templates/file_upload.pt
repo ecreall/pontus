@@ -9,8 +9,7 @@
 
     <input type="hidden" name="uid" value="${cstruct['uid']}"
            id="${oid}-uid"/>
-    <input type="hidden" name="oid" value="${cstruct['oid']}"
-           id="${oid}-oid"/>
+    <input tal:condition="cstruct.has_key('__objectid__')" type="hidden" name="__objectid__" value="${cstruct['__objectid__']}" id="${oid}-__objectid__"/>
     <span tal:content="cstruct.get('filename')"
           id="${oid}-filename"/>
 
