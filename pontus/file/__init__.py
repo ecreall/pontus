@@ -120,14 +120,8 @@ class ObjectData(colander.Mapping):
         if _object is None:
             _object = self.factory(**result)
             return _object
-        
-        for name, val in result.items():
-            if getattr(_object, name, None) is not None:
-                existing_val = getattr(_object, name, None)
-                new_val = result[name]
-                if existing_val != new_val:
-                    setattr(_object, name, new_val)
 
+        _object.set_data(result)
         return _object
 
     def cstruct_children(self, node, cstruct):
