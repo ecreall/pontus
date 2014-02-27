@@ -64,10 +64,21 @@ class File(Object,FL):
         else:
             super(File,self).__setattr__(name, value)
 
+    def url(self, request, view=None, args=None):
+        if view is None:
+            #generalement c est la vue de l index associer qu'il faut retourner
+            return request.mgmt_path(self, '@@view')
+        else:
+            return request.mgmt_path(self, '@@'+view)
+
+
+class Image(File):
+    pass
+
 
 class ObjectData(colander.Mapping):
 
-    __specialObjects = (File,)
+    __specialObjects = (File, Image)
 
     def __init__(self, factory, unknown='ignore'):
         colander.Mapping.__init__(self, unknown)
@@ -76,6 +87,9 @@ class ObjectData(colander.Mapping):
   
     def serialize(self, node, appstruct):
         _object = None
+        if appstruct is None:
+            appstruct = colander.null
+
         if  appstruct is not colander.null and not isinstance(appstruct, dict):
             if node.widget is None:
                 self.context  = appstruct
@@ -99,6 +113,7 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
+        import pdb; pdb.set_trace()
         result = None
         if not (self.factory in self.__specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
