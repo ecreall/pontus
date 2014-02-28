@@ -6,6 +6,7 @@ from zope.interface.interface import TAGGED_DATA
 from pontus.file import ObjectData
 from pontus.visual import VisualElement
 
+
 class Schema(VisualElement,SH):
 
     def __init__(self, description='',label='', **kwargs):

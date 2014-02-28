@@ -86,6 +86,7 @@ class ObjectData(colander.Mapping):
         self.context = None
   
     def serialize(self, node, appstruct):
+
         _object = None
         if appstruct is None:
             appstruct = colander.null
@@ -128,7 +129,7 @@ class ObjectData(colander.Mapping):
         _object = None
         _objectIndex = result.get(__ObjectIndex__)
         if isinstance(result, dict) and _objectIndex is not None and not (_objectIndex==''):
-            _object = get_obj(int(result.get(__ObjectIndex__)))
+            _object = get_obj(int(_objectIndex))
         elif self.context is not None:
             _object = self.context
             
@@ -138,7 +139,7 @@ class ObjectData(colander.Mapping):
 
         if self.factory is None and _object is None:
             return result
-        
+
         _object.set_data(result)
         return _object
 
