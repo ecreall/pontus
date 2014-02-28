@@ -8,9 +8,9 @@ from pontus.visual import VisualElement
 
 class Schema(VisualElement,SH):
 
-    def __init__(self, description='',label=''):
+    def __init__(self, description='',label='', **kwargs):
         VisualElement.__init__(self, description, label)
-        SH.__init__(self)
+        SH.__init__(self,**kwargs)
 
     def deserialize(self, cstruct=colander.null):
         appstruct = super(Schema, self).deserialize(cstruct)

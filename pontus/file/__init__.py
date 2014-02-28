@@ -80,7 +80,7 @@ class ObjectData(colander.Mapping):
 
     __specialObjects = (File, Image)
 
-    def __init__(self, factory, unknown='ignore'):
+    def __init__(self, factory=None, unknown='ignore'):
         colander.Mapping.__init__(self, unknown)
         self.factory = factory
         self.context = None
@@ -113,7 +113,6 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
-        import pdb; pdb.set_trace()
         result = None
         if not (self.factory in self.__specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
@@ -127,21 +126,25 @@ class ObjectData(colander.Mapping):
             result = cstruct
 
         _object = None
-        if isinstance(result, dict) and result.get(__ObjectIndex__) is not None:
+        _objectIndex = result.get(__ObjectIndex__)
+        if isinstance(result, dict) and _objectIndex is not None and not (_objectIndex==''):
             _object = get_obj(int(result.get(__ObjectIndex__)))
         elif self.context is not None:
             _object = self.context
             
-        if _object is None:
+        if _object is None and self.factory is not None:
             _object = self.factory(**result)
             return _object
 
+        if self.factory is None and _object is None:
+            return result
+        
         _object.set_data(result)
         return _object
 
     def cstruct_children(self, node, cstruct):
         result = []
-        if not (self.factory in self.__specialObjects):
+        if self.factory is None or not (self.factory in self.__specialObjects):
             result = colander.Mapping.cstruct_children(self, node, cstruct)
             if result is colander.null or cstruct is colander.null:
                 return result
