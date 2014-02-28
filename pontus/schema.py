@@ -4,14 +4,18 @@ import colander
 from substanced.schema import Schema as SH
 from zope.interface.interface import TAGGED_DATA
 from pontus.file import ObjectData
+from pontus.widget import MappingWidget
 from pontus.visual import VisualElement
 
 
 class Schema(VisualElement,SH):
 
-    def __init__(self, description='',label='', **kwargs):
+    def __init__(self, description='',label='', _class=None, **kwargs):
         VisualElement.__init__(self, description, label)
         SH.__init__(self,**kwargs)
+        self.widget = MappingWidget()
+        if _class is not None:
+            self.typ = ObjectData(_class)   
 
     def deserialize(self, cstruct=colander.null):
         appstruct = super(Schema, self).deserialize(cstruct)
@@ -21,11 +25,6 @@ class Schema(VisualElement,SH):
                 invariant(self, appstruct)
 
         return appstruct
-
-
-def edit(schema, factory):
-    schema.typ = ObjectData(factory)
-    return schema
 
 
 def select(schema, mask):

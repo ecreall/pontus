@@ -8,7 +8,6 @@ from substanced.form import FormView as FV, FormError
 
 from pontus.wizard import Step, STEPID
 from pontus.visual import VisualElement
-from pontus.schema import edit
 # Il faut partir de l'idée que toute est étape et non l'inverse.
 # Une étape a une condition permettant de la validé. True par défaut
 class FormView(VisualElement, Step, FV):
