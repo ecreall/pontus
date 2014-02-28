@@ -139,6 +139,7 @@ class SequenceWidget(SW):
 
         return result
 
+
 class MappingWidget(MW):
 
     template = 'pontus:templates/mapping.pt'

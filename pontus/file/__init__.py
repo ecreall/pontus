@@ -150,3 +150,9 @@ class ObjectData(colander.Mapping):
             if result is colander.null or cstruct is colander.null:
                 return result
         return result
+
+
+from deform.schema import default_widget_makers
+from pontus.widget import MappingWidget
+
+default_widget_makers[ObjectData]= MappingWidget
