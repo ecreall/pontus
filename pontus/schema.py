@@ -6,13 +6,13 @@ import deform.widget
 from substanced.schema import Schema as SH
 
 from pontus.file import ObjectData
-from pontus.visual import VisualElement
+from pontus.visual import VisualisableElement
 
 
-class Schema(VisualElement,SH):
+class Schema(VisualisableElement,SH):
 
-    def __init__(self, description='',label='', _class=None, **kwargs):
-        VisualElement.__init__(self, description, label)
+    def __init__(self, _class=None, **kwargs):
+        VisualisableElement.__init__(self, **kwargs)
         SH.__init__(self,**kwargs)
         self.typ = ObjectData(_class)   
 

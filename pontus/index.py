@@ -1,43 +1,63 @@
-# -*- coding: utf-8 -*-
+import functools
+from pyramid.threadlocal import get_current_registry
+import venusian
+from substanced.sdi import mgmt_view
+from pyramid.util import action_method
+from pontus.view import View
+from dace.interfaces import IBusinessAction, IProcessDefinition
+from dace.util import find_catalog
+from substanced.util import _
+from dace.objectofcollaboration.object import Object
 
-from zope.component import getMultiAdapter
-from zope.security.interfaces import Forbidden
-
-from dace.util import queryWorkItem
-#from grok import context, name
-#from omegsi.layout import Page
-
- 
-
-
-class BaseIndex(object)#(Page):
-
-#    il faut voir avec le name et le context dans SD
-#    name(u'index')
-#    context(Ipropositiondaction)
-     actions = []
+#a changer...
+def comp(action1, action2):
+    if action1.title < action2.title:
+        return -1
+    elif action1.title > action2.title:
+        return 1
+  
+    return 0
 
 
-    def render(self, ):
+@mgmt_view(
+    name = 'Voir',
+    context=Object,
+    renderer='templates/index.pt',
+    )
+class Index(View):
+
+
+    def render(self):
+        dace_catalog = find_catalog('dace')
+        context_id_index = dace_catalog['context_id']
+        object_provides_index = dace_catalog['object_provides']
+        isautomatic_index = dace_catalog['isautomatic']
+        query = object_provides_index.any((IBusinessAction.__identifier__,)) & \
+                context_id_index.any(self.context.__provides__.declared) & \
+                isautomatic_index.eq(True)
+        results = query.execute().all()
+        allactions = [action for action in results if action.validate(context)]
+        registry = get_current_registry()
+        allprocess = registry.getUtilitiesFor(IProcessDefinition)
+        # Add start workitem
+        for name, pd in allprocess:
+            if not pd.isControlled and (not pd.isUnique or (pd.isUnique and not pd.isInstantiated)):
+                wis = pd.createStartWorkItem(None)
+                for key in wis.keys():
+                    swisactions = wis[key].actions
+                    for action in swisactions:
+                        if action.isautomatic and action.validate(self.context) :
+                            allactions.append(action)
+
+        allactions.sort(cmp=comp)
         content = u'<div class="accordion" id="accordion">'
-        for actionclass in actions:
-
-            action = queryWorkItem(actionclass.process_id, actionclass.node_id, self.request, self.context) # actionclass.condition: est vérifier par le validate() de l'action
-            if (not (action is None) ):
-                view = getMultiAdapter((self.context, self.request), name=actionclass.view_name)
-                view.update()
-                # nous pouvons ajouter des balises pour délimiter les vues
-                content += view.content()
+        for action in allactions:
+            view = getMultiAdapter((self.context, self.request), name=action.view_name)
+            view.update()
+            # nous pouvons ajouter des balises pour les vues
+            content += view.content()
         
         if (not content ):
             raise Forbidden
         
-        return (content + '</div>' )
-
-
-
-# exemple
-
-#class MonIndex(BaseIndex):
-#
-#    actions = [Action1, Action2]
+        return {'index':(content + '</div>' )}

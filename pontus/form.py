@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from zope.interface import implements
 import deform.exception
 import deform.widget
 import colander
@@ -7,20 +8,22 @@ from substanced.schema import Schema
 from substanced.form import FormView as FV, FormError
 
 from pontus.wizard import Step, STEPID
-from pontus.visual import VisualElement
+from pontus.visual import VisualisableElement
+from pontus.interfaces import IFormView
 # Il faut partir de l'idée que toute est étape et non l'inverse.
 # Une étape a une condition permettant de la validé. True par défaut
 
 
 
-class FormView(VisualElement, Step, FV):
+class FormView(VisualisableElement, Step, FV):
+    implements(IFormView)
 
     chmod = []
 
-    def __init__(self, context, request, wizard = None, index = 0, descreption='',label=''):
+    def __init__(self, context, request, wizard = None, index = 0, **kwargs):
         FV.__init__(self, context, request)
         Step.__init__(self, wizard, index)
-        VisualElement.__init__(self, descreption, label)
+        VisualisableElement.__init__(self, **kwargs)
         
     def _get(self, form, node):
         for child in form.children:
