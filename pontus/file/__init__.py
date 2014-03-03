@@ -5,8 +5,9 @@ from deform.i18n import _
 
 from substanced.file import File as FL
 from substanced.util import get_oid
+
 from dace.util import get_obj
-from dace.object import Object
+from dace.objectofcollaboration.object import Object
 
 
 USE_MAGIC = object()

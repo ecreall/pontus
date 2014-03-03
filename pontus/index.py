@@ -3,7 +3,7 @@
 from zope.component import getMultiAdapter
 from zope.security.interfaces import Forbidden
 
-from dace.indexes import queryWorkItem
+from dace.util import queryWorkItem
 #from grok import context, name
 #from omegsi.layout import Page
 
