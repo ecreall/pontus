@@ -10,20 +10,20 @@ from substanced.form import FormView as FV, FormError
 from pontus.wizard import Step, STEPID
 from pontus.visual import VisualisableElement
 from pontus.interfaces import IFormView
+from pontus.view import View
 # Il faut partir de l'idée que toute est étape et non l'inverse.
 # Une étape a une condition permettant de la validé. True par défaut
 
 
 
-class FormView(VisualisableElement, Step, FV):
+class FormView(View, FV):
     implements(IFormView)
 
     chmod = []
 
-    def __init__(self, context, request, wizard = None, index = 0, **kwargs):
+    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
         FV.__init__(self, context, request)
-        Step.__init__(self, wizard, index)
-        VisualisableElement.__init__(self, **kwargs)
+        View.__init__(self, context, request, parent, wizard, index)
         
     def _get(self, form, node):
         for child in form.children:
@@ -93,5 +93,9 @@ class FormView(VisualisableElement, Step, FV):
             self.schema.children.append(stepIndexNode)
         else:
             self.schema.children[len(self.schema.children)-1].default = str(self.index)
+
+    def setviewid(self, viewid):
+        View.setviewid(self,viewid)
+        self.formid = viewid
         
 

@@ -5,7 +5,7 @@ STEPID = '__stepindex__'
 
 class Step(object):
 
-    def __init__(self, wizard = None, index = 0):
+    def __init__(self, wizard=None, index=0):
         self.wizard = wizard
         self.index = index
         self.esucces = False
