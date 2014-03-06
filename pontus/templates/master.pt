@@ -43,7 +43,7 @@
   </head>
 
   <body>
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
     <img class="loading-indicator"
          id="sdi-loading-img" 
          src="${su('substanced.sdi:static/img/progress_bar.gif')}"
@@ -92,8 +92,9 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </div>
 
             <div class="inner-content">
-              <div metal:define-slot="main">
-              </div>
+              <div metal:define-slot="left"></div>
+              <div metal:define-slot="main"></div>
+              <div metal:define-slot="right"></div>
             </div>
 
             <div class="below-content">

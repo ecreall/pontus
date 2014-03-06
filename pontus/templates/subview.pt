@@ -1,0 +1,8 @@
+      <ul tal:attributes="id (id+'_multipleform_'+slot)" class="nav nav-tabs">
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+slot">${item['title']}</a></li>
+      </ul>
+     <div tal:attributes="id (id+'_multipleform')" class="tab-content">
+          <div tal:repeat="item items" tal:attributes="id item['id']+slot; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
+              <div tal:replace="view.render_item(item, slot)" />         
+          </div>
+      </div>

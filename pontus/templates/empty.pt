@@ -1,0 +1,9 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      metal:define-macro="main"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="substanced"
+      tal:omit-tag="">
+  <tal:main metal:define-slot="main">
+  </tal:main>
+</html>
