@@ -63,11 +63,11 @@ class MultipleView(View):
 
     views = ()
     viewid = ''
-    subview_template = 'templates/subview.pt'
+    item_template = 'templates/subview.pt'
 
     def render_item(self, item, slot):
         if 'items' in item:
-            body = renderers.render(self.subview_template, {'slot':slot,'subitem':item}, self.request)
+            body = renderers.render(self.item_template, {'slot':slot,'subitem':item}, self.request)
             return Structure(body)
 
         return Structure(item['body'])
@@ -116,11 +116,12 @@ class MultipleView(View):
                         allviews[allsubviews[subv].viewid]= allsubviews[subv]
 
                 elif isinstance(f, View):
-                    resources = f.updateresources()
+                    result = f()
                     self._slots.append(f.slot)
-                    header_resources =  resources['header_resources']
-                    allreqts['js'].extend(header_resources['js'])
-                    allreqts['css'].extend(header_resources['css'])
+                    if isinstance(result, dict):
+                        allreqts['js'].extend(result['js'])
+                        allreqts['css'].extend(result['css'])
+
                     f.setviewid(self.viewid+'_'+f.viewid)
                     allviews[f.viewid]= f
 
@@ -159,15 +160,15 @@ class MultipleView(View):
 
         return result
 
-    def _allhtmstruct(self, allforms, allMultiviews, allviews, currentitem=None, exception=None ,validated=None):
-        html_struct = {}
+    def _allslots(self, allforms, allMultiviews, allviews, currentitem=None, exception=None ,validated=None):
+        slots = {}
         for slot in self._slots:
-            html_struct[slot] = self._htmlslot(slot ,allforms, allMultiviews, allviews, currentitem, exception ,validated)
+            slots[slot] = self._itemsbyslot(slot ,allforms, allMultiviews, allviews, currentitem, exception ,validated)
      
-        return html_struct
+        return slots
      
-    def _htmlslot(self, slot ,allforms, allMultiviews, allviews, currentitem=None, exception=None ,validated=None):
-        html_struct = []
+    def _itemsbyslot(self, slot ,allforms, allMultiviews, allviews, currentitem=None, exception=None ,validated=None):
+        itemsbyslot = []
         allitems = []
         allsubforms = self._getAllsubforms(slot, allforms)
         allsubmultiviews = self._getAllsubmultiviews(slot, allMultiviews)
@@ -202,21 +203,21 @@ class MultipleView(View):
                 else:
                     body = form.render()
 
-                html_struct.append({'isactive':isactive,'body': body, 'view': view, 'id':itemid})
+                itemsbyslot.append({'isactive':isactive,'body': body, 'view': view, 'id':itemid})
             elif isinstance(item, MultipleView) and item.viewid in allsubmultiviews: 
                 itemid = item.viewid
                 view = allsubmultiviews[itemid]
                 items = []
                 if (currentitem is not None and view._isin(currentitem, True)):
-                    items = view._htmlslot(slot, allforms, allMultiviews, allviews, currentitem, exception ,validated)
+                    items = view._itemsbyslot(slot, allforms, allMultiviews, allviews, currentitem, exception ,validated)
                     isactive = True
                 elif (currentitem is not None and currentitem == itemid):
-                    items = view._htmlslot(slot, allforms, allMultiviews, allviews, None, None ,None)
+                    items = view._itemsbyslot(slot, allforms, allMultiviews, allviews, None, None ,None)
                     isactive = True
                 else:
-                    items = view._htmlslot(slot, allforms, allMultiviews, allviews, None, None ,None)
+                    items = view._itemsbyslot(slot, allforms, allMultiviews, allviews, None, None ,None)
 
-                html_struct.append({'isactive':isactive,'items': items, 'view': view, 'id':itemid})
+                itemsbyslot.append({'isactive':isactive,'items': items, 'view': view, 'id':itemid})
             elif isinstance(item, View) and item.viewid in allsubviews:
                 itemid = item.viewid
                 view = allsubviews[itemid]
@@ -224,19 +225,17 @@ class MultipleView(View):
                 if (currentitem is not None and currentitem == itemid):
                     isactive = True
                 
-                html_struct.append({'isactive':isactive,'body': body, 'view': view, 'id':itemid})
+                itemsbyslot.append({'isactive':isactive,'body': body, 'view': view, 'id':itemid})
   
-        return html_struct
+        return itemsbyslot
 
-    def updateresources(self,):
+    def update(self,):
         allforms, allMultiviews, allviews, allreqts = self._build_view()
-        html_struct = []
+        slots = []
         validated = None
         posted_formid = None
-        content_resources = None
-        header_resources = {}
-        header_resources['js_links'] = list(set(allreqts['js']))
-        header_resources['css_links'] = list(set(allreqts['css']))
+        result = None
+
 
         if '__formid__' in self.request.POST:
             posted_formid = self.request.POST['__formid__']
@@ -254,37 +253,37 @@ class MultipleView(View):
                         fail = getattr(formview, '%s_failure' % button.name, None)
                         if fail is None:
                             fail = formview.failure
-                        html_struct = self._allhtmstruct(allforms, allMultiviews, allviews, posted_formid, e, validated)
+                        slots = self._allslots(allforms, allMultiviews, allviews, posted_formid, e, validated)
                     else:
                         try:
-                            html_struct = success_method(validated)
+                            slots = success_method(validated)
                             self.esucces = True
                         except FormError as e:
                             snippet = '<div class="error">Failed: %s</div>' % e
                             formview.request.sdiapi.flash(snippet, 'danger',
                                                       allow_duplicate=True)
-                            html_struct = self._allhtmstruct(allforms, allMultiviews, allviews, posted_formid, None, validated)
+                            slots = self._allslots(allforms, allMultiviews, allviews, posted_formid, None, validated)
 
                     break
         
-        if not html_struct:
-            html_struct = self._allhtmstruct(allforms, allMultiviews, allviews, posted_formid, None, validated)
+        if not slots:
+            slots = self._allslots(allforms, allMultiviews, allviews, posted_formid, None, validated)
 
         code, start, end = get_code(1)
-        if isinstance(html_struct, dict):
-            content_resources = {
-                'slots': html_struct,
+        if isinstance(slots, dict):
+            result = {
+                'slots': slots,
                 'captured': repr(validated),
                 'code': code,
                 'start': start,
                 'showmenu': True,
                 'end': end,
                 'title': self.title,
+                'js_links': list(set(allreqts['js'])),
+                'css_links': list(set(allreqts['css']))
                 }
         else:
-            content_resources = html_struct
+            result = slots
 
         # values passed to template for rendering
-        return {'header_resources':header_resources,
-                'content_resources':content_resources
-               }
+        return result

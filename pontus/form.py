@@ -42,14 +42,10 @@ class FormView(View, FV):
                 else:
                     self._chmod(node.children[0], m[1])
 
-    def updateresources(self,):
+    def update(self,):
         self._setSchemaStepIndexNode()
         form, reqts = self._build_form()
-        content_resources = None
-        header_resources = None
-        header_resources['js_links'] = reqts['js']
-        header_resources['css_links'] = reqts['css']
-
+        result = None
         for button in form.buttons:
             if button.name in self.request.POST:
                 success_method = getattr(self, '%s_success' % button.name)
@@ -60,25 +56,27 @@ class FormView(View, FV):
                     fail = getattr(self, '%s_failure' % button.name, None)
                     if fail is None:
                         fail = self.failure
-                    content_resources = fail(e)
+                    result = fail(e)
                 else:
                     try:
-                        content_resources = success_method(validated)
+                        result = success_method(validated)
                         self.esucces = True
                     except FormError as e:
                         snippet = '<div class="error">Failed: %s</div>' % e
                         self.request.sdiapi.flash(snippet, 'danger',
                                                   allow_duplicate=True)
-                        content_resources = {'form': form.render(validated)}
+                        result = {'form': form.render(validated)}
 
                 break
 
-        if content_resources is None:
-            content_resources = self.show(form)
+        if result is None:
+            result = self.show(form)
 
-        return {'header_resources':header_resources,
-                'content_resources':content_resources
-               }
+        if isinstance(result,dict):
+            result['js_links'] = reqts['js']
+            result['css_links'] = reqts['css']
+
+        return result
 
 
     def before(self, form):

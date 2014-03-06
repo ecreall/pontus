@@ -25,27 +25,19 @@ class View(VisualisableElement, Step):
         self.context = context
         self.request = request
         self.parent = parent
-        self.content_resources = None
-        self.header_resources = {}
-        self.content = None
-
-    def _getresources(self):
-        resources = self.updateresources()
-        content_resources = resources['content_resources']
-        header_resources =  resources['header_resources']
-        result = content_resources
-        if isinstance(result, dict):
-            for k in header_resources.keys():
-                result[k] = header_resources[k]
-
-        return content_resources, header_resources, result
-
 
     def __call__(self):
-        cr, hr, result = self._getresources()
+        result = self.update()
+        if isinstance(result, dict):
+            if not ('js_links' in result):
+                result['js_links'] = []
+
+            if not ('css_links' in result):
+                result['css_links'] = []
+
         return result
   
-    def updateresources(self,):
+    def update(self,):
         pass
 
     def content(self, main_template=None):
@@ -54,9 +46,9 @@ class View(VisualisableElement, Step):
         view_deriver = registry.adapters.lookup((IViewClassifier, self.request.request_iface, context_iface), IV, name=self.title, default=None)
         discriminator = view_deriver.__discriminator__().resolve()
         template = registry.introspector.get('templates', discriminator)
-        content_resources, header_resources, result = self._getresources()
+        result = self()
         if main_template is None:
-            main_template = get_renderer(__emptytemplate__).implementation()
+            main_template = get_renderer(__emptyteheadermplate__).implementation()
 
         if isinstance(result, dict):
             result['main_template'] = main_template
@@ -67,8 +59,7 @@ class View(VisualisableElement, Step):
                     registry = registry)
         response = renderer.render_view(self.request, result, self, self.context)
         return {'body':response.ubody,
-                'header_resources':header_resources,
-                'content_resources':content_resources
+                'args':result,
                }
 
     def setviewid(self, viewid):
