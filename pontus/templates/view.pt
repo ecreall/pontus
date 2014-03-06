@@ -1,0 +1,15 @@
+<div metal:use-macro="main_template">
+  <div >
+
+    <div class="container">
+      <div class="panel panel-default">
+        <div class="panel-heading"><b>${view.title|''}</b></div>
+         <div class="panel-body">
+           <div class="col-md-12" id="view" tal:content="structure content"/>
+           </div>
+         </div>
+      </div>
+
+  </div>
+
+</div>

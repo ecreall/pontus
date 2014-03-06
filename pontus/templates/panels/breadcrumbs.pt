@@ -1,0 +1,24 @@
+        <div class="col-md-10 breadcrumbs-bounding"
+             tal:define="breadcrumbs request.sdiapi.breadcrumbs()">
+
+          <ul tal:condition="breadcrumbs"
+              class="breadcrumb">
+            <tal:breadcrumbs repeat="breadcrumb breadcrumbs">
+              <li tal:attributes="class breadcrumb['active']"
+                  title="${breadcrumb['content_type']} '${breadcrumb['name']}'">
+                <i class="${breadcrumb['icon']}"> </i>
+                <a href="${breadcrumb['url']}">${breadcrumb['name']}</a>
+              </li>
+            </tal:breadcrumbs>
+          </ul>
+
+          <a tal:condition="not breadcrumbs"
+             tal:define="sdititle request.sdiapi.sdi_title();
+                         home_path request.sdiapi.mgmt_path(request.virtual_root)"
+             class="navbar-brand"
+             href="${home_path}"><img 
+                    alt="${sdititle}"
+                    src="${request.static_url('substanced.sdi:static/img/capsule-icon-32.png')}"
+                    />${sdititle}</a>
+
+        </div>
