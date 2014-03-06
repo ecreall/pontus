@@ -24,7 +24,7 @@
          tal:define="items slots['left']|nothing"
          tal:condition="items">
      <ul tal:attributes="id (view.viewid+'_multipleform_left')" class="nav nav-tabs">
-          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'left'">${item['title']}</a></li>
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'left'">${item['view'].title}</a></li>
      </ul>
      <div tal:attributes="id (view.viewid+'_multipleform_left')" class="tab-content">
           <div tal:repeat="item items" tal:attributes="id item['id']+'left'; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
@@ -39,7 +39,7 @@
          tal:define="items slots['main']|nothing"
          tal:condition="items">
       <ul tal:attributes="id (view.viewid+'_multipleform_main')" class="nav nav-tabs">
-          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'main'">${item['title']}</a></li>
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'main'">${item['view'].title}</a></li>
       </ul>
      <div tal:attributes="id (view.viewid+'_multipleform_main')" class="tab-content">
           <div tal:repeat="item items" tal:attributes="id item['id']+'main'; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
@@ -54,7 +54,7 @@
          tal:define="items slots['right']|nothing"
          tal:condition="items">
       <ul tal:attributes="id (view.viewid+'_multipleform_right')" class="nav nav-tabs">
-          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'right'">${item['title']}</a></li>
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'right'">${item['view'].title}</a></li>
       </ul>
      <div tal:attributes="id (view.viewid+'_multipleform_right')" class="tab-content">
           <div tal:repeat="item items" tal:attributes="id item['id']+'right'; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">

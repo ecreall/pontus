@@ -63,10 +63,11 @@ class MultipleView(View):
 
     views = ()
     viewid = ''
+    subview_template = 'templates/subview.pt'
 
     def render_item(self, item, slot):
         if 'items' in item:
-            body = renderers.render('templates/subview.pt', {'slot':slot, 'id':item['id'], 'view': self, 'items': item['items']}, self.request)
+            body = renderers.render(self.subview_template, {'slot':slot,'subitem':item}, self.request)
             return Structure(body)
 
         return Structure(item['body'])
@@ -201,7 +202,7 @@ class MultipleView(View):
                 else:
                     body = form.render()
 
-                html_struct.append({'isactive':isactive,'body': body, 'title': view.title, 'id':itemid})
+                html_struct.append({'isactive':isactive,'body': body, 'view': view, 'id':itemid})
             elif isinstance(item, MultipleView) and item.viewid in allsubmultiviews: 
                 itemid = item.viewid
                 view = allsubmultiviews[itemid]
@@ -215,7 +216,7 @@ class MultipleView(View):
                 else:
                     items = view._htmlslot(slot, allforms, allMultiviews, allviews, None, None ,None)
 
-                html_struct.append({'isactive':isactive,'items': items, 'title': view.title, 'id':itemid})
+                html_struct.append({'isactive':isactive,'items': items, 'view': view, 'id':itemid})
             elif isinstance(item, View) and item.viewid in allsubviews:
                 itemid = item.viewid
                 view = allsubviews[itemid]
@@ -223,7 +224,7 @@ class MultipleView(View):
                 if (currentitem is not None and currentitem == itemid):
                     isactive = True
                 
-                html_struct.append({'isactive':isactive,'body': body, 'title': view.title, 'id':itemid})
+                html_struct.append({'isactive':isactive,'body': body, 'view': view, 'id':itemid})
   
         return html_struct
 
