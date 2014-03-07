@@ -45,7 +45,8 @@ class FormView(View, FV):
     def update(self,):
         self._setSchemaStepIndexNode()
         form, reqts = self._build_form()
-        result = None
+        item = None
+        result = {} 
         for button in form.buttons:
             if button.name in self.request.POST:
                 success_method = getattr(self, '%s_success' % button.name)
@@ -55,26 +56,30 @@ class FormView(View, FV):
                 except deform.exception.ValidationFailure as e:
                     fail = getattr(self, '%s_failure' % button.name, None)
                     if fail is None:
-                        fail = self.failure
-                    result = fail(e)
+                        fail = self._failure
+                    item = fail(e, form)
                 else:
                     try:
-                        result = success_method(validated)
+                        item = success_method(validated)
                         self.esucces = True
                     except FormError as e:
                         snippet = '<div class="error">Failed: %s</div>' % e
                         self.request.sdiapi.flash(snippet, 'danger',
                                                   allow_duplicate=True)
-                        result = {'form': form.render(validated)}
+                        item =self.adapt_item(form.render(validated), form.formid)
 
                 break
 
-        if result is None:
-            result = self.show(form)
+        if item is None:
+            item = self.show(form)
 
-        if isinstance(result,dict):
+       
+        if isinstance(item,dict):
+            result['slots'] = {self.slot:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
+        else:
+            result = item
 
         return result
 
@@ -94,6 +99,12 @@ class FormView(View, FV):
             self.schema.children.append(stepIndexNode)
         else:
             self.schema.children[len(self.schema.children)-1].default = str(self.index)
+
+    def _failure(self, e, form):
+        return self.adapt_item(e.render(), form.formid)
+
+    def show(self, form):
+        return self.adapt_item(form.render(), form.formid)
 
     def setviewid(self, viewid):
         View.setviewid(self,viewid)

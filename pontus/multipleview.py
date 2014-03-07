@@ -42,40 +42,29 @@ def get_code(level):
         code = unicode(code, 'utf-8')
     formatter = HtmlFormatter()
     return highlight(code, PythonLexer(), formatter), start, end
-
-
-def buildMultiViewTree(parent, views, context, request, wizard, index):
-    reslut = []
-    for view in views:
-        if isinstance(view, tuple):
-            mf = MultipleView(context, request, parent, wizard, index)
-            mf.title = view[0]
-            mf.viewid = mf.title.replace(' ','-')
-            mf.children = buildMultiViewTree(mf, view[1], context, request, wizard, index)
-            reslut.append(mf)
-        else:
-            reslut.append(view(context, request, parent, wizard, index))
-    
-    return reslut
                
 
 class MultipleView(View):
 
     views = ()
-    viewid = ''
-    item_template = 'templates/subview.pt'
-
-    def render_item(self, item, slot):
-        if 'items' in item:
-            body = renderers.render(self.item_template, {'slot':slot,'subitem':item}, self.request)
-            return Structure(body)
-
-        return Structure(item['body'])
 
     def __init__(self, context, request, parent=None, wizard=None, index=0):
         super(MultipleView, self).__init__(context, request, wizard, index)
-        self.children = buildMultiViewTree(self, self.views, self.context, self.request, wizard, index)
-        self._slots = [] 
+        self.children = []
+        self._slots = []
+        if self.views:      
+            self._buildMultiViewTree(self.views)
+
+    def _buildMultiViewTree(self, views):
+        for view in views:
+            if isinstance(view, tuple):
+                mf = MultipleView(self.context, self.request, self, self.wizard, self.index)
+                mf.title = view[0]
+                mf.viewid = mf.title.replace(' ','-')
+                mf._buildMultiViewTree(view[1])
+                self.children.append(mf)
+            else:
+                self.children.append(view(self.context, self.request, self, self.wizard, self.index))
 
     def _build_view(self):
         allforms = {}
@@ -116,11 +105,12 @@ class MultipleView(View):
                         allviews[allsubviews[subv].viewid]= allsubviews[subv]
 
                 elif isinstance(f, View):
+                    f.context = self.context.propositions[0] # pour le test
                     result = f()
                     self._slots.append(f.slot)
                     if isinstance(result, dict):
-                        allreqts['js'].extend(result['js'])
-                        allreqts['css'].extend(result['css'])
+                        allreqts['js'].extend(result['js_links'])
+                        allreqts['css'].extend(result['css_links'])
 
                     f.setviewid(self.viewid+'_'+f.viewid)
                     allviews[f.viewid]= f
@@ -221,12 +211,18 @@ class MultipleView(View):
             elif isinstance(item, View) and item.viewid in allsubviews:
                 itemid = item.viewid
                 view = allsubviews[itemid]
-                body = view.content()['body']
+                result = view.update()
+                subitem = result['slots'][slot][0]
+                body = subitem['body']
                 if (currentitem is not None and currentitem == itemid):
                     isactive = True
                 
-                itemsbyslot.append({'isactive':isactive,'body': body, 'view': view, 'id':itemid})
-  
+                subitem_result= {'isactive':isactive,'body': body, 'view': view, 'id':itemid}
+                if 'messages' in subitem:
+                    subitem_result['messages'] = subitem['messages']
+
+                itemsbyslot.append(subitem_result)
+
         return itemsbyslot
 
     def update(self,):
@@ -235,8 +231,6 @@ class MultipleView(View):
         validated = None
         posted_formid = None
         result = None
-
-
         if '__formid__' in self.request.POST:
             posted_formid = self.request.POST['__formid__']
 
@@ -265,7 +259,7 @@ class MultipleView(View):
                             slots = self._allslots(allforms, allMultiviews, allviews, posted_formid, None, validated)
 
                     break
-        
+
         if not slots:
             slots = self._allslots(allforms, allMultiviews, allviews, posted_formid, None, validated)
 

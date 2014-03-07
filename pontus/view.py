@@ -6,6 +6,7 @@ from pyramid.interfaces import IView as IV, IViewClassifier
 from pyramid import renderers
 from pyramid.renderers import get_renderer
 from pyramid.path import package_of
+from pyramid_layout.layout import Structure
 
 from pontus.visual import VisualisableElement
 from pontus.interfaces import IView
@@ -18,6 +19,14 @@ class View(VisualisableElement, Step):
 
     viewid = ''
     slot = 'main'
+    item_template = 'templates/subview.pt'
+
+    def render_item(self, item, slot):
+        if 'items' in item:
+            body = renderers.render(self.item_template, {'slot':slot,'subitem':item}, self.request)
+            return Structure(body)
+        import pdb; pdb.set_trace()
+        return Structure(item['body'])
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
         VisualisableElement.__init__(self,**kwargs)
@@ -40,28 +49,34 @@ class View(VisualisableElement, Step):
     def update(self,):
         pass
 
-    def content(self, main_template=None):
-        registry = get_current_registry()
-        context_iface = providedBy(self.context)
-        view_deriver = registry.adapters.lookup((IViewClassifier, self.request.request_iface, context_iface), IV, name=self.title, default=None)
-        discriminator = view_deriver.__discriminator__().resolve()
-        template = registry.introspector.get('templates', discriminator)
-        result = self()
+    def content(self, result, template=None, main_template=None):
+        if template is None:
+            registry = get_current_registry()
+            context_iface = providedBy(self.context)
+            view_deriver = registry.adapters.lookup((IViewClassifier, self.request.request_iface, context_iface), IV, name=self.title, default=None)
+            discriminator = view_deriver.__discriminator__().resolve()
+            template = registry.introspector.get('templates', discriminator).title
+
         if main_template is None:
-            main_template = get_renderer(__emptyteheadermplate__).implementation()
+            main_template = get_renderer(__emptytemplate__).implementation()
 
         if isinstance(result, dict):
             result['main_template'] = main_template
 
-        renderer = renderers.RendererHelper(
-                    name=template.title,
-                    package=package_of(self.__class__.__module__),
-                    registry = registry)
-        response = renderer.render_view(self.request, result, self, self.context)
-        return {'body':response.ubody,
+        body = renderers.render(template, result, self.request)
+        return {'body':body,
                 'args':result,
                }
 
+    def adapt_item(self, render, id, isactive=True):
+        item = {'view':self, 'id':id, 'isactive':True}
+        if isinstance(render, list):
+            item['items'] = render
+        else:
+            item['body'] = render
+
+        return item
+  
     def setviewid(self, viewid):
         self.viewid = viewid
 

@@ -1,0 +1,223 @@
+<div metal:use-macro="main_template">
+
+  <metal:head-more fill-slot="head-more">
+    <!-- CSS -->
+    <link rel="stylesheet" 
+          href="${request.static_url('deform:static/css/form.css')}"
+          type="text/css"/>
+    <tal:block repeat="reqt css_links|[]">
+      <link rel="stylesheet" 
+            href="${request.static_url(reqt)}" 
+            type="text/css" />
+     </tal:block>
+
+    <!-- JavaScript -->
+    <tal:block repeat="reqt js_links|[]">
+      <script type="text/javascript"
+              src="${request.static_url(reqt)}"
+       ></script>
+    </tal:block>
+  </metal:head-more>
+
+ <div metal:fill-slot="left">
+   <div tal:omit-tag="" tal:define="items slots['left']|nothing;
+                     itemslen len(items)|0">
+    <div class="panel panel-default"
+         tal:condition="items and itemslen == 1">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+         <div class="panel-heading">${view.title}</div>
+         <div class="panel-body">
+         <div tal:replace="view.render_item(items[0], 'left')" />
+         </div>
+    </div>
+    <div class="container"
+         tal:condition="items and itemslen > 1">
+       <ul tal:attributes="id (view.viewid+'_multipleform_left')" class="nav nav-tabs">
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'left'">${item['view'].title}</a></li>
+       </ul>
+       <div tal:attributes="id (view.viewid+'_multipleform_left')" class="tab-content">
+          <div tal:repeat="item items" tal:attributes="id item['id']+'left'; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+              <div tal:replace="view.render_item(item, 'left')" />         
+          </div>
+       </div>
+    </div>
+   </div>
+ </div>
+
+ <div metal:fill-slot="main">
+   <div tal:omit-tag="" tal:define="items slots['main']|nothing;
+                     itemslen len(items)|0">
+    <div class="panel panel-default"
+         tal:condition="items and itemslen == 1"
+         tal:define="item items[0]">
+         <div class="panel-heading">${view.title}</div>
+         <div class="panel-body">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+         <div tal:replace="view.render_item(item, 'main')" />
+         </div>
+    </div>
+    <div class="container"
+         tal:condition="items and itemslen > 1">
+       <ul tal:attributes="id (view.viewid+'_multipleform_main')" class="nav nav-tabs">
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'main'">${item['view'].title}</a></li>
+       </ul>
+       <div tal:attributes="id (view.viewid+'_multipleform_main')" class="tab-content">
+          <div tal:repeat="item items" tal:attributes="id item['id']+'main'; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+              <div tal:replace="view.render_item(item, 'main')" />         
+          </div>
+       </div>
+    </div>
+   </div>
+ </div>
+
+ <div metal:fill-slot="right">
+   <div tal:omit-tag="" tal:define="items slots['right']|nothing;
+                     itemslen len(items)|0">
+    <div class="panel panel-default"
+         tal:condition="items and itemslen == 1">
+         <div class="panel-heading">${view.title}</div>
+         <div class="panel-body">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+         <div tal:replace="view.render_item(items[0], 'right')" />
+         </div>
+    </div>
+    <div class="container"
+         tal:condition="items and itemslen > 1">
+       <ul tal:attributes="id (view.viewid+'_multipleform_right')" class="nav nav-tabs">
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'right'">${item['view'].title}</a></li>
+       </ul>
+       <div tal:attributes="id (view.viewid+'_multipleform_right')" class="tab-content">
+          <div tal:repeat="item items" tal:attributes="id item['id']+'right'; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+              <div tal:replace="view.render_item(item, 'right')" />         
+          </div>
+       </div>
+    </div>
+   </div>
+ </div>
+
+ <div metal:fill-slot="footer">
+   <div tal:omit-tag="" tal:define="items slots['footer']|nothing;
+                     itemslen len(items)|0">
+    <div class="panel panel-default"
+         tal:condition="items and itemslen == 1">
+         <div class="panel-heading">${view.title}</div>
+         <div class="panel-body">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+         <div tal:replace="view.render_item(items[0], 'footer')" />
+         </div>
+    </div>
+    <div class="container"
+         tal:condition="items and itemslen > 1">
+       <ul tal:attributes="id (view.viewid+'_multipleform_footer')" class="nav nav-tabs">
+          <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''"><a data-toggle="tab" tal:attributes="href '#'+item['id']+'footer'">${item['view'].title}</a></li>
+       </ul>
+       <div tal:attributes="id (view.viewid+'_multipleform_footer')" class="tab-content">
+          <div tal:repeat="item items" tal:attributes="id item['id']+'footer'; class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
+
+            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+              <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
+                <div class="alert alert-${queue or 'info'}"
+                     tal:define="messagesr allmessages[queue]"
+                     tal:condition="messagesr"
+                     tal:repeat="message messagesr">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  ${structure:message}
+                </div>
+              </div>
+            </div>
+
+              <div tal:replace="view.render_item(item, 'footer')" />         
+          </div>
+       </div>
+    </div>
+   </div>
+ </div>
+
+</div>

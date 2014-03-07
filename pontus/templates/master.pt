@@ -56,15 +56,17 @@
         ${panel('usermenu')}
       </div>
     </div>
-
-    <div class="container">
+    <!--div class="container"-->
 
       <metal:slot metal:define-slot="outer-content">
 
-        <div class="row">
+        <div class="row clearfix">
 
-          <div class="col-md-12">
+          <div class="col-md-3 column ui-sortable">
+             <div metal:define-slot="left"></div>
+          </div>
 
+          <div class="col-md-5 column ui-sortable">
             <ul class="nav nav-tabs"
                 tal:define="tabs request.sdiapi.mgmt_views(context)"
                 tal:condition="tabs">
@@ -92,21 +94,27 @@
             </div>
 
             <div class="inner-content">
-              <div metal:define-slot="left"></div>
-              <div metal:define-slot="main"></div>
-              <div metal:define-slot="right"></div>
+               <div metal:define-slot="main"></div>
             </div>
 
             <div class="below-content">
             </div>
-
           </div>
 
+          <div class="col-md-3 column ui-sortable">
+             <div metal:define-slot="right"></div>
+          </div>
         </div>
+
+        <div class="row clearfix">
+          <div class="col-md-12 column ui-sortable">
+             <div metal:define-slot="footer"></div>
+          </div>
+         </div> 
 
       </metal:slot>
 
-    </div>
+    <!--/div-->
 
     <more tal:omit-tag="" metal:define-slot="tail-more"></more>
 

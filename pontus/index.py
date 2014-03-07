@@ -1,14 +1,11 @@
-import functools
 from pyramid.threadlocal import get_current_registry
-from pyramid.view import view_config
-import venusian
+from pyramid import renderers
+
 from substanced.sdi import mgmt_view
-from pyramid.util import action_method
-from pontus.view import View
+
 from dace.interfaces import IBusinessAction, IProcessDefinition, IObject
 from dace.util import find_catalog
-from substanced.util import _
-from pontus.util import get_view
+from pontus.view import View
 
 #a changer...
 def comp(action1, action2):
@@ -19,7 +16,7 @@ def comp(action1, action2):
   
     return 0
 
-@view_config(name='index', context=IObject, renderer='templates/view.pt')
+
 @mgmt_view(
     name='index',
     tab_title='Voir',
@@ -29,9 +26,9 @@ def comp(action1, action2):
 class Index(View):
 
     title = 'Voire'
+    viewid = 'index'
 
-    def __call__(self):
-        #red = render_view(self.context, self.request, name='index')
+    def update(self):
         dace_catalog = find_catalog('dace')
         context_id_index = dace_catalog['context_id']
         object_provides_index = dace_catalog['object_provides']
@@ -43,7 +40,7 @@ class Index(View):
         allactions = [action for action in results if action.validate(context)]
         registry = get_current_registry()
         allprocess = registry.getUtilitiesFor(IProcessDefinition)
-        # Add start workitem
+        # Add start actions
         for name, pd in allprocess:
             if not pd.isControlled and (not pd.isUnique or (pd.isUnique and not pd.isInstantiated)):
                 wis = pd.createStartWorkItem(None)
@@ -54,18 +51,19 @@ class Index(View):
                             allactions.append(action)
 
         allactions.sort(cmp=comp)
-        content = u'<div class="accordion" id="accordion">'
+        views = []
         for action in allactions:
-            view = get_view(self.context, self.request, name=action.view_name)
-            response = view(self.context, self.request)
-            #self.request.mgmt_path(self.context, '@@'+action.view_name)
-            # nous pouvons ajouter des balises pour les vues
-            content += response.rbody
-        
-        if (not content ):
-            raise Forbidden
+            views.append(action.view_action)
 
-        result = {'content':(content + '</div>' ) }
+        if views:
+            indexmultiview = MultipleView(self.context, self.request)
+            self._buildMultiViewTree(views)
+            return indexmultiview.update()
+        
+        warning_message = renderers.render('templates/forbidden.pt', {}, self.request)
+        item =self.adapt_item('', self.viewid)
+        item['messages'] = {'warning': [warning_message]}
+        result = {'js_links': [], 'css_links': [], 'slots': {self.slot:[item]}}
         return result
 
 
