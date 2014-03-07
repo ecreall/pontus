@@ -19,7 +19,7 @@
               </div>
             </div>
 
-             <div tal:replace="subitem['view'].render_item(items[0], slot)" />
+             <div tal:replace="subitem['view'].render_item(item, slot)" />
          </div> 
     </div>
     <div tal:omit-tag="" tal:condition="items and itemslen > 1">
