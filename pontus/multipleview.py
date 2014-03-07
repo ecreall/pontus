@@ -18,7 +18,6 @@ from substanced.form import FormError
 from pontus.wizard import Step
 from pontus.form import FormView
 from pontus.view import View
-from pontus.util import get_view
 
 
 try:
