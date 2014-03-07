@@ -28,6 +28,10 @@ class Index(View):
     title = 'Voire'
     viewid = 'index'
 
+    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
+        View.__init__(self, context, request, parent, wizard, index,**kwargs)
+        self.title = self.context.title
+
     def update(self):
         dace_catalog = find_catalog('dace')
         context_id_index = dace_catalog['context_id']

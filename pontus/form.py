@@ -73,7 +73,6 @@ class FormView(View, FV):
         if item is None:
             item = self.show(form)
 
-       
         if isinstance(item,dict):
             result['slots'] = {self.slot:[item]}
             result['js_links'] = reqts['js']

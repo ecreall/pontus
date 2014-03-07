@@ -25,7 +25,7 @@
     <div class="panel panel-default"
          tal:condition="items and itemslen == 1">
 
-            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+            <div tal:define="item items[0]" tal:condition="'messages' in item" id="messages" class="ajax-replace">
               <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
                 <div class="alert alert-${queue or 'info'}"
                      tal:define="messagesr allmessages[queue]"
@@ -71,14 +71,13 @@
 
  <div metal:fill-slot="main">
    <div tal:omit-tag="" tal:define="items slots['main']|nothing;
-                     itemslen len(items)|0">
+                                    itemslen len(items)|0">
     <div class="panel panel-default"
-         tal:condition="items and itemslen == 1"
-         tal:define="item items[0]">
+         tal:condition="items and itemslen == 1">
          <div class="panel-heading">${view.title}</div>
          <div class="panel-body">
 
-            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+            <div tal:define="item items[0]" tal:condition="'messages' in item" id="messages" class="ajax-replace">
               <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
                 <div class="alert alert-${queue or 'info'}"
                      tal:define="messagesr allmessages[queue]"
@@ -128,7 +127,7 @@
          <div class="panel-heading">${view.title}</div>
          <div class="panel-body">
 
-            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+            <div tal:define="item items[0]" tal:condition="'messages' in item" id="messages" class="ajax-replace">
               <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
                 <div class="alert alert-${queue or 'info'}"
                      tal:define="messagesr allmessages[queue]"
@@ -178,7 +177,7 @@
          <div class="panel-heading">${view.title}</div>
          <div class="panel-body">
 
-            <div tal:condition="'messages' in item" id="messages" class="ajax-replace">
+            <div tal:define="item items[0]" tal:condition="'messages' in item" id="messages" class="ajax-replace">
               <div tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()" tal:omit-tag="">
                 <div class="alert alert-${queue or 'info'}"
                      tal:define="messagesr allmessages[queue]"

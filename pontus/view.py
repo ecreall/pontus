@@ -25,7 +25,7 @@ class View(VisualisableElement, Step):
         if 'items' in item:
             body = renderers.render(self.item_template, {'slot':slot,'subitem':item}, self.request)
             return Structure(body)
-        import pdb; pdb.set_trace()
+
         return Structure(item['body'])
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
