@@ -60,7 +60,7 @@ class Index(View):
             views.append(action.view_action)
 
         if views:
-            indexmultiview = MultipleView(self.context, self.request)
+            indexmultiview = MultipleView(self.context, self.request, self.parent)
             self._buildMultiViewTree(views)
             return indexmultiview.update()
         

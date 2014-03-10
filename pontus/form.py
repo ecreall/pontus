@@ -45,6 +45,7 @@ class FormView(View, FV):
     def update(self,):
         self._setSchemaStepIndexNode()
         form, reqts = self._build_form()
+        form.formid = self.viewid+'_'+form.formid
         item = None
         result = {} 
         for button in form.buttons:
