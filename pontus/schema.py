@@ -1,7 +1,8 @@
 from zope.interface.interface import TAGGED_DATA
 import inspect
-import colander
+import deform
 import deform.widget
+import colander
 
 from substanced.schema import Schema as SH
 
@@ -17,12 +18,13 @@ class Schema(VisualisableElement,SH):
         self.typ = ObjectData(_class)   
 
     def deserialize(self, cstruct=colander.null):
-        appstruct = super(Schema, self).deserialize(cstruct)
+        import pdb; pdb.set_trace()
         members = dict(inspect.getmembers(self))
         if TAGGED_DATA in members and 'invariants' in members[TAGGED_DATA]:
             for invariant in members[TAGGED_DATA]['invariants']:
-                invariant(self, appstruct)
+                invariant(self, cstruct)
 
+        appstruct = super(Schema, self).deserialize(cstruct)
         return appstruct
 
 
@@ -93,3 +95,21 @@ def omit(schema, mask, isinternal=False):
                 omit(node.children[0], m[1], True)
 
     return new_schema
+
+
+class VisualisableElementSchema(Schema):
+
+    title = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget()
+        )
+
+    label = colander.SchemaNode(
+        colander.String(),
+        widget= deform.widget.TextInputWidget()
+        )
+
+    description = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextAreaWidget(rows=10, cols=60)
+        )

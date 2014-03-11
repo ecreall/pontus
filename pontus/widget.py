@@ -1,10 +1,16 @@
 import weakref
-from colander import null
+from colander import (
+    Invalid,
+    null,
+    )
 from deform.widget import (
     SequenceWidget as SW,
     MappingWidget as MW,
     RichTextWidget,
-    FileUploadWidget
+    FileUploadWidget,
+    Select2Widget as Select2W,
+    OptGroup,
+    CheckboxChoiceWidget as CheckboxChoiceW
     )
 
 from deform.compat import (
@@ -13,9 +19,10 @@ from deform.compat import (
     )
 
 from translationstring import TranslationString
+from substanced.util import get_oid
 
 from pontus.file import __ObjectIndex__
-
+from dace.util import get_obj
 
 class SequenceWidget(SW):
 
@@ -197,3 +204,84 @@ class FileWidget(FileUploadWidget):
 
         data[__ObjectIndex__] = pstruct.get(__ObjectIndex__)
         return data
+
+
+def _normalize_choices(values):
+    result = []
+    for item in values:
+        if isinstance(item, OptGroup):
+            normalized_options = _normalize_choices(item.options)
+            result.append(OptGroup(item.label, *normalized_options))
+        else:
+            value, description = item
+            if not isinstance(value, string_types):
+                value = str(get_oid(value))
+            result.append((value, description))
+    return result
+
+
+class Select2Widget(Select2W):
+
+    def serialize(self, field, cstruct, **kw):
+        if cstruct in (null, None):
+            cstruct = self.null_value
+        readonly = kw.get('readonly', self.readonly)
+        values = kw.get('values', self.values)
+        template = readonly and self.readonly_template or self.template
+        kw['values'] = _normalize_choices(values)
+        tmpl_values = self.get_template_values(field, cstruct, kw)
+        return field.renderer(template, **tmpl_values)
+
+    def deserialize(self, field, pstruct):
+        if pstruct in (null, self.null_value):
+            return null
+
+        result = []
+        for item in pstruct:
+            ob = None
+            try:
+                ob = get_obj(int(item))
+                if ob is None:
+                    result.append(item)
+                else:
+                    result.append(ob)
+            except ValueError:
+                result.append(item)
+
+        return result
+
+
+class CheckboxChoiceWidget(CheckboxChoiceW):
+
+    #template = 'pontus:templates/checkbox_choice.pt'
+
+    def serialize(self, field, cstruct, **kw):
+        if cstruct in (null, None):
+            cstruct = ()
+        readonly = kw.get('readonly', self.readonly)
+        values = kw.get('values', self.values)
+        kw['values'] = _normalize_choices(values)
+        template = readonly and self.readonly_template or self.template
+        tmpl_values = self.get_template_values(field, cstruct, kw)
+        return field.renderer(template, **tmpl_values)
+
+    def deserialize(self, field, pstruct):
+        if pstruct is null:
+            return null
+
+        if not isinstance(pstruct, (list, tuple)):
+            pstruct = (pstruct,)
+
+        result = []
+        for item in pstruct:
+            ob = None
+            try:
+                ob = get_obj(int(item))
+                if ob is None:
+                    result.append(item)
+                else:
+                    result.append(ob)
+            except ValueError:
+                result.append(item)
+
+        return tuple(result)

@@ -47,29 +47,34 @@ class FormView(View, FV):
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
-        result = {} 
-        for button in form.buttons:
-            if button.name in self.request.POST:
-                success_method = getattr(self, '%s_success' % button.name)
-                try:
-                    controls = self.request.POST.items()
-                    validated = form.validate(controls)
-                except deform.exception.ValidationFailure as e:
-                    fail = getattr(self, '%s_failure' % button.name, None)
-                    if fail is None:
-                        fail = self._failure
-                    item = fail(e, form)
-                else:
+        result = {}
+        posted_formid = None
+        if '__formid__' in self.request.POST:
+            posted_formid = self.request.POST['__formid__']
+ 
+        if posted_formid is not None and posted_formid == form.formid:
+            for button in form.buttons:
+                if button.name in self.request.POST:
+                    success_method = getattr(self, '%s_success' % button.name)
                     try:
-                        item = success_method(validated)
-                        self.esucces = True
-                    except FormError as e:
-                        snippet = '<div class="error">Failed: %s</div>' % e
-                        self.request.sdiapi.flash(snippet, 'danger',
-                                                  allow_duplicate=True)
-                        item =self.adapt_item(form.render(validated), form.formid)
+                        controls = self.request.POST.items()
+                        validated = form.validate(controls)
+                    except deform.exception.ValidationFailure as e:
+                        fail = getattr(self, '%s_failure' % button.name, None)
+                        if fail is None:
+                            fail = self._failure
+                        item = fail(e, form)
+                    else:
+                        try:
+                            item = success_method(validated)
+                            self.esucces = True
+                        except FormError as e:
+                            snippet = '<div class="error">Failed: %s</div>' % e
+                            self.request.sdiapi.flash(snippet, 'danger',
+                                                      allow_duplicate=True)
+                            item =self.adapt_item(form.render(validated), form.formid)
 
-                break
+                    break
 
         if item is None:
             item = self.show(form)
@@ -105,6 +110,19 @@ class FormView(View, FV):
 
     def show(self, form):
         return self.adapt_item(form.render(), form.formid)
+
+    def show(self, form):
+        result = self.default_data()
+        body = None
+        if result is None:
+            body = form.render(readonly=False)
+        else:
+            body = form.render(appstruct=result, readonly=False)
+
+        return self.adapt_item(body, form.formid)
+
+    def default_data(self):
+        return None 
 
     def setviewid(self, viewid):
         View.setviewid(self,viewid)

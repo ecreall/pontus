@@ -8,25 +8,24 @@ from pyramid.renderers import get_renderer
 from pyramid.path import package_of
 from pyramid_layout.layout import Structure
 
-from pontus.visual import VisualisableElement
 from pontus.interfaces import IView
 from pontus.wizard import Step
 
 __emptytemplate__ = 'templates/empty.pt'
 
-class View(VisualisableElement, Step):
+class View(Step):
     implements(IView)
 
     viewid = ''
     slot = 'main'
     item_template = 'templates/subview.pt'
+    self_template = None
 
     def render_item(self, item, slot):
         body = renderers.render(self.item_template, {'slot':slot,'subitem':item}, self.request)
         return Structure(body)
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
-        VisualisableElement.__init__(self,**kwargs)
         Step.__init__(self, wizard, index)
         self.context = context
         self.request = request

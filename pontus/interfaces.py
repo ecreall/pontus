@@ -5,12 +5,14 @@ class IVisualisableElement(Interface):
     pass
 
 
-class IFormView(IVisualisableElement):
+class IView(Interface):
     pass
 
 
-class IView(IVisualisableElement):
+class IFormView(IView):
     pass
+
+
 
 
 

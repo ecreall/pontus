@@ -39,7 +39,7 @@
     <div class="panel-body">
     <p>${description}</p>
   </div>
-        <table  class="table">
+        <table  class="table table-striped">
           <thead>
               <tr class="row">
                 <th  tal:define="children field.children[0].children"

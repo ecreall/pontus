@@ -115,6 +115,7 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
+        import pdb; pdb.set_trace()
         result = None
         if not (self.factory in self.__specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
