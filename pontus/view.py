@@ -81,3 +81,29 @@ class View(Step):
     def setviewid(self, viewid):
         self.viewid = viewid
 
+
+class CallView(View):
+    view = None
+    self_template = 'pontus:templates/global_accordion.pt'
+
+    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
+        View.__init__(self, context, request, parent, wizard, index, **kwargs)
+        items = self.get_items()
+        if not isinstance(items, (list, tuple)):
+            items = [items]
+
+        self.children = [self.view(item_context, request, self, None, None,**kwargs) for item_context in items]
+        for i, v in enumerate(self.children):
+            v.setviewid(v.viewid+'_'+str(i))
+
+    def update(self,):
+        items = [v.update()['slots'][v.slot][0] for v in self.children]
+        values = {'items': items}           
+        body = self.content(result=values, template=self.self_template)['body']
+        item = self.adapt_item(body, self.viewid)
+        result = {}
+        result['slots'] = {self.slot:[item]}
+        return result
+
+    def get_items(self):
+        pass

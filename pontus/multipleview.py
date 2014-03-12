@@ -117,3 +117,4 @@ class MultipleView(View):
                                       'id':self.viewid}]
 
         return result
+

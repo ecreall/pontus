@@ -18,7 +18,6 @@ class Schema(VisualisableElement,SH):
         self.typ = ObjectData(_class)   
 
     def deserialize(self, cstruct=colander.null):
-        import pdb; pdb.set_trace()
         members = dict(inspect.getmembers(self))
         if TAGGED_DATA in members and 'invariants' in members[TAGGED_DATA]:
             for invariant in members[TAGGED_DATA]['invariants']:
@@ -98,7 +97,7 @@ def omit(schema, mask, isinternal=False):
 
 
 class VisualisableElementSchema(Schema):
-
+    
     title = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.TextInputWidget()

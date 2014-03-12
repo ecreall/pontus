@@ -2,6 +2,8 @@ from ZODB.blob import Blob
 import colander
 import deform.widget
 from deform.i18n import _
+import transaction
+from ZODB.interfaces import BlobError
 
 from substanced.file import File as FL
 from substanced.util import get_oid
@@ -43,6 +45,13 @@ class File(Object,FL):
         result['size'] = self.get_size()
         result['fp'] = self.blob.open('r')
         return result
+
+    def get_size(self):
+        try:
+            return FL.get_size(self)
+        except BlobError as e:
+            transaction.commit()
+            return FL.get_size(self)
 
     def __setattr__(self, name, value):
         if name == 'mimetype':
@@ -87,7 +96,6 @@ class ObjectData(colander.Mapping):
         self.context = None
   
     def serialize(self, node, appstruct):
-
         _object = None
         if appstruct is None:
             appstruct = colander.null
@@ -107,6 +115,7 @@ class ObjectData(colander.Mapping):
         else:
             if appstruct is colander.null:
                 return  appstruct  
+
             result = appstruct
 
         if _object is not None:
@@ -115,7 +124,10 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
-        import pdb; pdb.set_trace()
+        _objectIndex = None
+        if cstruct and __ObjectIndex__ in cstruct:
+            _objectIndex = cstruct.get(__ObjectIndex__)
+
         result = None
         if not (self.factory in self.__specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
@@ -129,7 +141,6 @@ class ObjectData(colander.Mapping):
             result = cstruct
 
         _object = None
-        _objectIndex = result.get(__ObjectIndex__)
         if isinstance(result, dict) and _objectIndex is not None and not (_objectIndex==''):
             _object = get_obj(int(_objectIndex))
         elif self.context is not None:

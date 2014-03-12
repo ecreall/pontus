@@ -10,6 +10,7 @@ from deform.widget import (
     FileUploadWidget,
     Select2Widget as Select2W,
     OptGroup,
+    FormWidget as FW,
     CheckboxChoiceWidget as CheckboxChoiceW
     )
 
@@ -178,6 +179,11 @@ class LineWidget(MappingWidget):
     readonly_template = 'pontus:templates/readonly/line_mapping.pt'
     readonly_item_template = 'pontus:templates/readonly/line_mapping_item.pt'
 
+class AccordionWidget(SequenceWidget):
+  
+    template = 'pontus:templates/accordion.pt'
+    item_template = 'pontus:templates/accordion_item.pt'
+
 
 class RichTextWidget(RichTextWidget):
   
@@ -285,3 +291,12 @@ class CheckboxChoiceWidget(CheckboxChoiceW):
                 result.append(item)
 
         return tuple(result)
+
+
+class SimpleMappingWidget(MappingWidget):
+
+    template = 'pontus:templates/simple_mapping.pt'
+
+class SimpleFormWidget(FW):
+
+    item_template = 'pontus:templates/simple_mapping_item.pt'
