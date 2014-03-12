@@ -1,0 +1,39 @@
+<div tal:define="item_tmpl item_template|field.widget.item_template;
+                 oid oid|field.oid;
+                 name name|field.name;
+                 prototype field.widget.prototype(field);
+                 title title|field.title;
+                 description description|field.description"
+     class="deformSeq"
+     id="${oid}">
+
+  <style>
+    body.dragging, body.dragging * {
+      cursor: move !important;
+    }
+
+    .dragged {
+      position: absolute;
+      opacity: 0.5;
+      z-index: 2000;
+    }
+  </style>   
+
+  <!-- sequence -->
+  <input type="hidden" name="__start__"
+         value="${field.name}:sequence"
+         class="deformProto"
+         tal:attributes="prototype prototype"/>
+
+  <div class="panel-group" id="accordion">
+    <div tal:define="subfields [ x[1] for x in subfields ]" 
+             tal:repeat="subfield subfields" class="panel panel-default">
+
+        <div tal:replace="structure subfield.render_template(item_tmpl,parent=field)" />
+
+    </div>
+  </div>
+ <input type="hidden" name="__end__" value="${field.name}:sequence"/>
+  <!-- /sequence -->
+
+</div>

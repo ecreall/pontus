@@ -1,0 +1,24 @@
+<div tal:omit-tag="" 
+     tal:define="hidden hidden|field.widget.hidden;
+                 error_class error_class|field.widget.error_class;
+                 description description|field.description;
+                 title title|field.title;
+                 oid oid|field.oid"
+     title="${description}"
+     class="form-group row deformSeqItem ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
+     i18n:domain="deform">
+
+    <div tal:omit-tag="field.widget.hidden"
+     class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" tal:attributes="href '#'+oid" tal:define="atitle cstruct['title']| oid">
+          ${atitle}
+        </a>
+      </h4>
+    </div>
+    <div tal:attributes="id oid" class="panel-collapse collapse collapse">
+      <div class="panel-body">
+      <span tal:replace="structure field.serialize(cstruct)"/>
+      </div>
+    </div>
+</div>

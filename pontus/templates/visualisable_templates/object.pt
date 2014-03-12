@@ -1,0 +1,3 @@
+  <i tal:attributes="title object.title" class="glyphicon glyphicon-align-left"> </i>
+  <a tal:attributes="href object.url(request)">${object.title}</a>
+

@@ -1,0 +1,57 @@
+<div tal:define="css_class css_class|field.widget.css_class;
+                 style style|field.widget.style;
+                 oid oid|field.oid;
+                 inline getattr(field.widget, 'inline', False)"
+     tal:omit-tag="not inline">
+
+
+  ${field.start_sequence()}
+
+<div class="slickgrid-wrapper slickgrid_664451 ui-widget" id="sdi-contents-table-sg" style="overflow: hidden; outline: 0px none;">
+
+<div style="position:fixed;width:0;height:0;top:0;left:0;outline:0;" hidefocus="" tabindex="0"></div>
+
+<div style="overflow:hidden;position:relative;" class="slick-header ui-state-default">
+<div style="left: -1000px; -moz-user-select: none; width: 2119px;" class="slick-header-columns ui-sortable" unselectable="on">
+<div class="ui-state-default slick-header-column" style="width: 14.1167px;" id="slickgrid_664451_checkbox_selector" title="Select/Deselect All">
+<span class="slick-column-name"><input type="checkbox"></span></div>
+<div class="ui-state-default slick-header-column slick-header-sortable slick-header-column-sorted" style="width: 1064.12px;" id="slickgrid_664451Name" title="">
+<span class="slick-column-name">Name</span><span class="slick-sort-indicator slick-sort-indicator-asc"></span></div>
+</div>
+</div>
+
+<div style="overflow: hidden; position: relative; display: none;" class="slick-headerrow ui-state-default">
+<div class="slick-headerrow-columns" style="width: 1110px;"></div>
+<div style="display: block; height: 1px; position: absolute; top: 0px; left: 0px; width: 1110px;"></div></div>
+
+<div style="overflow: hidden; position: relative; display: none;" class="slick-top-panel-scroller ui-state-default">
+<div style="width:10000px" class="slick-top-panel"></div></div>
+
+<div style="width: 100%; overflow: auto; outline: 0px none; position: relative; height: 344.233px;" class="slick-viewport">
+<div class="grid-canvas" style="width: 1110px; height: 334.233px;" tal:define="topn -35" tal:define="allvalues values | field.widget.values">
+  <div tal:repeat="choice allvalues"
+       style="top:${35*allvalues.index(choice)}px" class="ui-widget-content slick-row even">
+
+<div tal:omit-tag="" tal:define="(value, body) choice">
+ <div class="slick-cell l0 r0 sdi-sg-checkboxcell" >
+    <!--label for="${oid}-${repeat.choice.index}" -->
+      <input tal:attributes="checked value in cstruct"
+             type="checkbox"
+             name="checkbox"
+             value="${value}"
+             id="${oid}-${repeat.choice.index}"/>
+   <!--/label-->
+ </div>
+<div class="slick-cell l1 r1 cell-Name">
+      ${body}
+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="position:fixed;width:0;height:0;top:0;left:0;outline:0;" hidefocus="" tabindex="0"></div></div>
+
+${field.end_sequence()}
+</div>
+
+

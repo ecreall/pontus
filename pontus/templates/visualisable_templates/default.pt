@@ -1,0 +1,6 @@
+<h4>${object.title} <span class="label label-default" tal:condition="object.label">${object.label}</span></h4>
+<p class="text-muted" tal:condition="object.description">
+    <small  >${object.description}</small>
+</p>
+
+
