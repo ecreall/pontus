@@ -3,7 +3,8 @@
                  error_class error_class|field.widget.error_class;
                  description description|field.description;
                  title title|field.title;
-                 oid oid|field.oid"
+                 oid oid|field.oid;
+                 rootid field.get_root().formid|''"
      title="${description}"
      class="form-group row deformSeqItem ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
      i18n:domain="deform">
@@ -11,7 +12,8 @@
     <div tal:omit-tag="field.widget.hidden"
      class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" tal:attributes="href '#'+oid" tal:define="atitle cstruct['title']| oid">
+        <a data-toggle="collapse" tal:attributes="data-parent '#accordion_'+rootid; 
+                                                  href '#'+oid" tal:define="atitle cstruct['title']| oid">
           ${atitle}
         </a>
       </h4>

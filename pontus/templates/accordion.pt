@@ -1,6 +1,7 @@
 <div tal:define="item_tmpl item_template|field.widget.item_template;
                  oid oid|field.oid;
                  name name|field.name;
+                 rootid field.get_root().formid|'';
                  prototype field.widget.prototype(field);
                  title title|field.title;
                  description description|field.description"
@@ -25,9 +26,9 @@
          class="deformProto"
          tal:attributes="prototype prototype"/>
 
-  <div class="panel-group" id="accordion">
+  <div class="panel-group" tal:attributes="id 'accordion_'+rootid">
     <div tal:define="subfields [ x[1] for x in subfields ]" 
-             tal:repeat="subfield subfields" class="panel panel-default">
+             tal:repeat="subfield subfields" class="panel panel-${subfield.error and 'danger' or 'default'}">
 
         <div tal:replace="structure subfield.render_template(item_tmpl,parent=field)" />
 

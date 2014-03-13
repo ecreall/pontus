@@ -1,9 +1,9 @@
-<div class="panel-group" id="accordion">
+<div class="panel-group" tal:attributes="id 'accordion_'+id">
     <div tal:repeat="item items" class="panel panel-default">
 
       <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" tal:attributes="href '#'+item['id']" tal:define="atitle item['view'].context.title| item['id']">
+        <a data-toggle="collapse" tal:attributes="data-parent '#accordion_'+id; href '#'+item['id']" tal:define="atitle item['view'].context.title| item['id']">
           ${atitle}
         </a>
       </h4>
