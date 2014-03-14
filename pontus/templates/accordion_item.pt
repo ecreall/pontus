@@ -13,12 +13,12 @@
      class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" tal:attributes="data-parent '#accordion_'+rootid; 
-                                                  href '#'+oid" tal:define="atitle cstruct['title']| oid">
+                                                  href '#'+oid+rootid" tal:define="atitle cstruct['title']| oid">
           ${atitle}
         </a>
       </h4>
     </div>
-    <div tal:attributes="id oid" class="panel-collapse collapse collapse">
+    <div tal:attributes="id oid+rootid" class="panel-collapse collapse collapse">
       <div class="panel-body">
       <span tal:replace="structure field.serialize(cstruct)"/>
       </div>

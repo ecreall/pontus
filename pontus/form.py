@@ -97,7 +97,7 @@ class FormView(View, FV):
             self._chmod(form, self.chmod)
 
     def _setSchemaStepIndexNode(self):
-        if not (self.schema.children[len(self.schema.children)-1].name == STEPID):
+        if self.schema.get(STEPID) is None:
             stepIndexNode = colander.SchemaNode(
                 colander.String(),
                 name = STEPID,
@@ -106,7 +106,7 @@ class FormView(View, FV):
                 )
             self.schema.children.append(stepIndexNode)
         else:
-            self.schema.children[len(self.schema.children)-1].default = str(self.index)
+            self.schema.get(STEPID).default = str(self.index)
 
     def _failure(self, e, form):
         return self.adapt_item(e.render(), form.formid)
