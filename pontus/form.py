@@ -67,7 +67,7 @@ class FormView(View, FV):
                     else:
                         try:
                             item = success_method(validated)
-                            self.esucces = True
+                            self.finished_successfully = True
                         except FormError as e:
                             snippet = '<div class="error">Failed: %s</div>' % e
                             self.request.sdiapi.flash(snippet, 'danger',

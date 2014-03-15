@@ -8,29 +8,47 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 from pontus.schema import Schema
-from pontus.view import View
+from pontus.view import View, merg_dicts
 from pontus.form import FormView
 from pontus.multipleview import MultipleView
 from pontus.widget import SimpleFormWidget, AccordionWidget, SimpleMappingWidget, CheckboxChoiceWidget
 from pontus.interfaces import IFormView
 
+def default_view(callview):
+    return None
 
-class ViewOperation(View):
-    pass
-
-class ViewsForContextOperation(ViewOperation):
-    pass
+def default_views(callview):
+    return []
 
 def default_contexts(callview):
     return []
 
+def default_context(callview):
+    return callview.context
 
-class ViewForContextsOperation(ViewOperation):
-    view = None
+
+class ViewOperation(View):
+    merged = False
+
+
+class MultipleViewsOperation(ViewOperation):
+    views = default_views
+
+    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
+        ViewOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
+        if type(self.views).__name__ == 'function':
+            self.views = self.views(self)
+
+
+class MultipleContextsOperation(ViewOperation):
+    view = default_view
     contexts = default_contexts
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
-        View.__init__(self, context, request, parent, wizard, index, **kwargs)
+        ViewOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
+        if type(self.view).__name__ == 'function':
+            self.view = self.view(self)
+
         self._init_children(self.contexts())
 
 
@@ -48,6 +66,15 @@ class ViewForContextsOperation(ViewOperation):
             self.children.append(subview)
 
 
+class MultipleContextsViewsOperation(ViewOperation):
+    views = None
+    contexts = default_contexts
+
+    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
+        ViewOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
+        if type(self.views).__name__ == 'function':
+            self.views = self.views(self)
+    
 
 class ViewSchema(Schema):
 
@@ -74,18 +101,18 @@ class EmptySchema(Schema):
             )
 
 
-class CallFormView(FormView, ViewForContextsOperation):
+class CallFormView(FormView, MultipleContextsOperation):
     schema = EmptySchema(widget=SimpleFormWidget())
     widget = AccordionWidget()
     prefixe = 'All'
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
-        ViewForContextsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
+        MultipleContextsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
         FormView.__init__(self, context, request, parent, wizard, index, **kwargs)
         self._addItemsNode()
 
     def _init_children(self, contexts):
-        ViewForContextsOperation._init_children(self, contexts)
+        MultipleContextsOperation._init_children(self, contexts)
         items = self.children
         self.children = {}
         for i, subform in enumerate(items):
@@ -152,7 +179,7 @@ class CallFormView(FormView, ViewForContextsOperation):
                     else:
                         try:
                             item = success_method(validated)
-                            self.esucces = True
+                            self.finished_successfully = True
                         except FormError as e:
                             snippet = '<div class="error">Failed: %s</div>' % e
                             self.request.sdiapi.flash(snippet, 'danger',
@@ -197,16 +224,12 @@ class CallFormView(FormView, ViewForContextsOperation):
         return result 
 
 
-class CallView(ViewForContextsOperation):
-    view = None
-    merged = False
+class CallView(MultipleContextsOperation):
+
     self_template = 'pontus:templates/global_accordion.pt'
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
-        if hasattr(self.view, 'merged'):
-            self.view.merged = self.merged
-
-        ViewForContextsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
+        MultipleContextsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
 
 
     def update(self,):
@@ -214,25 +237,41 @@ class CallView(ViewForContextsOperation):
         if self.children and isinstance(self.children[0], MultipleView):
             return self._updateMultipleview()
 
-        items = [v()['slots'][v.slot][0] for v in self.children]
+        views_result = []
+        for v in self.children:
+            view_result = v()
+            import pdb; pdb.set_trace()
+            if v.finished_successfully:
+                self.finished_successfully = True
+
+            if not isinstance(view_result, dict):
+                return view_result
+           
+            views_result.append(view_result)
+              
+        items = [vr['slots'][v.slot][0] for vr in views_result]
         values = {'items': items, 'id':self.view.viewid}           
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
-        result['slots'] = {self.slot:[item]} #integrer les ressources
+        result['slots'] = {self.slot:[item]}
+        for vr in views_result:
+            vr.pop('slots')
+            merg_dicts(vr, result) #integrer les ressources
+
         return result
 
     def _updateMultipleview(self,):
         result = {}
         global_result = {}
         for v in self.children:
-            view_result = v.update()
-            if v.esucces:
-                self.esucces = True
+            view_result = v()
+            if v.finished_successfully:
+                self.finished_successfully = True
 
             if not isinstance(view_result, dict):
                 return view_result
 
-            global_result = v._merg(view_result, global_result)
+            global_result = merg_dicts(view_result, global_result)
             for slot, values in view_result['slots'].iteritems():
                 item = {'view':v,'items': values, 'id': v.viewid}
                 subbody = v.render_item(slot='globalslot'+'_'+slot, item=item)
@@ -251,23 +290,24 @@ class CallView(ViewForContextsOperation):
         return  global_result 
 
 
-class LoopSchema(Schema):
+class ItemsSchema(Schema):
         items = colander.SchemaNode(
             colander.Set()
             )
 
 
-class ExclusifCallViews(FormView):
+class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
 
-    views = None
-    contexts =  default_contexts
+    #widgets
     items_widget = CheckboxChoiceWidget
-    widget = SimpleFormWidget
-    schema = LoopSchema
+    form_widget = SimpleFormWidget
+    # a ne pas changer 
+    schema = ItemsSchema
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
-        self.schema = self.schema(widget=self.widget())
+        self.schema = self.schema(widget=self.form_widget())
         FormView.__init__(self, context, request, parent, wizard, index, **kwargs)
+        MultipleContextsViewsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
         self.items = self.contexts()
         self.validated_items = []
         self.children = {}
@@ -281,22 +321,20 @@ class ExclusifCallViews(FormView):
             _views[name] = v
 
         for key, view in _views.iteritems():
-            viewforcontexts_class = CallView
+            multiplecontextsview_class = CallView
             if IFormView.implementedBy(view):
-                viewforcontexts_class = CallFormView
+                multiplecontextsview_class = CallFormView
 
-            viewforcontexts_class.title = view.title
-            viewforcontexts_class.view = view
-            view_instance = viewforcontexts_class(self.context, self.request, self.parent, self.wizard, self.index)
+            multiplecontextsview_class.title = view.title
+            multiplecontextsview_class.view = view
+            view_instance = multiplecontextsview_class(self.context, self.request, self.parent, self.wizard, self.index)
             self.children[key] = view_instance
 
     def _additemswidget(self):
-        viewsschemanode =  self.schema.get('items')
-        viewsschemanode.widget = self.get_itemswidget()
-
-    def get_itemswidget(self):
         values = [(i, i.get_view(self.request)) for i in self.items]
-        return self.items_widget(values=values, multiple=True)
+        widget = self.items_widget(values=values, multiple=True)
+        viewsschemanode =  self.schema.get('items')
+        viewsschemanode.widget = widget
 
     def _build_form(self):
         self.buttons = [b.title for b in self.views]
@@ -340,10 +378,14 @@ class ExclusifCallViews(FormView):
                             error = True
 
                     break
-        elif posted_formid is not None:
-            self.validated_items = [get_obj(int(o)) for o  in self.request.POST['__contextsoids__'].split(':')[1:]]
-            viewname = self.request.POST['__viewid__']
-            return self._call_callview(viewname)
+
+        if posted_formid is not None and '__viewid__' in self.request.POST:
+            posted_viewid= self.request.POST['__viewid__'].split(':')
+            _viewid = posted_viewid[0]
+            if _viewid == self.viewid:
+                self.validated_items = [get_obj(int(o)) for o  in self.request.POST['__contextsoids__'].split(':')[1:]]
+                viewname = posted_viewid[1]
+                return self._call_callview(viewname)
 
         if item is None:
             item = self.show(form)
@@ -367,7 +409,7 @@ class ExclusifCallViews(FormView):
             self._addCallViewSchemaIdsNode(callview.schema, viewname)
 
         callview_result = callview()
-        self.esucces = callview.esucces
+        self.finished_successfully = callview.finished_successfully
         return callview_result
 
     def _getcontextsoids(self):
@@ -379,18 +421,18 @@ class ExclusifCallViews(FormView):
 
     def _addCallViewSchemaIdsNode(self, schema, viewname):
         if schema.get('__viewid__') is not None:
-            schema.__delitem__('__viewid__') #return
+            schema.__delitem__('__viewid__')
 
         __viewid__ = colander.SchemaNode(
                 colander.String(),
                 name='__viewid__',
                 widget=deform.widget.HiddenWidget(),
-                default=viewname
+                default=self.viewid+':'+viewname
                 )
         schema.children.append(__viewid__)
         contextsoid = self._getcontextsoids()
         if schema.get('__contextsoids__') is not None:
-            schema.__delitem__('__contextsoids__') #return
+            schema.__delitem__('__contextsoids__') 
 
         __contextsoids__ = colander.SchemaNode(
                 colander.String(),

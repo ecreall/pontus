@@ -8,7 +8,7 @@ class Step(object):
     def __init__(self, wizard=None, index=0):
         self.wizard = wizard
         self.index = index
-        self.esucces = False
+        self.finished_successfully = False
 
     def condition(self):
         return True
@@ -32,7 +32,7 @@ class Wizard(object):
 
         result = self.stepsinstances[posted_stepid]()
         self.title = self.stepsinstances[posted_stepid].title
-        if self.stepsinstances[posted_stepid].esucces and len(self.stepsinstances)>(posted_stepid + 1):
+        if self.stepsinstances[posted_stepid].finished_successfully and len(self.stepsinstances)>(posted_stepid + 1):
             posted_stepid += 1
             self.request.POST.clear()
             self.title = self.stepsinstances[posted_stepid].title
@@ -50,7 +50,7 @@ class Wizard(object):
 
         result = self.stepsinstances[posted_stepid].update()
         self.title = self.stepsinstances[posted_stepid].title
-        if self.stepsinstances[posted_stepid].esucces and len(self.stepsinstances)>(posted_stepid + 1):
+        if self.stepsinstances[posted_stepid].finished_successfully and len(self.stepsinstances)>(posted_stepid + 1):
             posted_stepid += 1
             self.request.POST.clear()
             self.title = self.stepsinstances[posted_stepid].title

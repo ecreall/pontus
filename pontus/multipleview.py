@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pontus.view import View
+from pontus.view import View, merg_dicts
 
 
 def default_builder(parent, views):
@@ -39,19 +39,6 @@ class MultipleView(View):
         self._slots = []
         self.builder(self.views)
 
-    def _merg(self, source, target):
-        result = target
-        for k in source.keys():
-            if k in result.keys():
-                if isinstance(result[k], list):
-                    result[k].extend(source[k])
-                elif isinstance(result[k], dict):
-                    result[k] = self._merg(source[k], result[k])
-            else:
-                result[k] = source[k]
-       
-        return result
-
     def _activate(self, items):
         if items:
             item = items[0]
@@ -64,13 +51,13 @@ class MultipleView(View):
         for view in self.children:
             view_result = view.update()
 
-            if view.esucces:
-                self.esucces = True
+            if view.finished_successfully:
+                self.finished_successfully = True
 
             if not isinstance(view_result,dict):
                 return view_result
 
-            result = self._merg(view_result, result)
+            result = merg_dicts(view_result, result)
 
         for slot in result['slots']:
             items = result['slots'][slot]

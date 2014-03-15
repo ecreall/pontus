@@ -11,6 +11,19 @@ from pyramid_layout.layout import Structure
 from pontus.interfaces import IView
 from pontus.wizard import Step
 
+def merg_dicts(source, target):
+    result = target
+    for k in source.keys():
+        if k in result.keys():
+            if isinstance(result[k], list):
+                result[k].extend(source[k])
+            elif isinstance(result[k], dict):
+                result[k] = merg_dicts(source[k], result[k])
+        else:
+            result[k] = source[k]
+       
+    return result
+
 __emptytemplate__ = 'templates/empty.pt'
 
 class View(Step):
