@@ -11,7 +11,7 @@ def default_builder(parent, views):
             viewinstance = MultipleView(parent.context, parent.request, parent, parent.wizard, parent.index)
             viewinstance.merged = parent.merged
             if parent.merged:
-                viewinstance.slot = parent.slot
+                viewinstance.coordiantes = parent.coordiantes
 
             viewinstance.title = view[0]
             viewinstance.viewid = parent.viewid+'_'+viewinstance.title.replace(' ','-')
@@ -20,7 +20,7 @@ def default_builder(parent, views):
         else:
             viewinstance = view(parent.context, parent.request, parent, parent.wizard, parent.index)
             if parent.merged:
-                viewinstance.slot = parent.slot
+                viewinstance.coordiantes = parent.coordiantes
 
             parent.children.append(viewinstance)        
 
@@ -36,7 +36,7 @@ class MultipleView(View):
     def __init__(self, context, request, parent=None, wizard=None, index=0):
         super(MultipleView, self).__init__(context, request, parent, wizard, index)
         self.children = []
-        self._slots = []
+        self._coordiantes = []
         self.builder(self.views)
 
     def _activate(self, items):
@@ -59,8 +59,8 @@ class MultipleView(View):
 
             result = merg_dicts(view_result, result)
 
-        for slot in result['slots']:
-            items = result['slots'][slot]
+        for coordiante in result['coordiantes']:
+            items = result['coordiantes'][coordiante]
             isactive = False
             for item in items:
                 if item['isactive']:
@@ -72,7 +72,7 @@ class MultipleView(View):
                 if self.parent is None:
                     isactive = True
 
-            result['slots'][slot] = [{'isactive':isactive,
+            result['coordiantes'][coordiante] = [{'isactive':isactive,
                                       'items': items,
                                       'view': self,
                                       'id':self.viewid}]

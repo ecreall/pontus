@@ -67,7 +67,7 @@ class Index(View):
         warning_message = renderers.render('templates/forbidden.pt', {}, self.request)
         item =self.adapt_item('', self.viewid)
         item['messages'] = {'warning': [warning_message]}
-        result = {'js_links': [], 'css_links': [], 'slots': {self.slot:[item]}}
+        result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
         return result
 
 

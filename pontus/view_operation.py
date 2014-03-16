@@ -9,6 +9,7 @@ from substanced.util import get_oid
 from dace.util import get_obj
 from pontus.schema import Schema
 from pontus.view import View, merg_dicts
+from pontus.wizard import STEPID
 from pontus.form import FormView
 from pontus.multipleview import MultipleView
 from pontus.widget import SimpleFormWidget, AccordionWidget, SimpleMappingWidget, CheckboxChoiceWidget
@@ -139,7 +140,7 @@ class CallFormView(FormView, MultipleContextsOperation):
 
 
     def update(self,):
-        self._setSchemaStepIndexNode()
+        self.schema.add_idnode(STEPID, str(self.index))
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
@@ -196,7 +197,7 @@ class CallFormView(FormView, MultipleContextsOperation):
             if error:
                 item['isactive'] = True
        
-            result['slots'] = {self.slot:[item]}
+            result['coordiantes'] = {self.coordiantes:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
         else:
@@ -240,7 +241,6 @@ class CallView(MultipleContextsOperation):
         views_result = []
         for v in self.children:
             view_result = v()
-            import pdb; pdb.set_trace()
             if v.finished_successfully:
                 self.finished_successfully = True
 
@@ -249,13 +249,13 @@ class CallView(MultipleContextsOperation):
            
             views_result.append(view_result)
               
-        items = [vr['slots'][v.slot][0] for vr in views_result]
+        items = [vr['coordiantes'][v.coordiantes][0] for vr in views_result]
         values = {'items': items, 'id':self.view.viewid}           
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
-        result['slots'] = {self.slot:[item]}
+        result['coordiantes'] = {self.coordiantes:[item]}
         for vr in views_result:
-            vr.pop('slots')
+            vr.pop('coordiantes')
             merg_dicts(vr, result) #integrer les ressources
 
         return result
@@ -272,20 +272,20 @@ class CallView(MultipleContextsOperation):
                 return view_result
 
             global_result = merg_dicts(view_result, global_result)
-            for slot, values in view_result['slots'].iteritems():
+            for coordiante, values in view_result['coordiantes'].iteritems():
                 item = {'view':v,'items': values, 'id': v.viewid}
-                subbody = v.render_item(slot='globalslot'+'_'+slot, item=item)
-                item = {'view':v,'body': subbody, 'id': v.viewid+'_'+slot}
-                if slot in result:
-                    result[slot].append(item) 
+                subbody = v.render_item(coordiantes='globalcoordiantes'+'_'+coordiante, item=item)
+                item = {'view':v,'body': subbody, 'id': v.viewid+'_'+coordiante}
+                if coordiante in result:
+                    result[coordiante].append(item) 
                 else:
-                    result[slot] = [item]
+                    result[coordiante] = [item]
 
-        for slot, items in result.iteritems():
-            values = {'items': items, 'id':self.viewid+slot }           
+        for coordiante, items in result.iteritems():
+            values = {'items': items, 'id':self.viewid+coordiante }           
             body = self.content(result=values, template=self.self_template)['body']
             item = self.adapt_item(body, self.viewid)
-            global_result['slots'][slot]=[item]
+            global_result['coordiantes'][coordiante]=[item]
 
         return  global_result 
 
@@ -341,7 +341,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         return FormView._build_form(self)
 
     def update(self,):
-        self._setSchemaStepIndexNode()
+        self.schema.add_idnode(STEPID, str(self.index))
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
@@ -394,7 +394,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             if error:
                 item['isactive'] = True
        
-            result['slots'] = {self.slot:[item]}
+            result['coordiantes'] = {self.coordiantes:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
         else:
@@ -406,7 +406,8 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         callview = self.children[viewname]
         callview._init_children(self.validated_items)
         if IFormView.implementedBy(callview.view):
-            self._addCallViewSchemaIdsNode(callview.schema, viewname)
+            callview.schema.add_idnode('__viewid__', (self.viewid+':'+viewname))
+            callview.schema.add_idnode('__contextsoids__', self._getcontextsoids())
 
         callview_result = callview()
         self.finished_successfully = callview.finished_successfully
@@ -418,27 +419,3 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             result+= ':'+str(get_oid(c))
 
         return result
-
-    def _addCallViewSchemaIdsNode(self, schema, viewname):
-        if schema.get('__viewid__') is not None:
-            schema.__delitem__('__viewid__')
-
-        __viewid__ = colander.SchemaNode(
-                colander.String(),
-                name='__viewid__',
-                widget=deform.widget.HiddenWidget(),
-                default=self.viewid+':'+viewname
-                )
-        schema.children.append(__viewid__)
-        contextsoid = self._getcontextsoids()
-        if schema.get('__contextsoids__') is not None:
-            schema.__delitem__('__contextsoids__') 
-
-        __contextsoids__ = colander.SchemaNode(
-                colander.String(),
-                name='__contextsoids__',
-                widget=deform.widget.HiddenWidget(),
-                default=contextsoid
-                )
-        schema.children.append(__contextsoids__)
-

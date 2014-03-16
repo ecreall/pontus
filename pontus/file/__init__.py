@@ -101,10 +101,8 @@ class ObjectData(colander.Mapping):
             appstruct = colander.null
 
         if  appstruct is not colander.null and not isinstance(appstruct, dict):
-            if node.widget is None:
-                self.context  = appstruct
-
             _object = appstruct
+            self.context  = appstruct
             appstruct = _object.get_data(node)
 
         result = None

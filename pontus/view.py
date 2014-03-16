@@ -11,6 +11,7 @@ from pyramid_layout.layout import Structure
 from pontus.interfaces import IView
 from pontus.wizard import Step
 
+
 def merg_dicts(source, target):
     result = target
     for k in source.keys():
@@ -30,12 +31,12 @@ class View(Step):
     implements(IView)
 
     viewid = ''
-    slot = 'main'
+    coordiantes = 'main'
     item_template = 'templates/subview.pt'
     self_template = None
 
-    def render_item(self, item, slot):
-        body = renderers.render(self.item_template, {'slot':slot,'subitem':item}, self.request)
+    def render_item(self, item, coordiantes):
+        body = renderers.render(self.item_template, {'coordiantes':coordiantes,'subitem':item}, self.request)
         return Structure(body)
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):

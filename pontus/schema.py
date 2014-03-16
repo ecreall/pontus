@@ -26,6 +26,21 @@ class Schema(VisualisableElement,SH):
         appstruct = super(Schema, self).deserialize(cstruct)
         return appstruct
 
+    def add_idnode(self, id, value=None):
+        if self.get(id) is not None:
+            self.__delitem__(id)
+
+        if value is None:
+            value
+
+        idnode = colander.SchemaNode(
+                colander.String(),
+                name = id,
+                widget=deform.widget.HiddenWidget(),
+                default=value
+                )
+        self.children.append(idnode)
+
 
 def select(schema, mask):
     """Return a new schema with only fields included in mask.

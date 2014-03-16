@@ -41,7 +41,8 @@ class FormView(View, FV):
                     self._chmod(node.children[0], m[1])
 
     def update(self,):
-        self._setSchemaStepIndexNode()
+        self.schema.add_idnode(STEPID, str(self.index))
+        self.schema.add_idnode('__objectoid__')
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
@@ -84,7 +85,7 @@ class FormView(View, FV):
             if error:
                 item['isactive'] = True
 
-            result['slots'] = {self.slot:[item]}
+            result['coordiantes'] = {self.coordiantes:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
         else:
@@ -95,18 +96,6 @@ class FormView(View, FV):
     def before(self, form):
         if self.chmod:
             self._chmod(form, self.chmod)
-
-    def _setSchemaStepIndexNode(self):
-        if self.schema.get(STEPID) is None:
-            stepIndexNode = colander.SchemaNode(
-                colander.String(),
-                name = STEPID,
-                widget=deform.widget.HiddenWidget(),
-                default = str(self.index)
-                )
-            self.schema.children.append(stepIndexNode)
-        else:
-            self.schema.get(STEPID).default = str(self.index)
 
     def _failure(self, e, form):
         return self.adapt_item(e.render(), form.formid)

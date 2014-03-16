@@ -1,18 +1,18 @@
 <div tal:omit-tag="" tal:define=" items subitem['items'];
                                   itemslen len(items)|0">
   <div tal:omit-tag="" tal:condition="items and itemslen == 1">
-      <div tal:define="item items[0]" tal:replace="item['view'].render_item(item, slot)" />
+      <div tal:define="item items[0]" tal:replace="item['view'].render_item(item, coordiantes)" />
   </div>
   <div tal:omit-tag="" tal:condition="items and itemslen > 1">
-      <ul tal:attributes="id (subitem['view'].viewid+'_multipleform_'+slot)" class="nav nav-tabs">
+      <ul tal:attributes="id (subitem['view'].viewid+'_multipleform_'+coordiantes)" class="nav nav-tabs">
           <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''">
-             <a data-toggle="tab" tal:attributes="href '#'+item['id']+slot">${item['view'].title}</a>
+             <a data-toggle="tab" tal:attributes="href '#'+item['id']+coordiantes">${item['view'].title}</a>
           </li>
       </ul>
-      <div tal:attributes="id (subitem['id']+'_multipleform'+slot)" class="tab-content">
-          <div tal:repeat="item items" tal:attributes="id item['id']+slot;
+      <div tal:attributes="id (subitem['id']+'_multipleform'+coordiantes)" class="tab-content">
+          <div tal:repeat="item items" tal:attributes="id item['id']+coordiantes;
                                                        class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
-              <div tal:replace="item['view'].render_item(item, slot)" />         
+              <div tal:replace="item['view'].render_item(item, coordiantes)" />         
           </div>
       </div>
   </div>
