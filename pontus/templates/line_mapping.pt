@@ -5,9 +5,15 @@
                      item_template item_template|field.widget.item_template"
          i18n:domain="deform">
        ${field.start_mapping()}
-       <input tal:condition="cstruct.has_key('__objectid__')" type="hidden" name="__objectid__" value="${cstruct['__objectid__']}" id="${oid}-__objectid__"/>
-      <td tal:repeat="child field.children">
+
+      <div tal:omit-tag="" tal:repeat="child field.children">
+        <td tal:condition="child.widget.hidden" hidden="">
            <div tal:replace="structure child.render_template(item_template)" />
-      </td>
+        </td>
+        <td tal:condition="not child.widget.hidden">
+           <div tal:replace="structure child.render_template(item_template)" />
+        </td>
+      </div>
+
       ${field.end_mapping()}     
 </tal:def>

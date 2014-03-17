@@ -12,8 +12,11 @@ from dace.util import get_obj
 from dace.objectofcollaboration.object import Object
 
 
+ObjectOID = '__objectoid__'
+
+
 USE_MAGIC = object()
-__ObjectIndex__ = '__objectid__'
+
 
 class File(Object,FL):
 
@@ -90,10 +93,12 @@ class ObjectData(colander.Mapping):
 
     __specialObjects = (File, Image)
 
-    def __init__(self, factory=None, unknown='ignore'):
+    def __init__(self, factory=None, editable=False, unknown='ignore'):
         colander.Mapping.__init__(self, unknown)
         self.factory = factory
-        self.context = None
+        self.editable = editable
+        if self.factory is not None and self.factory in self.__specialObjects:
+            self.editable = True 
   
     def serialize(self, node, appstruct):
         _object = None
@@ -102,13 +107,12 @@ class ObjectData(colander.Mapping):
 
         if  appstruct is not colander.null and not isinstance(appstruct, dict):
             _object = appstruct
-            self.context  = appstruct
             appstruct = _object.get_data(node)
 
         result = None
         if not (self.factory in self.__specialObjects):
             result = colander.Mapping.serialize(self, node, appstruct)
-            if result is colander.null:
+            if not self.editable or result is colander.null:
                 return result
         else:
             if appstruct is colander.null:
@@ -117,19 +121,19 @@ class ObjectData(colander.Mapping):
             result = appstruct
 
         if _object is not None:
-            result[__ObjectIndex__] = get_oid(_object)
+            result[ObjectOID] = get_oid(_object)
 
         return result
 
     def deserialize(self, node, cstruct):
-        _objectIndex = None
-        if cstruct and __ObjectIndex__ in cstruct:
-            _objectIndex = cstruct.get(__ObjectIndex__)
+        obj_oid = None
+        if self.editable and cstruct and ObjectOID in cstruct:
+            obj_oid = cstruct.get(ObjectOID)
 
         result = None
         if not (self.factory in self.__specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
-            if result is colander.null or cstruct is colander.null:
+            if not self.editable or result is colander.null or cstruct is colander.null:
                 return result
         else:
             if cstruct is colander.null:
@@ -139,17 +143,15 @@ class ObjectData(colander.Mapping):
             result = cstruct
 
         _object = None
-        if isinstance(result, dict) and _objectIndex is not None and not (_objectIndex==''):
-            _object = get_obj(int(_objectIndex))
-        elif self.context is not None:
-            _object = self.context
+        if isinstance(result, dict) and obj_oid is not None and not (obj_oid==''):
+            _object = get_obj(int(obj_oid))
             
+        if self.factory is None and _object is None:
+            return result
+
         if _object is None and self.factory is not None:
             _object = self.factory(**result)
             return _object
-
-        if self.factory is None and _object is None:
-            return result
 
         _object.set_data(result)
         return _object

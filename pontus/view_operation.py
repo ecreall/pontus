@@ -50,12 +50,13 @@ class MultipleContextsOperation(ViewOperation):
         if type(self.view).__name__ == 'function':
             self.view = self.view(self)
 
-        self._init_children(self.contexts())
+        self.contexts = self.contexts()
+        self._init_children(self.contexts)
 
 
     def _init_children(self, contexts=None):
         if contexts is None:
-            contexts = self.contexts()
+            contexts = self.contexts
 
         self.children = []
         if not isinstance(contexts, (list, tuple)):
@@ -63,8 +64,9 @@ class MultipleContextsOperation(ViewOperation):
 
         for item_context in contexts:
             subview = self.view(item_context, self.request, self, None, None,**{})
-            subview.setviewid(subview.viewid+'_'+str(get_oid(item_context)))       
-            self.children.append(subview)
+            if subview.validate():
+                subview.setviewid(subview.viewid+'_'+str(get_oid(item_context)))       
+                self.children.append(subview)
 
 
 class MultipleContextsViewsOperation(ViewOperation):
@@ -75,6 +77,8 @@ class MultipleContextsViewsOperation(ViewOperation):
         ViewOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
         if type(self.views).__name__ == 'function':
             self.views = self.views(self)
+
+        self.contexts = self.contexts()
     
 
 class ViewSchema(Schema):
@@ -140,6 +144,9 @@ class CallFormView(FormView, MultipleContextsOperation):
 
 
     def update(self,):
+        if not self.children:
+            return None
+
         self.schema.add_idnode(STEPID, str(self.index))
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
@@ -159,12 +166,20 @@ class CallFormView(FormView, MultipleContextsOperation):
                         validated = form.validate(controls)
                         views = validated['views']
                         for v in views:
-                            views_context = self.children[v['context_oid']]
+                            views_context = None
+                            if v['context_oid'] in self.children:
+                                views_context = self.children[v['context_oid']]
+                            else:
+                                continue
+
                             view_instance = None
                             for v_context in views_context:
                                 if v_context.viewid == v['id']:
                                     view_instance = v_context
                                     break
+
+                            if view_instance is None:
+                                continue
 
                             bname = button.name.replace(('_'+self.prefixe), '')
 
@@ -234,13 +249,16 @@ class CallView(MultipleContextsOperation):
 
 
     def update(self,):
+        if not self.children:
+            return None
+
         result = {}
-        if self.children and isinstance(self.children[0], MultipleView):
+        if isinstance(self.children[0], MultipleView):
             return self._updateMultipleview()
 
         views_result = []
         for v in self.children:
-            view_result = v()
+            view_result = v.update()
             if v.finished_successfully:
                 self.finished_successfully = True
 
@@ -264,7 +282,7 @@ class CallView(MultipleContextsOperation):
         result = {}
         global_result = {}
         for v in self.children:
-            view_result = v()
+            view_result = v.update()
             if v.finished_successfully:
                 self.finished_successfully = True
 
@@ -287,6 +305,9 @@ class CallView(MultipleContextsOperation):
             item = self.adapt_item(body, self.viewid)
             global_result['coordiantes'][coordiante]=[item]
 
+        #if not (len(self.children) == len(self.contexts)):
+        #    global_result['messages']
+
         return  global_result 
 
 
@@ -308,7 +329,6 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         self.schema = self.schema(widget=self.form_widget())
         FormView.__init__(self, context, request, parent, wizard, index, **kwargs)
         MultipleContextsViewsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
-        self.items = self.contexts()
         self.validated_items = []
         self.children = {}
         self._additemswidget()
@@ -331,7 +351,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             self.children[key] = view_instance
 
     def _additemswidget(self):
-        values = [(i, i.get_view(self.request)) for i in self.items]
+        values = [(i, i.get_view(self.request)) for i in self.contexts]
         widget = self.items_widget(values=values, multiple=True)
         viewsschemanode =  self.schema.get('items')
         viewsschemanode.widget = widget

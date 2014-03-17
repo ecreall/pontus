@@ -16,9 +16,13 @@ def default_builder(parent, views):
             viewinstance.title = view[0]
             viewinstance.viewid = parent.viewid+'_'+viewinstance.title.replace(' ','-')
             viewinstance.builder(view[1])
-            parent.children.append(viewinstance)
+            if viewinstance.children:
+                parent.children.append(viewinstance)
         else:
             viewinstance = view(parent.context, parent.request, parent, parent.wizard, parent.index)
+            if not viewinstance.validate():
+                continue
+
             if parent.merged:
                 viewinstance.coordiantes = parent.coordiantes
 
@@ -47,9 +51,14 @@ class MultipleView(View):
                 self._activate(item['items'])
 
     def update(self,):
+        if not self.children:
+            return None
+
         result = {}
         for view in self.children:
             view_result = view.update()
+            if view_result is None:
+                continue
 
             if view.finished_successfully:
                 self.finished_successfully = True
@@ -58,6 +67,9 @@ class MultipleView(View):
                 return view_result
 
             result = merg_dicts(view_result, result)
+
+        if not result:
+            return None
 
         for coordiante in result['coordiantes']:
             items = result['coordiantes'][coordiante]
@@ -77,4 +89,11 @@ class MultipleView(View):
                                       'view': self,
                                       'id':self.viewid}]
 
+        return result
+
+    def mesage_content(self, type='warning'):#...
+        content_message = renderers.render('templates/message.pt', {}, self.request)
+        item =self.adapt_item([], self.viewid)
+        item['messages'] = {type: [content_message]}
+        result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
         return result

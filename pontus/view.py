@@ -47,8 +47,17 @@ class View(Step):
         if self.parent is not None:
             self.viewid = self.parent.viewid+'_'+self.viewid
 
+    def validate(self):
+        return True
+
     def __call__(self):
+        if not self.validate():
+            return self.message_content()
+            
         result = self.update()
+        if result is None:
+            return self.message_content()
+
         if isinstance(result, dict):
             if not ('js_links' in result):
                 result['js_links'] = []
@@ -94,3 +103,10 @@ class View(Step):
   
     def setviewid(self, viewid):
         self.viewid = viewid
+
+    def mesage_content(self, type='warning'):#...
+        content_message = renderers.render('templates/message.pt', {}, self.request)
+        item =self.adapt_item('', self.viewid)
+        item['messages'] = {type: [content_message]}
+        result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
+        return result

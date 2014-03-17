@@ -42,7 +42,6 @@ class FormView(View, FV):
 
     def update(self,):
         self.schema.add_idnode(STEPID, str(self.index))
-        self.schema.add_idnode('__objectoid__')
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None

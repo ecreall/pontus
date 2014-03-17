@@ -42,13 +42,24 @@
         <table  class="table table-striped">
           <thead>
               <tr class="row">
-                <th  tal:define="children field.children[0].children"
-                     tal:repeat="child children"
-                     for="${child.oid}"
-                     class="control-label ${child.required and 'required' or ''}"
-                     id="req-${child.oid}">
-                 ${child.title}
-               </th>
+               <div tal:omit-tag="" tal:define="children field.children[0].children"
+                     tal:repeat="child children">
+                     
+                  <th  tal:condition="child.widget.hidden"
+                       for="${child.oid}"
+                       class="control-label ${child.required and 'required' or ''}"
+                       id="req-${child.oid}" hidden="">
+                   ${child.title}
+                 </th>
+
+                  <th  tal:condition="not child.widget.hidden"
+                       for="${child.oid}"
+                       class="control-label ${child.required and 'required' or ''}"
+                       id="req-${child.oid}">
+                   ${child.title}
+                 </th>
+
+              </div>
                <th/>
              </tr>
          </thead>

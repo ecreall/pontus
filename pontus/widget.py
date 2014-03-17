@@ -5,7 +5,7 @@ from colander import (
     )
 from deform.widget import (
     SequenceWidget as SW,
-    MappingWidget as MW,
+    MappingWidget,
     RichTextWidget,
     FileUploadWidget,
     Select2Widget as Select2W,
@@ -22,7 +22,7 @@ from deform.compat import (
 from translationstring import TranslationString
 from substanced.util import get_oid
 
-from pontus.file import __ObjectIndex__
+from pontus.file import ObjectOID
 from dace.util import get_obj
 
 class SequenceWidget(SW):
@@ -148,22 +148,6 @@ class SequenceWidget(SW):
         return result
 
 
-class MappingWidget(MW):
-
-    template = 'pontus:templates/mapping.pt'
-    item_template = 'pontus:templates/mapping_item.pt'
-    readonly_template = 'pontus:templates/readonly/mapping.pt'
-    readonly_item_template = 'pontus:templates/readonly/mapping_item.pt'
-
-    def deserialize(self, field, pstruct):
-        data = super(MappingWidget, self).deserialize(field, pstruct)
-        if data is null:
-            return null
-
-        data[__ObjectIndex__] = pstruct.get(__ObjectIndex__)
-        return data
-
-
 class TableWidget(SequenceWidget):
   
     template = 'pontus:templates/table.pt'
@@ -208,7 +192,7 @@ class FileWidget(FileUploadWidget):
         if data is null:
             return null
 
-        data[__ObjectIndex__] = pstruct.get(__ObjectIndex__)
+        data[ObjectOID] = pstruct.get(ObjectOID)
         return data
 
 

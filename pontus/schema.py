@@ -6,16 +6,18 @@ import colander
 
 from substanced.schema import Schema as SH
 
-from pontus.file import ObjectData
+from pontus.file import ObjectData, ObjectOID
 from pontus.visual import VisualisableElement
 
 
 class Schema(VisualisableElement,SH):
 
-    def __init__(self, _class=None, **kwargs):
+    def __init__(self, objectfactory=None, editable=False, **kwargs):
         VisualisableElement.__init__(self, **kwargs)
         SH.__init__(self,**kwargs)
-        self.typ = ObjectData(_class)   
+        self.typ = ObjectData(objectfactory, editable)
+        if editable:
+            self.add_idnode(ObjectOID)  
 
     def deserialize(self, cstruct=colander.null):
         members = dict(inspect.getmembers(self))
@@ -47,6 +49,9 @@ def select(schema, mask):
     """
     if schema.get('_csrf_token_', None) is not None:
         mask.insert(0, '_csrf_token_')
+
+    if schema.get(ObjectOID, None) is not None:
+        mask.insert(0, ObjectOID)
 
     new_schema = schema.clone()
     new_schema.children = []

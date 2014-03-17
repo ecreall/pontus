@@ -63,11 +63,7 @@ class Index(View):
             indexmultiview = MultipleView(self.context, self.request, self.parent)
             self._buildMultiViewTree(views)
             return indexmultiview.update()
-        
-        warning_message = renderers.render('templates/forbidden.pt', {}, self.request)
-        item =self.adapt_item('', self.viewid)
-        item['messages'] = {'warning': [warning_message]}
-        result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
-        return result
+
+        return None
 
 
