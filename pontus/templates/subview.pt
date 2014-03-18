@@ -1,8 +1,5 @@
 <div tal:omit-tag="" tal:define=" item subitem|nothing">
-    <div class="panel panel-primary"
-         tal:condition="item">
-         <div class="panel-heading">${item['view'].title}</div>
-         <div class="panel-body">
+    <div tal:omit-tag="" tal:condition="item">
             <div  tal:condition="'messages' in item" id="messages" class="ajax-replace">
               <div tal:omit-tag="" tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()">
                 <div class="alert alert-${queue or 'info'}"
@@ -15,7 +12,6 @@
               </div>
             </div>
             <div tal:replace="structure item['body']" />
-         </div> 
     </div>
 </div>
 

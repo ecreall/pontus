@@ -1,7 +1,12 @@
 <div tal:omit-tag="" tal:define=" items subitem['items'];
                                   itemslen len(items)|0">
   <div tal:omit-tag="" tal:condition="items and itemslen == 1">
-      <div tal:define="item items[0]" tal:replace="item['view'].render_item(item, coordiantes)" />
+    <div class="panel panel-primary" tal:define="item items[0]" >
+         <div class="panel-heading">${item['view'].title}</div>
+         <div class="panel-body">
+           <div tal:replace="item['view'].render_item(item, coordiantes)" />
+         </div>
+   </div>
   </div>
   <div tal:omit-tag="" tal:condition="items and itemslen > 1">
       <ul tal:attributes="id (subitem['view'].viewid+'_multipleform_'+coordiantes)" class="nav nav-tabs">
