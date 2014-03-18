@@ -8,12 +8,13 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 from pontus.schema import Schema
-from pontus.view import View, merg_dicts
+from pontus.view import View, merg_dicts, ViewError
 from pontus.wizard import STEPID
 from pontus.form import FormView
 from pontus.multipleview import MultipleView
 from pontus.widget import SimpleFormWidget, AccordionWidget, SimpleMappingWidget, CheckboxChoiceWidget
 from pontus.interfaces import IFormView
+from pontus.resources import CallViewErrorPrincipalmessage, CallViewViewErrorCauses
 
 def default_view(callview):
     return None
@@ -64,9 +65,13 @@ class MultipleContextsOperation(ViewOperation):
 
         for item_context in contexts:
             subview = self.view(item_context, self.request, self, None, None,**{})
-            if subview.validate():
-                subview.setviewid(subview.viewid+'_'+str(get_oid(item_context)))       
-                self.children.append(subview)
+            try:
+                subview.validate()
+            except ViewError as e:
+                continue
+
+            subview.setviewid(subview.viewid+'_'+str(get_oid(item_context)))       
+            self.children.append(subview)
 
 
 class MultipleContextsViewsOperation(ViewOperation):
@@ -145,7 +150,10 @@ class CallFormView(FormView, MultipleContextsOperation):
 
     def update(self,):
         if not self.children:
-            return None
+            e = ViewError()
+            e.principalmessage = CallViewErrorPrincipalmessage
+            e.causes = CallViewViewErrorCauses
+            raise e
 
         self.schema.add_idnode(STEPID, str(self.index))
         form, reqts = self._build_form()
@@ -250,7 +258,10 @@ class CallView(MultipleContextsOperation):
 
     def update(self,):
         if not self.children:
-            return None
+            e = ViewError()
+            e.principalmessage = CallViewErrorPrincipalmessage
+            e.causes = CallViewViewErrorCauses
+            raise e
 
         result = {}
         if isinstance(self.children[0], MultipleView):
@@ -258,7 +269,11 @@ class CallView(MultipleContextsOperation):
 
         views_result = []
         for v in self.children:
-            view_result = v.update()
+            try:
+                view_result = v.update()
+            except ViewError as e:
+                continue
+
             if v.finished_successfully:
                 self.finished_successfully = True
 
@@ -282,7 +297,11 @@ class CallView(MultipleContextsOperation):
         result = {}
         global_result = {}
         for v in self.children:
-            view_result = v.update()
+            try:
+                view_result = v.update()
+            except ViewError as e:
+                continue
+
             if v.finished_successfully:
                 self.finished_successfully = True
 

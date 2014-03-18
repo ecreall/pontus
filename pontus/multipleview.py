@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from pontus.view import View, merg_dicts
-
+from pontus.view import View, merg_dicts, ViewError
+from pontus.resources import MutltipleViewErrorPrincipalmessage, MutltipleViewErrorCauses
 
 def default_builder(parent, views):
     if views is None:
@@ -20,7 +20,9 @@ def default_builder(parent, views):
                 parent.children.append(viewinstance)
         else:
             viewinstance = view(parent.context, parent.request, parent, parent.wizard, parent.index)
-            if not viewinstance.validate():
+            try:
+                viewinstance.validate()
+            except ViewError as e:
                 continue
 
             if parent.merged:
@@ -52,12 +54,16 @@ class MultipleView(View):
 
     def update(self,):
         if not self.children:
-            return None
+            e = ViewError()
+            e.principalmessage = MutltipleViewErrorPrincipalmessage
+            e.causes = MutltipleViewErrorCauses
+            raise e
 
         result = {}
         for view in self.children:
-            view_result = view.update()
-            if view_result is None:
+            try:
+                view_result = view.update()
+            except ViewError as e:
                 continue
 
             if view.finished_successfully:
@@ -91,9 +97,9 @@ class MultipleView(View):
 
         return result
 
-    def mesage_content(self, type='warning'):#...
-        content_message = renderers.render('templates/message.pt', {}, self.request)
+    def failure(self, e, subject=None):#...
+        content_message = renderers.render(e.template, {'error':e, 'subject': subject}, self.request)
         item =self.adapt_item([], self.viewid)
-        item['messages'] = {type: [content_message]}
+        item['messages'] = {e.type: [content_message]}
         result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
         return result

@@ -2,12 +2,10 @@
 	<div class="row clearfix">
 		<div class="col-md-12 column">
 			<h3>
-				vous n'avez pas les droits suffisants pour accéder à cette page.
+				${error.principalmessage.decode("utf8")}
 			</h3>
 			<ul>
-				<li>Vous ne disposez pas des rôles nécessaires.</li>
-				<li>Certaines conditions ne sont pas encore satisfaites.</li>
-				<li>...</li>
+				<li tal:repeat="message error.causes"> ${message.decode("utf8")} </li>
 			</ul>
 		</div>
 	</div>

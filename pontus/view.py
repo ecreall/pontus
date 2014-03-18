@@ -12,6 +12,15 @@ from pontus.interfaces import IView
 from pontus.wizard import Step
 
 
+class ViewError(Exception):
+    principalmessage = ''
+    causes = []
+    solutions = []
+    type = 'danger'
+    template='templates/message.pt'
+
+    
+
 def merg_dicts(source, target):
     result = target
     for k in source.keys():
@@ -51,13 +60,13 @@ class View(Step):
         return True
 
     def __call__(self):
-        if not self.validate():
-            return self.message_content()
+        result = None
+        try:
+            self.validate()
+            result = self.update()
+        except ViewError as e:
+            return self.failure(e)
             
-        result = self.update()
-        if result is None:
-            return self.message_content()
-
         if isinstance(result, dict):
             if not ('js_links' in result):
                 result['js_links'] = []
@@ -104,9 +113,9 @@ class View(Step):
     def setviewid(self, viewid):
         self.viewid = viewid
 
-    def mesage_content(self, type='warning'):#...
-        content_message = renderers.render('templates/message.pt', {}, self.request)
+    def failure(self, e, subject=None):#...
+        content_message = renderers.render(e.template, {'error':e, 'subject': subject}, self.request)
         item =self.adapt_item('', self.viewid)
-        item['messages'] = {type: [content_message]}
+        item['messages'] = {e.type: [content_message]}
         result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
         return result

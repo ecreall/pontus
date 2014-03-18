@@ -5,7 +5,8 @@ from substanced.sdi import mgmt_view
 
 from dace.interfaces import IBusinessAction, IProcessDefinition, IObject
 from dace.util import find_catalog
-from pontus.view import View
+from pontus.view import View, ViewError
+from pontus.resources import IndexViewErrorPrincipalmessage, IndexViewErrorCauses
 
 #a changer...
 def comp(action1, action2):
@@ -64,6 +65,9 @@ class Index(View):
             self._buildMultiViewTree(views)
             return indexmultiview.update()
 
-        return None
+        e = ViewError()
+        e.principalmessage = IndexViewErrorPrincipalmessage
+        e.causes = IndexViewErrorCauses
+        raise e
 
 
