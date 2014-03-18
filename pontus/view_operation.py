@@ -64,7 +64,7 @@ class MultipleContextsOperation(ViewOperation):
             contexts = [contexts]
 
         for item_context in contexts:
-            subview = self.view(item_context, self.request, self, None, None,**{})
+            subview = self.view(item_context, self.request, self, self.wizard, self.index,**{})
             try:
                 subview.validate()
             except ViewError as e:
