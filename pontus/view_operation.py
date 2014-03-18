@@ -220,7 +220,7 @@ class CallFormView(FormView, MultipleContextsOperation):
             if error:
                 item['isactive'] = True
        
-            result['coordiantes'] = {self.coordiantes:[item]}
+            result['coordiantes'] = {self.view.coordiantes:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
         else:

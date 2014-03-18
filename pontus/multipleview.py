@@ -101,5 +101,6 @@ class MultipleView(View):
         content_message = renderers.render(e.template, {'error':e, 'subject': subject}, self.request)
         item =self.adapt_item([], self.viewid)
         item['messages'] = {e.type: [content_message]}
+        item['isactive'] = True
         result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
         return result
