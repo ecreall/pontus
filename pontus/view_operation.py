@@ -71,7 +71,6 @@ class MultipleContextsOperation(ViewOperation):
             except ViewError as e:
                 continue
 
-            subview.setviewid(subview.viewid+'_'+str(get_oid(item_context)))       
             self.children.append(subview)
 
 
@@ -100,7 +99,6 @@ def default_builder(parent, views):
                 viewinstance.coordiantes = parent.coordiantes
 
             viewinstance.title = view[0]
-            viewinstance.viewid = parent.viewid+'_'+viewinstance.title.replace(' ','-')
             viewinstance.builder(view[1])
             if viewinstance.children:
                 parent.children.append(viewinstance)
@@ -118,7 +116,8 @@ def default_builder(parent, views):
 
 
 class MultipleView(View):
-
+    
+    title = 'Multiple View'
     views = ()
     builder = default_builder
     merged = False
@@ -218,6 +217,7 @@ class EmptySchema(Schema):
 
 
 class CallFormView(FormView, MultipleContextsOperation):
+    title = 'CallFormView'
     schema = EmptySchema(widget=SimpleFormWidget())
     widget = AccordionWidget()
     prefixe = 'All'
@@ -357,6 +357,7 @@ class CallFormView(FormView, MultipleContextsOperation):
 
 class CallView(MultipleContextsOperation):
 
+    title = 'CallView'
     self_template = 'pontus:templates/global_accordion.pt'
 
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
@@ -397,9 +398,10 @@ class CallView(MultipleContextsOperation):
                     result[coordiante] = [item]
             else:
                 for coordiante, values in view_result['coordiantes'].iteritems():
-                    item = {'view':currentview,'items': values, 'id': currentview.viewid}
+                    subviewid = currentview.viewid+'_'+coordiante
+                    item = {'view':currentview,'items': values, 'id': subviewid}
                     subbody = currentview.render_item(coordiantes='globalcoordiantes'+'_'+coordiante, item=item, parent=None)
-                    item = {'view':currentview,'body': subbody, 'id': currentview.viewid+'_'+coordiante}
+                    item = {'view':currentview,'body': subbody, 'id':subviewid }
                     if coordiante in result:
                         result[coordiante].append(item) 
                     else:
@@ -425,6 +427,8 @@ class ItemsSchema(Schema):
 
 class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
 
+
+    title = 'CallSelectedContextsViews'
     #widgets
     items_widget = CheckboxChoiceWidget
     form_widget = SimpleFormWidget
@@ -551,6 +555,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
 class Wizard(MultipleViewsOperation):
 
     transitions = ()
+    title = 'Wizard'
 
     def __init__(self, context, request, parent=None, wizard=None, index='', **kwargs):
         MultipleViewsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
@@ -559,7 +564,8 @@ class Wizard(MultipleViewsOperation):
         self.startnode = None
         self.endnode = None
         for key, view in self.views.iteritems():
-            self.viewsinstances[key] = view(self.context, self.request, self, self, key)
+            viewinstance = view(self.context, self.request, self, self, key)
+            self.viewsinstances[key] = viewinstance
 
         for transition in self.transitions:
             sourceinstance = self.viewsinstances[transition[0]]

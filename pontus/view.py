@@ -1,3 +1,4 @@
+import re
 from zope.interface import implements
 from zope.interface import providedBy
 
@@ -7,6 +8,8 @@ from pyramid import renderers
 from pyramid.renderers import get_renderer
 from pyramid.path import package_of
 from pyramid_layout.layout import Structure
+
+from substanced.util import get_oid
 
 from pontus.interfaces import IView
 from pontus.step import Step
@@ -39,8 +42,9 @@ __emptytemplate__ = 'templates/empty.pt'
 class View(Step):
     implements(IView)
 
-    viewid = ''
-    coordiantes = 'main'
+    viewid = None
+    title = 'View'
+    coordiantes = 'main' # default value
     item_template = 'templates/subview.pt'
     self_template = None
 
@@ -53,8 +57,14 @@ class View(Step):
         self.context = context
         self.request = request
         self.parent = parent
+        if self.viewid is None:
+            self.viewid = re.sub(r'\s', '_', self.title)
+
         if self.parent is not None:
             self.viewid = self.parent.viewid+'_'+self.viewid
+        
+        if self.context is not None:
+            self.viewid = self.viewid+'_'+str(get_oid(self.context))
 
     def validate(self):
         return True

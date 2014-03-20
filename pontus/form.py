@@ -16,6 +16,7 @@ from pontus.view import View
 class FormView(View, FV):
     implements(IFormView)
 
+    title = 'Form View'
     chmod = []
 
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
