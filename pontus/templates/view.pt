@@ -23,7 +23,7 @@
    <div tal:omit-tag="" tal:define="slot coordiantes['left']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'left')" />   
+           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'left', None)" />   
      </div>
    </div>
  </div>
@@ -33,7 +33,7 @@
    <div tal:omit-tag="" tal:define="slot coordiantes['main']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'main')" />   
+           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'main', None)" />   
      </div>        
    </div>
  </div>
@@ -43,7 +43,7 @@
    <div tal:omit-tag="" tal:define="slot coordiantes['right']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'right')" />   
+           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'right', None)" />   
      </div>      
    </div>
  </div>
@@ -53,7 +53,7 @@
    <div tal:omit-tag="" tal:define="slot coordiantes['footer']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'footer')" />   
+           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'footer', None)" />   
      </div>       
    </div>
  </div>

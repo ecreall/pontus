@@ -9,7 +9,7 @@ from pyramid.path import package_of
 from pyramid_layout.layout import Structure
 
 from pontus.interfaces import IView
-from pontus.wizard import Step
+from pontus.step import Step
 
 
 class ViewError(Exception):
@@ -44,11 +44,11 @@ class View(Step):
     item_template = 'templates/subview.pt'
     self_template = None
 
-    def render_item(self, item, coordiantes):
-        body = renderers.render(self.item_template, {'coordiantes':coordiantes,'subitem':item}, self.request)
+    def render_item(self, item, coordiantes, parent):
+        body = renderers.render(self.item_template, {'coordiantes':coordiantes,'subitem':item, 'parent': parent}, self.request)
         return Structure(body)
 
-    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
+    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
         Step.__init__(self, wizard, index)
         self.context = context
         self.request = request

@@ -6,7 +6,6 @@ import colander
 
 from substanced.form import FormView as FV, FormError
 
-from pontus.wizard import Step, STEPID
 from pontus.interfaces import IFormView
 from pontus.view import View
 # Il faut partir de l'idée que toute est étape et non l'inverse.
@@ -19,7 +18,8 @@ class FormView(View, FV):
 
     chmod = []
 
-    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
+    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
+        self.schema = self.schema.clone()
         FV.__init__(self, context, request)
         View.__init__(self, context, request, parent, wizard, index)
         
@@ -41,7 +41,7 @@ class FormView(View, FV):
                     self._chmod(node.children[0], m[1])
 
     def update(self,):
-        self.schema.add_idnode(STEPID, str(self.index))
+        self.init_stepindex(self.schema)
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None

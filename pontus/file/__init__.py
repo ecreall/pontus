@@ -101,6 +101,7 @@ class ObjectData(colander.Mapping):
             self.editable = True 
   
     def serialize(self, node, appstruct):
+
         _object = None
         if appstruct is None:
             appstruct = colander.null
@@ -143,7 +144,7 @@ class ObjectData(colander.Mapping):
             result = cstruct
 
         _object = None
-        if isinstance(result, dict) and obj_oid is not None and not (obj_oid==''):
+        if isinstance(result, dict) and obj_oid is not None and not (obj_oid=='None'):
             _object = get_obj(int(obj_oid))
             
         if self.factory is None and _object is None:
