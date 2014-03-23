@@ -2,6 +2,7 @@ import re
 import deform.widget
 import colander
 import itertools
+from inspect import isfunction
 from pyramid.httpexceptions import HTTPFound
 
 from substanced.form import FormError
@@ -32,29 +33,40 @@ def default_context(callview):
 
 class ViewOperation(View):
     merged = False
-
-
-class MultipleViewsOperation(ViewOperation):
+    contexts = default_contexts
     views = default_views
 
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        ViewOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
+        View.__init__(self, context, request, parent, wizard, index, **kwargs)
+        if hasattr(self.views, '__func__'):
+            self.views = self.views.__func__
+
         if type(self.views).__name__ == 'function':
             self.views = self.views(self)
+        
+        if not isinstance(self.views,(list, tuple, dict)):
+            self.views = [self.views]
+
+        self.contexts = self.contexts()
+
+
+
+
+class MultipleViewsOperation(ViewOperation):
+    pass
 
 
 class MultipleContextsOperation(ViewOperation):
-    view = default_view
-    contexts = default_contexts
 
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
         ViewOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
-        if type(self.view).__name__ == 'function':
-            self.view = self.view(self)
+        self.children = []
+        self.view = None
+        if self.views:
+            self.view = self.views[0]
 
-        self.contexts = self.contexts()
-        self._init_children(self.contexts)
-
+        if self.view is not None:
+            self._init_children(self.contexts)
 
     def _init_children(self, contexts=None):
         if contexts is None:
@@ -75,15 +87,7 @@ class MultipleContextsOperation(ViewOperation):
 
 
 class MultipleContextsViewsOperation(ViewOperation):
-    views = None
-    contexts = default_contexts
-
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        ViewOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
-        if type(self.views).__name__ == 'function':
-            self.views = self.views(self)
-
-        self.contexts = self.contexts()
+    pass
     
 
 
@@ -115,17 +119,15 @@ def default_builder(parent, views):
             parent.children.append(viewinstance)        
 
 
-class MultipleView(View):
+class MultipleView(MultipleViewsOperation):
     
     title = 'Multiple View'
-    views = ()
     builder = default_builder
-    merged = False
     item_template = 'templates/submultipleview.pt'
     self_template = 'templates/submultipleview.pt'
     
     def __init__(self, context, request, parent=None, wizard=None, index=None):
-        super(MultipleView, self).__init__(context, request, parent, wizard, index)
+        MultipleViewsOperation.__init__(self, context, request, parent, wizard, index)
         self.children = []
         self._coordiantes = []
         self.builder(self.views)
@@ -216,8 +218,8 @@ class EmptySchema(Schema):
             )
 
 
-class CallFormView(FormView, MultipleContextsOperation):
-    title = 'CallFormView'
+class MergedFormsView(FormView, MultipleContextsOperation):
+    title = 'MergedFormsView'
     schema = EmptySchema(widget=SimpleFormWidget())
     widget = AccordionWidget()
     prefixe = 'All'
@@ -454,10 +456,10 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         for key, view in _views.iteritems():
             multiplecontextsview_class = CallView
             if IFormView.implementedBy(view):
-                multiplecontextsview_class = CallFormView
+                multiplecontextsview_class = MergedFormsView
 
             multiplecontextsview_class.title = view.title
-            multiplecontextsview_class.view = view
+            multiplecontextsview_class.views = view
             view_instance = multiplecontextsview_class(self.context, self.request, self.parent, self.wizard, self.index)
             self.children[key] = view_instance
 
@@ -556,6 +558,7 @@ class Wizard(MultipleViewsOperation):
 
     transitions = ()
     title = 'Wizard'
+    durable = False # session ou pas?
 
     def __init__(self, context, request, parent=None, wizard=None, index='', **kwargs):
         MultipleViewsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
@@ -611,17 +614,25 @@ class Wizard(MultipleViewsOperation):
 
     def update(self):
         stepidkey = STEPID+self.viewid
-        if stepidkey in self.request.POST:
-            self.currentsteps = [self.viewsinstances[self.request.POST[stepidkey]]]
+        # a voir
+        #if stepidkey in self.request.POST:
+        #    self.currentsteps = [self.viewsinstances[self.request.POST[stepidkey]]]
 
+        if stepidkey in self.request.session:
+            self.currentsteps = [self.viewsinstances[self.request.session.pop(stepidkey)]]
+       
         result = None
         fs = False
         viewinstance, fs, result = self._get_result(self.currentsteps)
         if viewinstance is not None and fs and viewinstance._outgoing and not(viewinstance._outgoing[0].target == self.endnode) :
             nextsteps = [transition.target for transition in viewinstance._outgoing if transition.validate()]
-            v, fs, result = self._get_result(nextsteps)
+            viewinstance, fs, result = self._get_result(nextsteps)
 
         self.finished_successfully = fs
+        if self.finished_successfully and (viewinstance._outgoing[0].target == self.endnode):
+            self.request.session.__delitem__(stepidkey)
+            return self.succes()
+
         return result
 
     def _get_result(self, sourceviews):
@@ -647,5 +658,8 @@ class Wizard(MultipleViewsOperation):
                 result['view'] = viewinstance
 
             return viewinstance, multipleviewinstance.finished_successfully, result
-        
+
+    def success(self):
+        return HTTPFound(
+            self.request.mgmt_path(self.context, '@@contents'))
         

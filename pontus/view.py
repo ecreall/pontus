@@ -66,6 +66,24 @@ class View(Step):
         if self.context is not None:
             self.viewid = self.viewid+'_'+str(get_oid(self.context))
 
+    def params(self, key=None):
+        if key is None:
+            return self.request.params
+
+        if key in self.request.params:
+            return self.request.params[key]
+
+        return None
+
+    @property
+    def process(self):
+        params = self.params('p_uid')    
+
+    @property
+    def action(self):
+        pass
+
+    
     def validate(self):
         return True
 
@@ -130,3 +148,6 @@ class View(Step):
         item['isactive'] = True
         result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
         return result
+
+class ElementaryView(View):
+    pass

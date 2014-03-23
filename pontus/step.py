@@ -17,13 +17,14 @@ class Step(object):
     def add_incoming(self, transition):
         self._incoming.append(transition)
 
-    def init_stepindex(self, schema):
+    def init_stepindex(self, schema, wizard=None):
         if self.wizard is not None:
-            if self.index is not None:
-                schema.add_idnode(STEPID+self.wizard.viewid, self.index)
+            self.wizard.request.session[STEPID+self.wizard.viewid] = self.index
+            #if self.index is not None:
+            #    schema.add_idnode(STEPID+self.wizard.viewid, self.index)
 
-            if hasattr(self, 'parent'):
-                self.parent.init_stepindex(schema)
+            #if hasattr(self, 'parent'):
+            #    self.parent.init_stepindex(schema)
 
 
 class Transition(object):
