@@ -2,10 +2,10 @@
 	<div class="row clearfix">
 		<div class="col-md-12 column">
 			<h3>
-				${error.principalmessage.decode("utf8")}
+				${error.principalmessage}
 			</h3>
 			<ul>
-				<li tal:repeat="message error.causes"> ${message.decode("utf8")} </li>
+				<li tal:repeat="message error.causes"> ${message} </li>
 			</ul>
 		</div>
 	</div>
