@@ -15,7 +15,7 @@ from pontus.form import FormView
 from pontus.widget import SimpleFormWidget, AccordionWidget, SimpleMappingWidget, CheckboxChoiceWidget
 from pontus.interfaces import IFormView
 from pontus.resources import CallViewErrorPrincipalmessage, CallViewViewErrorCauses, MutltipleViewErrorPrincipalmessage, MutltipleViewErrorCauses
-from pontus.step import STEPID, Transition, Step
+from pontus.core import STEPID, Transition, Step
 
 
 def default_view(callview):

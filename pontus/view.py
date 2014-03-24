@@ -12,7 +12,7 @@ from pyramid_layout.layout import Structure
 from substanced.util import get_oid
 
 from pontus.interfaces import IView
-from pontus.step import Step
+from pontus.core import Step, Validator, ValidationError
 
 
 class ViewError(Exception):
@@ -46,7 +46,8 @@ class View(Step):
     viewid = None
     title = 'View'
     coordinates = 'main' # default value
-    behaviors = None
+    behaviors = []
+    validators = []
     item_template = 'templates/subview.pt'
     self_template = None
 
@@ -68,6 +69,27 @@ class View(Step):
         if self.context is not None:
             self.viewid = self.viewid+'_'+str(get_oid(self.context))
 
+        self.allvalidators = [behavior.get_validator() for behavior in self.behaviors]
+        self.allvalidators.extend(self.validators)
+        self.behaviorinstances = {}
+        self._init_behaviors()
+
+    def _init_behaviors(self):
+        for behavior in self.behaviors:
+            behaviorinstance = behavior.get_instance(self.context, self.request)
+            if behaviorinstance is not None:
+                key = re.sub(r'\s', '_', behaviorinstance.title)
+                self.behaviorinstances[key] = behaviorinstance
+
+    def validate(self):
+        for validator in self.allvalidators:
+            try:
+                validator.validate(self.context, self.request)
+            except ValidationError as e:
+                raise ViewError()
+        #@TODO
+        return True
+
     def params(self, key=None):
         if key is None:
             return self.request.params
@@ -85,9 +107,6 @@ class View(Step):
     def action(self):
         pass
 
-    
-    def validate(self):
-        return True
 
     def __call__(self):
         result = None
