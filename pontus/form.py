@@ -85,7 +85,7 @@ class FormView(View, FV):
             if error:
                 item['isactive'] = True
 
-            result['coordiantes'] = {self.coordiantes:[item]}
+            result['coordinates'] = {self.coordinates:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
         else:

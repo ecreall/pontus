@@ -20,7 +20,7 @@
   </metal:head-more>
 
  <div metal:fill-slot="left">
-   <div tal:omit-tag="" tal:define="slot coordiantes['left']|nothing"
+   <div tal:omit-tag="" tal:define="slot coordinates['left']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'left', None)" />   
@@ -30,7 +30,7 @@
 
 
  <div metal:fill-slot="main">
-   <div tal:omit-tag="" tal:define="slot coordiantes['main']|nothing"
+   <div tal:omit-tag="" tal:define="slot coordinates['main']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'main', None)" />   
@@ -40,7 +40,7 @@
 
 
  <div metal:fill-slot="right">
-   <div tal:omit-tag="" tal:define="slot coordiantes['right']|nothing"
+   <div tal:omit-tag="" tal:define="slot coordinates['right']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'right', None)" />   
@@ -50,7 +50,7 @@
 
 
  <div metal:fill-slot="footer">
-   <div tal:omit-tag="" tal:define="slot coordiantes['footer']|nothing"
+   <div tal:omit-tag="" tal:define="slot coordinates['footer']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'footer', None)" />   

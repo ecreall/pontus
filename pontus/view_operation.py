@@ -10,7 +10,7 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 from pontus.schema import Schema
-from pontus.view import View, merg_dicts, ViewError
+from pontus.view import View, merge_dicts, ViewError
 from pontus.form import FormView
 from pontus.widget import SimpleFormWidget, AccordionWidget, SimpleMappingWidget, CheckboxChoiceWidget
 from pontus.interfaces import IFormView
@@ -100,7 +100,7 @@ def default_builder(parent, views):
             viewinstance = MultipleView(parent.context, parent.request, parent, parent.wizard, parent.index)
             viewinstance.merged = parent.merged
             if parent.merged:
-                viewinstance.coordiantes = parent.coordiantes
+                viewinstance.coordinates = parent.coordinates
 
             viewinstance.title = view[0]
             viewinstance.builder(view[1])
@@ -114,7 +114,7 @@ def default_builder(parent, views):
                 continue
 
             if parent.merged:
-                viewinstance.coordiantes = parent.coordiantes
+                viewinstance.coordinates = parent.coordinates
 
             parent.children.append(viewinstance)        
 
@@ -129,7 +129,7 @@ class MultipleView(MultipleViewsOperation):
     def __init__(self, context, request, parent=None, wizard=None, index=None):
         MultipleViewsOperation.__init__(self, context, request, parent, wizard, index)
         self.children = []
-        self._coordiantes = []
+        self._coordinates = []
         self.builder(self.views)
 
     def _activate(self, items):
@@ -159,13 +159,13 @@ class MultipleView(MultipleViewsOperation):
             if not isinstance(view_result,dict):
                 return view_result
 
-            result = merg_dicts(view_result, result)
+            result = merge_dicts(view_result, result)
 
         if not result:
             return None
 
-        for coordiante in result['coordiantes']:
-            items = result['coordiantes'][coordiante]
+        for coordinate in result['coordinates']:
+            items = result['coordinates'][coordinate]
             isactive = False
             for item in items:
                 if item['isactive']:
@@ -177,7 +177,7 @@ class MultipleView(MultipleViewsOperation):
                 if self.parent is None:
                     isactive = True
 
-            result['coordiantes'][coordiante] = [{'isactive':isactive,
+            result['coordinates'][coordinate] = [{'isactive':isactive,
                                       'items': items,
                                       'view': self,
                                       'id':self.viewid}]
@@ -189,7 +189,7 @@ class MultipleView(MultipleViewsOperation):
         item =self.adapt_item([], self.viewid)
         item['messages'] = {e.type: [content_message]}
         item['isactive'] = True
-        result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
+        result = {'js_links': [], 'css_links': [], 'coordinates': {self.coordinates:[item]}}
         return result
 
 
@@ -329,7 +329,7 @@ class MergedFormsView(FormView, MultipleContextsOperation):
             if error:
                 item['isactive'] = True
        
-            result['coordiantes'] = {self.view.coordiantes:[item]}
+            result['coordinates'] = {self.view.coordinates:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
         else:
@@ -390,30 +390,30 @@ class CallView(MultipleContextsOperation):
             if 'view' in view_result:
                 currentview = view_result['view']
 
-            global_result = merg_dicts(view_result, global_result)
-            if len(view_result['coordiantes']) == 1 and len(view_result['coordiantes'].items()[0][1]) == 1:
-                coordiante = view_result['coordiantes'].items()[0][0]
-                item = view_result['coordiantes'].items()[0][1][0]
-                if coordiante in result:
-                    result[coordiante].append(item) 
+            global_result = merge_dicts(view_result, global_result)
+            if len(view_result['coordinates']) == 1 and len(view_result['coordinates'].items()[0][1]) == 1:
+                coordinate = view_result['coordinates'].items()[0][0]
+                item = view_result['coordinates'].items()[0][1][0]
+                if coordinate in result:
+                    result[coordinate].append(item) 
                 else:
-                    result[coordiante] = [item]
+                    result[coordinate] = [item]
             else:
-                for coordiante, values in view_result['coordiantes'].iteritems():
-                    subviewid = currentview.viewid+'_'+coordiante
+                for coordinate, values in view_result['coordinates'].iteritems():
+                    subviewid = currentview.viewid+'_'+coordinate
                     item = {'view':currentview,'items': values, 'id': subviewid}
-                    subbody = currentview.render_item(coordiantes='globalcoordiantes'+'_'+coordiante, item=item, parent=None)
+                    subbody = currentview.render_item(coordinates='globalcoordinates'+'_'+coordinate, item=item, parent=None)
                     item = {'view':currentview,'body': subbody, 'id':subviewid }
-                    if coordiante in result:
-                        result[coordiante].append(item) 
+                    if coordinate in result:
+                        result[coordinate].append(item) 
                     else:
-                        result[coordiante] = [item]
+                        result[coordinate] = [item]
 
-        for coordiante, items in result.iteritems():
-            values = {'items': items, 'id':self.viewid+coordiante }           
+        for coordinate, items in result.iteritems():
+            values = {'items': items, 'id':self.viewid+coordinate }           
             body = self.content(result=values, template=self.self_template)['body']
             item = self.adapt_item(body, self.viewid)
-            global_result['coordiantes'][coordiante]=[item]
+            global_result['coordinates'][coordinate]=[item]
 
         #if not (len(self.children) == len(self.contexts)):
         #    global_result['messages']
@@ -527,7 +527,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             if error:
                 item['isactive'] = True
        
-            result['coordiantes'] = {self.coordiantes:[item]}
+            result['coordinates'] = {self.coordinates:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
         else:

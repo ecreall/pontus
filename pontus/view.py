@@ -24,14 +24,14 @@ class ViewError(Exception):
 
     
 
-def merg_dicts(source, target):
+def merge_dicts(source, target):
     result = target
     for k in source.keys():
         if k in result.keys():
             if isinstance(result[k], list):
                 result[k].extend(source[k])
             elif isinstance(result[k], dict):
-                result[k] = merg_dicts(source[k], result[k])
+                result[k] = merge_dicts(source[k], result[k])
         else:
             result[k] = source[k]
        
@@ -44,12 +44,12 @@ class View(Step):
 
     viewid = None
     title = 'View'
-    coordiantes = 'main' # default value
+    coordinates = 'main' # default value
     item_template = 'templates/subview.pt'
     self_template = None
 
-    def render_item(self, item, coordiantes, parent):
-        body = renderers.render(self.item_template, {'coordiantes':coordiantes,'subitem':item, 'parent': parent}, self.request)
+    def render_item(self, item, coordinates, parent):
+        body = renderers.render(self.item_template, {'coordinates':coordinates,'subitem':item, 'parent': parent}, self.request)
         return Structure(body)
 
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
@@ -146,7 +146,7 @@ class View(Step):
         item =self.adapt_item('', self.viewid)
         item['messages'] = {e.type: [content_message]}
         item['isactive'] = True
-        result = {'js_links': [], 'css_links': [], 'coordiantes': {self.coordiantes:[item]}}
+        result = {'js_links': [], 'css_links': [], 'coordinates': {self.coordinates:[item]}}
         return result
 
 class ElementaryView(View):
