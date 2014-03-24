@@ -21,11 +21,14 @@ from pontus.step import STEPID, Transition, Step
 def default_view(callview):
     return None
 
+
 def default_views(callview):
     return []
 
+
 def default_contexts(callview):
     return []
+
 
 def default_context(callview):
     return callview.context
@@ -48,8 +51,6 @@ class ViewOperation(View):
             self.views = [self.views]
 
         self.contexts = self.contexts()
-
-
 
 
 class MultipleViewsOperation(ViewOperation):
@@ -89,7 +90,6 @@ class MultipleContextsOperation(ViewOperation):
 class MultipleContextsViewsOperation(ViewOperation):
     pass
     
-
 
 def default_builder(parent, views):
     if views is None:

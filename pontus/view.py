@@ -16,14 +16,13 @@ from pontus.step import Step
 
 
 class ViewError(Exception):
-    principalmessage = ''
+    principalmessage = u""
     causes = []
     solutions = []
     type = 'danger'
     template='templates/message.pt'
 
     
-
 def merge_dicts(source, target):
     result = target
     for k in source.keys():
@@ -37,7 +36,9 @@ def merge_dicts(source, target):
        
     return result
 
+
 __emptytemplate__ = 'templates/empty.pt'
+
 
 class View(Step):
     implements(IView)
@@ -45,6 +46,7 @@ class View(Step):
     viewid = None
     title = 'View'
     coordinates = 'main' # default value
+    behaviors = None
     item_template = 'templates/subview.pt'
     self_template = None
 
@@ -148,6 +150,7 @@ class View(Step):
         item['isactive'] = True
         result = {'js_links': [], 'css_links': [], 'coordinates': {self.coordinates:[item]}}
         return result
+
 
 class ElementaryView(View):
     pass
