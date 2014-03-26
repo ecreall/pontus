@@ -7,13 +7,12 @@ import colander
 from substanced.form import FormView as FV, FormError
 
 from pontus.interfaces import IFormView
-from pontus.view import View
-# Il faut partir de l'idée que toute est étape et non l'inverse.
-# Une étape a une condition permettant de la validé. True par défaut
+from pontus.view import ElementaryView, ViewError
+from pontus.resources import CallViewErrorPrincipalmessage, CallViewViewErrorCauses
 
 
 
-class FormView(View, FV):
+class FormView(ElementaryView, FV):
     implements(IFormView)
 
     title = 'Form View'
@@ -22,27 +21,20 @@ class FormView(View, FV):
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
         self.schema = self.schema.clone()
         FV.__init__(self, context, request)
-        View.__init__(self, context, request, parent, wizard, index)
+        ElementaryView.__init__(self, context, request, parent, wizard, index)
+        self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
         
-    def _get(self, form, node):
-        for child in form.children:
-            if child.name == node:
-                return child
-
-        return None
-
-    def _chmod(self, form, mask=[]):
-        for m in mask:
-            node = self._get(form, m[0])
-            if node is not None:
-                if isinstance(m[1], basestring):
-                   if m[1] == u'r':
-                       node.widget.readonly = True
-                else:
-                    self._chmod(node.children[0], m[1])
+    def setviewid(self, viewid):
+        View.setviewid(self,viewid)
+        self.formid = viewid
 
     def update(self,):
-        self.init_stepindex(self.schema)
+        #if not self.buttons:
+        #    e = ViewError()
+        #    e.principalmessage = CallViewErrorPrincipalmessage
+        #    e.causes = CallViewViewErrorCauses
+        #    raise e
+        self.init_stepindex(self.schema) # dans le before_update?!
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
@@ -55,7 +47,6 @@ class FormView(View, FV):
         if posted_formid is not None and posted_formid == form.formid:
             for button in form.buttons:
                 if button.name in self.request.POST:
-                    success_method = getattr(self, '%s_success' % button.name)
                     try:
                         controls = self.request.POST.items()
                         validated = form.validate(controls)
@@ -67,7 +58,8 @@ class FormView(View, FV):
                         error = True
                     else:
                         try:
-                            item = success_method(validated)
+                            behavior = self.behaviorinstances[button.name]
+                            item = behavior.execute(self.context, self.request, validated)
                             self.finished_successfully = True
                         except FormError as e:
                             snippet = '<div class="error">Failed: %s</div>' % e
@@ -97,9 +89,6 @@ class FormView(View, FV):
         if self.chmod:
             self._chmod(form, self.chmod)
 
-    def _failure(self, e, form):
-        return self.adapt_item(e.render(), form.formid)
-
     def show(self, form):
         result = self.default_data()
         body = None
@@ -113,7 +102,23 @@ class FormView(View, FV):
     def default_data(self):
         return None 
 
-    def setviewid(self, viewid):
-        View.setviewid(self,viewid)
-        self.formid = viewid
+    def _failure(self, e, form):
+        return self.adapt_item(e.render(), form.formid)
+
+    def _get(self, form, node):
+        for child in form.children:
+            if child.name == node:
+                return child
+
+        return None
+
+    def _chmod(self, form, mask=[]):
+        for m in mask:
+            node = self._get(form, m[0])
+            if node is not None:
+                if isinstance(m[1], basestring):
+                   if m[1] == u'r':
+                       node.widget.readonly = True
+                else:
+                    self._chmod(node.children[0], m[1])
 

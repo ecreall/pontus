@@ -11,5 +11,6 @@ MutltipleViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
 MutltipleViewErrorSolutions = [u"Contactez l'administrateur..."]
 
 CallViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour appliquer l'action suivante aux informations demandées."
+CallViewErrorCildrenNotValidatedmessage = u"Certaines informations n'ont pas été prises en compte!"
 CallViewViewErrorCauses =  [u"Vous ne disposez pas des rôles nécessaires.",
                             u"Certaines conditions ne sont pas encore satisfaites."]

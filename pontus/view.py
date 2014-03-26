@@ -46,7 +46,6 @@ class View(Step):
     viewid = None
     title = 'View'
     coordinates = 'main' # default value
-    behaviors = []
     validators = []
     item_template = 'templates/subview.pt'
     self_template = None
@@ -56,7 +55,7 @@ class View(Step):
         return Structure(body)
 
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        Step.__init__(self, wizard, index)
+        super(View, self).__init__(wizard, index)
         self.context = context
         self.request = request
         self.parent = parent
@@ -69,25 +68,13 @@ class View(Step):
         if self.context is not None:
             self.viewid = self.viewid+'_'+str(get_oid(self.context))
 
-        self.allvalidators = [behavior.get_validator() for behavior in self.behaviors]
-        self.allvalidators.extend(self.validators)
-        self.behaviorinstances = {}
-        self._init_behaviors()
-
-    def _init_behaviors(self):
-        for behavior in self.behaviors:
-            behaviorinstance = behavior.get_instance(self.context, self.request)
-            if behaviorinstance is not None:
-                key = re.sub(r'\s', '_', behaviorinstance.title)
-                self.behaviorinstances[key] = behaviorinstance
-
     def validate(self):
-        for validator in self.allvalidators:
+        for validator in self.validators:
             try:
                 validator.validate(self.context, self.request)
             except ValidationError as e:
                 raise ViewError()
-        #@TODO
+
         return True
 
     def params(self, key=None):
@@ -98,21 +85,23 @@ class View(Step):
             return self.request.params[key]
 
         return None
-
-    @property
-    def process(self):
-        params = self.params('p_uid')    
-
-    @property
-    def action(self):
+  
+    def before_update(self):
         pass
 
+    def update(self):
+        pass
+
+    def after_update(self):
+        pass
 
     def __call__(self):
         result = None
         try:
             self.validate()
+            self.before_update()
             result = self.update()
+            self.after_update()
         except ViewError as e:
             return self.failure(e)
             
@@ -124,17 +113,15 @@ class View(Step):
                 result['css_links'] = []
 
         return result
-  
-    def update(self,):
-        pass
 
     def content(self, result, template=None, main_template=None):
         if template is None:
-            registry = get_current_registry()
-            context_iface = providedBy(self.context)
-            view_deriver = registry.adapters.lookup((IViewClassifier, self.request.request_iface, context_iface), IV, name=self.title, default=None)
-            discriminator = view_deriver.__discriminator__().resolve()
-            template = registry.introspector.get('templates', discriminator).title
+            template = self_template
+            #registry = get_current_registry()
+            #context_iface = providedBy(self.context)
+            #view_deriver = registry.adapters.lookup((IViewClassifier, self.request.request_iface, context_iface), IV, name=self.title, default=None)
+            #discriminator = view_deriver.__discriminator__().resolve()
+            #template = registry.introspector.get('templates', discriminator).title
 
         if main_template is None:
             main_template = get_renderer(__emptytemplate__).implementation()
@@ -162,14 +149,65 @@ class View(Step):
     def setviewid(self, viewid):
         self.viewid = viewid
 
-    def failure(self, e, subject=None):#...
+    def _get_message(self, e, subject=None):
         content_message = renderers.render(e.template, {'error':e, 'subject': subject}, self.request)
+        return content_message
+
+    def failure(self, e, subject=None):
+        #TODO
+        content_message = self. _get_message(e, subject)
         item =self.adapt_item('', self.viewid)
         item['messages'] = {e.type: [content_message]}
         item['isactive'] = True
         result = {'js_links': [], 'css_links': [], 'coordinates': {self.coordinates:[item]}}
         return result
 
+    def success(self, validated=None):
+        pass
+
 
 class ElementaryView(View):
-    pass
+
+    behaviors = []
+    validate_behaviors = True
+
+    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
+        super(ElementaryView, self).__init__(context, request, parent, wizard, index, **kwargs)
+        if self.validate_behaviors:
+            self.validators.extend([behavior.get_validator() for behavior in self.behaviors])
+
+        self.behaviorinstances = {}
+        self._init_behaviors()
+
+    def _init_behaviors(self):
+        for behavior in self.behaviors:
+            try:
+                behavior.get_validator().validate(self.context, self.request)
+                behaviorinstance = behavior.get_instance(self.context, self.request)
+                if behaviorinstance is not None:
+                    key = re.sub(r'\s', '_', behaviorinstance.title)
+                    self.behaviorinstances[key] = behaviorinstance
+            except ValidationError as e:
+                continue 
+
+    def before_update(self):
+        for behavior in self.behaviorinstances.values():
+            behavior.before_execution(self.context, self.request)
+
+    def execute(self, appstruct=None):
+        for behavior in self.behaviorinstances.values():
+            behavior.execute(self.context, self.request, appstruct)
+
+    def after_update(self):
+        if self.finished_successfully:
+            for behavior in self.behaviorinstances.values():
+                behavior.after_execution(self.context, self.request)
+
+
+class BasicView(ElementaryView):
+
+    isexecutable = False
+    
+    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
+        super(BasicView, self).__init__(context, request, parent, wizard, index, **kwargs)
+        self.finished_successfully = True

@@ -4,6 +4,8 @@ STEPID = '__stepindex__'
 
 class Step(object):
 
+    isexecutable = True
+
     def __init__(self, wizard=None, index=None):
         self.wizard = wizard
         self.index = index
@@ -65,7 +67,7 @@ class Behavior(object):
 
     @classmethod
     def get_instance(cls, context, request, args=None):
-        pass #raise ValidationError if no action
+        return cls() #raise ValidationError if no action
 
     @classmethod
     def get_validator(cls):
@@ -74,20 +76,17 @@ class Behavior(object):
     def validate(self, context, request, args=None):
         return True #action instance validation
 
-    def beforeexecution(self, context, request, args=None):
+    def before_execution(self, context, request):
         pass
 
-    def start(self, context, request, appstruct, args=None):
+    def start(self, context, request, appstruct):
         pass
 
-    def execute(self, context, request, appstruct, args=None):
+    def execute(self, context, request, appstruct):
         pass
 
-    def afterexecution(self, context, request, appstruct, args=None):
+    def after_execution(self, context, request):
         pass
 
-    def redirect(self, context, request, appstruct, args=None):
+    def redirect(self, context, request, appstruct):
         pass
-
-        
-

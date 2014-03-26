@@ -144,7 +144,7 @@ class ObjectData(colander.Mapping):
             result = cstruct
 
         _object = None
-        if isinstance(result, dict) and obj_oid is not None and not (obj_oid=='None'):
+        if isinstance(result, dict) and obj_oid is not None and not (obj_oid=='None') and not (obj_oid==''):
             _object = get_obj(int(obj_oid))
             
         if self.factory is None and _object is None:
