@@ -54,8 +54,8 @@ class View(Step):
         body = renderers.render(self.item_template, {'coordinates':coordinates,'subitem':item, 'parent': parent}, self.request)
         return Structure(body)
 
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        super(View, self).__init__(wizard, index)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(View, self).__init__(wizard, stepid)
         self.context = context
         self.request = request
         self.parent = parent
@@ -171,13 +171,23 @@ class ElementaryView(View):
     behaviors = []
     validate_behaviors = True
 
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        super(ElementaryView, self).__init__(context, request, parent, wizard, index, **kwargs)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(ElementaryView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
+        self._allvalidators = list(self.validators)
         if self.validate_behaviors:
-            self.validators.extend([behavior.get_validator() for behavior in self.behaviors])
+            self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors])
 
         self.behaviorinstances = {}
         self._init_behaviors()
+
+    def validate(self):
+        for validator in self._allvalidators:
+            try:
+                validator.validate(self.context, self.request)
+            except ValidationError as e:
+                raise ViewError()
+
+        return True
 
     def _init_behaviors(self):
         for behavior in self.behaviors:
@@ -206,10 +216,8 @@ class ElementaryView(View):
 
 class BasicView(ElementaryView):
 
-    validators = []
-    behaviors = []
     isexecutable = False
     
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        super(BasicView, self).__init__(context, request, parent, wizard, index, **kwargs)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(BasicView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.finished_successfully = True

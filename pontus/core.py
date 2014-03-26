@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-STEPID = '__stepindex__'
+STEPID = '__stepid__'
 
 class Step(object):
 
     isexecutable = True
 
-    def __init__(self, wizard=None, index=None):
+    def __init__(self, wizard=None, stepid=None):
         self.wizard = wizard
-        self.index = index
+        self.stepid = stepid
         self.finished_successfully = False
         self._outgoing = []
         self._incoming = []
@@ -19,14 +19,14 @@ class Step(object):
     def add_incoming(self, transition):
         self._incoming.append(transition)
 
-    def init_stepindex(self, schema, wizard=None):
+    def init_stepid(self, schema, wizard=None):
         if self.wizard is not None:
-            self.wizard.request.session[STEPID+self.wizard.viewid] = self.index
-            #if self.index is not None:
-            #    schema.add_idnode(STEPID+self.wizard.viewid, self.index)
+            self.wizard.request.session[STEPID+self.wizard.viewid] = self.stepid
+            #if self.id is not None:
+            #    schema.add_idnode(STEPID+self.wizard.viewid, self.id)
 
             #if hasattr(self, 'parent'):
-            #    self.parent.init_stepindex(schema)
+            #    self.parent.init_stepid(schema)
 
 
 class Transition(object):

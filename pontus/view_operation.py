@@ -45,13 +45,12 @@ def default_context(callview):
 
 class ViewOperation(View):
 
-    validators = []
     merged = False
     contexts = default_contexts
     views = default_views
 
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        super(ViewOperation, self).__init__(context, request, parent, wizard, index, **kwargs)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(ViewOperation, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         if hasattr(self.views, '__func__'):
             self.views = self.views.__func__
 
@@ -75,8 +74,8 @@ class MultipleViewsOperation(ViewOperation):
 
 class MultipleContextsOperation(ViewOperation):
 
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        super(MultipleContextsOperation, self).__init__(context, request, parent, wizard, index, **kwargs)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(MultipleContextsOperation, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.children = []
         self.children_notvalitaed = []
         self.allviews = []
@@ -96,7 +95,7 @@ class MultipleContextsOperation(ViewOperation):
             contexts = [contexts]
 
         for item_context in contexts:
-            subview = self.view(item_context, self.request, self, self.wizard, self.index,**{})
+            subview = self.view(item_context, self.request, self, self.wizard, self.stepid,**{})
             try:
                 subview.validate()
             except ViewError as e:
@@ -117,7 +116,7 @@ def default_builder(parent, views):
 
     for view in views:
         if isinstance(view, tuple):
-            viewinstance = MultipleView(parent.context, parent.request, parent, parent.wizard, parent.index)
+            viewinstance = MultipleView(parent.context, parent.request, parent, parent.wizard, parent.stepid)
             viewinstance.merged = parent.merged
             if parent.merged:
                 viewinstance.coordinates = parent.coordinates
@@ -127,7 +126,7 @@ def default_builder(parent, views):
             if viewinstance.children:
                 parent.children.append(viewinstance)
         else:
-            viewinstance = view(parent.context, parent.request, parent, parent.wizard, parent.index)
+            viewinstance = view(parent.context, parent.request, parent, parent.wizard, parent.stepid)
             try:
                 viewinstance.validate()
             except ViewError as e:
@@ -146,8 +145,8 @@ class MultipleView(MultipleViewsOperation):
     item_template = 'templates/submultipleview.pt'
     self_template = 'templates/submultipleview.pt'
     
-    def __init__(self, context, request, parent=None, wizard=None, index=None):
-        super(MultipleView, self).__init__(context, request, parent, wizard, index)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None):
+        super(MultipleView, self).__init__(context, request, parent, wizard, stepid)
         self.children = []
         self._coordinates = []
         self.builder(self.views)
@@ -278,10 +277,9 @@ class MergedFormsView(MultipleContextsOperation, FormView):
     suffixe = 'All'
 
     # Cette vue n'est pas un form par rapport a l'utilisateur: C'est une operation
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         self.schema = self.schema.clone()
-        super(MergedFormsView, self).__init__(context, request, parent, wizard, index, **kwargs)
-        #FormView.__init__(self, context, request, parent, wizard, index, **kwargs)
+        super(MergedFormsView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.buttons = [b.title+' '+self.suffixe for b in self.view.behaviors]
         self._addItemsNode()
 
@@ -291,7 +289,6 @@ class MergedFormsView(MultipleContextsOperation, FormView):
         self.children = {}
         for subform in items:
             context_oid = str(get_oid(subform.context))
-            self.allviews.append(subform)
             if context_oid in self.children:
                 self.children[context_oid].append(subform)
             else:
@@ -327,7 +324,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
             e.causes = CallViewViewErrorCauses
             messages[e] = self._get_message(e)
 
-        self.init_stepindex(self.schema)
+        self.init_stepid(self.schema)
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
@@ -375,6 +372,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                                 if bname in view_instance.behaviorinstances:
                                     behavior = view_instance.behaviorinstances[bname] 
                                     behavior.execute(self.context, self.request, v['item'])
+                                    view_instance.finished_successfully = True
 
                             item = self.success(validated)
                             self.finished_successfully = True
@@ -419,7 +417,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
     def success(self, validated):
         return HTTPFound(
-            self.request.mgmt_path(self.context, '@@'+self.request.view_name))
+            self.request.mgmt_path(self.context, '@@contents'))#+self.request.view_name))
 
     def default_data(self):
         result = {'views':[]}
@@ -442,8 +440,8 @@ class CallView(MultipleContextsOperation):
     title = 'CallView'
     self_template = 'pontus:templates/global_accordion.pt'
 
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
-        super(CallView, self).__init__(context, request, parent, wizard, index, **kwargs)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(CallView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.define_executable()
 
     def define_executable(self):
@@ -544,11 +542,11 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
     # a ne pas changer 
     schema = ItemsSchema
 
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         self.schema = self.schema(widget=self.form_widget())
         self.schema = self.schema.clone()
-        super(CallSelectedContextsViews, self).__init__(context, request, parent, wizard, index, **kwargs)
-        #MultipleContextsViewsOperation.__init__(self, context, request, parent, wizard, index, **kwargs)
+        super(CallSelectedContextsViews, self).__init__(context, request, parent, wizard, stepid, **kwargs)
+        #MultipleContextsViewsOperation.__init__(self, context, request, parent, wizard, stepid, **kwargs)
         self.validated_items = []
         self.children = {}
         self._additemswidget()
@@ -569,7 +567,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
 
             multiplecontextsview_class.title = view.title
             multiplecontextsview_class.views = view
-            view_instance = multiplecontextsview_class(self.context, self.request, self.parent, self.wizard, self.index)
+            view_instance = multiplecontextsview_class(self.context, self.request, self.parent, self.wizard, self.stepid)
             self.children[key] = view_instance
 
     def _additemswidget(self):
@@ -579,7 +577,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         viewsschemanode.widget = widget
 
     def update(self,):
-        self.init_stepindex(self.schema)
+        self.init_stepid(self.schema)
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
@@ -674,8 +672,8 @@ class Wizard(MultipleViewsOperation):
     title = 'Wizard'
     durable = False # session ou pas?
 
-    def __init__(self, context, request, parent=None, wizard=None, index='', **kwargs):
-        super(Wizard, self).__init__(context, request, parent, wizard, index, **kwargs)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(Wizard, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.transitionsinstances = {}
         self.viewsinstances = {}
         self.startnode = None
@@ -700,14 +698,14 @@ class Wizard(MultipleViewsOperation):
         initnodes = self._getinitnodes()
         self.startnode = Step(self,'start_'+self.viewid)
         for node in initnodes:
-            transitionid = self.startnode.index+'->'+node.index
+            transitionid = self.startnode.stepid+'->'+node.stepid
             self.transitionsinstances[transitionid] = Transition(self.startnode, node, transitionid)  
 
     def _add_endnode(self):
         finalnodes = self._getfinalnodes()
         self.endnode = Step(self,'end_'+self.viewid)
         for node in finalnodes:
-            transitionid = node.index+'->'+self.endnode.index
+            transitionid = node.stepid+'->'+self.endnode.stepid
             self.transitionsinstances[transitionid] = Transition(node, self.endnode, transitionid) 
 
     def _getinitnodes(self):

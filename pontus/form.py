@@ -17,13 +17,11 @@ class FormView(ElementaryView, FV):
 
     title = 'Form View'
     chmod = []
-    validators = []
-    behaviors = []
 
-    def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         self.schema = self.schema.clone()
         FV.__init__(self, context, request)
-        ElementaryView.__init__(self, context, request, parent, wizard, index)
+        ElementaryView.__init__(self, context, request, parent, wizard, stepid, **kwargs)
         self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
         
     def setviewid(self, viewid):
@@ -36,7 +34,7 @@ class FormView(ElementaryView, FV):
         #    e.principalmessage = CallViewErrorPrincipalmessage
         #    e.causes = CallViewViewErrorCauses
         #    raise e
-        self.init_stepindex(self.schema) # dans le before_update?!
+        self.init_stepid(self.schema) # dans le before_update?!
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
         item = None
