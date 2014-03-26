@@ -206,6 +206,8 @@ class ElementaryView(View):
 
 class BasicView(ElementaryView):
 
+    validators = []
+    behaviors = []
     isexecutable = False
     
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):

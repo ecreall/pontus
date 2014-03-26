@@ -17,6 +17,8 @@ class FormView(ElementaryView, FV):
 
     title = 'Form View'
     chmod = []
+    validators = []
+    behaviors = []
 
     def __init__(self, context, request, parent=None, wizard=None, index=None, **kwargs):
         self.schema = self.schema.clone()

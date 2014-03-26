@@ -12,9 +12,18 @@ from dace.util import get_obj
 from pontus.schema import Schema
 from pontus.view import View, merge_dicts, ViewError
 from pontus.form import FormView
-from pontus.widget import SimpleFormWidget, AccordionWidget, SimpleMappingWidget, CheckboxChoiceWidget
+from pontus.widget import (
+        SimpleFormWidget, 
+        AccordionWidget, 
+        SimpleMappingWidget, 
+        CheckboxChoiceWidget)
 from pontus.interfaces import IFormView
-from pontus.resources import CallViewErrorPrincipalmessage, CallViewViewErrorCauses, MutltipleViewErrorPrincipalmessage, MutltipleViewErrorCauses, CallViewErrorCildrenNotValidatedmessage
+from pontus.resources import (
+        CallViewErrorPrincipalmessage, 
+        CallViewViewErrorCauses, 
+        MutltipleViewErrorPrincipalmessage, 
+        MutltipleViewErrorCauses, 
+        CallViewErrorCildrenNotValidatedmessage)
 from pontus.core import STEPID, Transition, Step
 
 
@@ -35,6 +44,8 @@ def default_context(callview):
 
 
 class ViewOperation(View):
+
+    validators = []
     merged = False
     contexts = default_contexts
     views = default_views
@@ -52,6 +63,8 @@ class ViewOperation(View):
 
         self.contexts = self.contexts()
 
+    #l'operation renvoie une vue qui peut etre executable ou non. 
+    #Il faut donc une fonction qui fixe si la vue renvoyee est executable ou non.
     def define_executable(self):
         return self.isexecutable
 
