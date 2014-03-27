@@ -223,7 +223,6 @@ class SelectWidget(SelectW):
         return field.renderer(template, **tmpl_values)
 
     def deserialize(self, field, pstruct):
-        import pdb; pdb.set_trace()
         if pstruct in (null, self.null_value):
             return null
 
