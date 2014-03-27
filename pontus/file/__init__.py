@@ -88,6 +88,23 @@ class File(Object,FL):
 class Image(File):
     pass
 
+class Object(colander.SchemaType):
+
+    def serialize(self, node, appstruct):
+        if appstruct is None:
+            appstruct = colander.null
+
+        if  appstruct is not colander.null:
+            return get_oid(appstruct)
+
+        return appstruct
+
+    def deserialize(self, node, cstruct):
+        if cstruct is colander.null:
+            return  cstruct
+
+        return cstruct
+
 
 class ObjectData(colander.Mapping):
 
@@ -127,6 +144,8 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
+        if node.name == 'proposition':
+            import pdb; pdb.set_trace()
         obj_oid = None
         if self.editable and cstruct and ObjectOID in cstruct:
             obj_oid = cstruct.get(ObjectOID)

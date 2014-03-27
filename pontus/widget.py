@@ -8,9 +8,9 @@ from deform.widget import (
     MappingWidget,
     RichTextWidget,
     FileUploadWidget,
-    Select2Widget as Select2W,
     OptGroup,
     FormWidget as FW,
+    SelectWidget as SelectW,
     CheckboxChoiceWidget as CheckboxChoiceW
     )
 
@@ -210,7 +210,7 @@ def _normalize_choices(values):
     return result
 
 
-class Select2Widget(Select2W):
+class SelectWidget(SelectW):
 
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
@@ -223,6 +223,7 @@ class Select2Widget(Select2W):
         return field.renderer(template, **tmpl_values)
 
     def deserialize(self, field, pstruct):
+        import pdb; pdb.set_trace()
         if pstruct in (null, self.null_value):
             return null
 
@@ -239,6 +240,25 @@ class Select2Widget(Select2W):
                 result.append(item)
 
         return result
+
+
+class Select2Widget(SelectWidget):
+    template = 'deform:templates/select2.pt'
+    requirements = (('deform', None), ('select2', None))
+    
+
+class RadioChoiceWidget(SelectWidget):
+    template = 'deform:templates/radio_choice.pt'
+    readonly_template = 'deform:templates/readonly/radio_choice.pt'
+
+    def deserialize(self, field, pstruct):
+        if pstruct in (null, self.null_value):
+            return null
+
+        try:
+            return get_obj(int(pstruct))
+        except ValueError:
+            return pstruct
 
 
 class CheckboxChoiceWidget(CheckboxChoiceW):
