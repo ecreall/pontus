@@ -31,7 +31,7 @@ setup(name='pontus',
       tests_require=requires,
       test_suite="pontus",
       extras_require = dict(
-          test=[],
+          test=['WebTest'],
       ),
       entry_points="""\
       """,
