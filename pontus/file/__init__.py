@@ -9,7 +9,7 @@ from substanced.file import File as FL
 from substanced.util import get_oid
 
 from dace.util import get_obj
-from dace.objectofcollaboration.object import Object
+from dace.objectofcollaboration.object import Object as DaceObject
 
 
 ObjectOID = '__objectoid__'
@@ -18,10 +18,10 @@ ObjectOID = '__objectoid__'
 USE_MAGIC = object()
 
 
-class File(Object,FL):
+class File(DaceObject,FL):
 
     def __init__(self, fp, mimetype, filename, preview_url, uid, **kwargs):
-        Object.__init__(self)
+        DaceObject.__init__(self)
         if fp:
             fp.seek(0)
         else:
@@ -144,8 +144,6 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
-        if node.name == 'proposition':
-            import pdb; pdb.set_trace()
         obj_oid = None
         if self.editable and cstruct and ObjectOID in cstruct:
             obj_oid = cstruct.get(ObjectOID)
