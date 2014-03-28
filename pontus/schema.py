@@ -7,13 +7,15 @@ import colander
 from substanced.schema import Schema as SH
 
 from pontus.file import ObjectData, ObjectOID
-from pontus.visual import VisualisableElement
 
 
-class Schema(VisualisableElement,SH):
+class Schema(SH):
+
+    title = ''
+    label = ''
+    description = ''
 
     def __init__(self, objectfactory=None, editable=False, **kwargs):
-        VisualisableElement.__init__(self, **kwargs)
         SH.__init__(self,**kwargs)
         self.typ = ObjectData(objectfactory, editable)
         if editable:
@@ -114,21 +116,3 @@ def omit(schema, mask, isinternal=False):
                 omit(node.children[0], m[1], True)
 
     return new_schema
-
-
-class VisualisableElementSchema(Schema):
-    
-    title = colander.SchemaNode(
-        colander.String(),
-        widget=deform.widget.TextInputWidget()
-        )
-
-    label = colander.SchemaNode(
-        colander.String(),
-        widget= deform.widget.TextInputWidget()
-        )
-
-    description = colander.SchemaNode(
-        colander.String(),
-        widget=deform.widget.TextAreaWidget(rows=10, cols=60)
-        )

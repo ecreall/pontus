@@ -24,7 +24,7 @@ from pontus.resources import (
         MutltipleViewErrorPrincipalmessage, 
         MutltipleViewErrorCauses, 
         CallViewErrorCildrenNotValidatedmessage)
-from pontus.core import STEPID, Transition, Step
+from pontus.core import STEPID, Step
 
 
 def default_view(callview):
@@ -664,6 +664,21 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
 
     def success(self, validated=None):
         return validated
+
+
+class Transition(object):
+
+    def __init__(self, source, target, id, condition=(lambda x, y:True)):
+        self.wizard = source.wizard
+        self.source = source
+        self.target = target
+        self.source.add_outgoing(self)
+        self.target.add_incoming(self)
+        self.condition = condition
+        self.id = id
+
+    def validate(self):
+        return self.condition(self.wizard.context, self.wizard.request)
 
 
 class Wizard(MultipleViewsOperation):

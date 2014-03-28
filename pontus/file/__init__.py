@@ -95,7 +95,7 @@ class Object(colander.SchemaType):
             appstruct = colander.null
 
         if  appstruct is not colander.null:
-            return get_oid(appstruct)
+            return str(get_oid(appstruct))
 
         return appstruct
 

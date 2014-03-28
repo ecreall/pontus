@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+import colander
+import deform
+from zope.interface import implements
+from pyramid import renderers
+from pyramid_layout.layout import Structure
+
+from .interfaces import IVisualisableElement
+from .schema import Schema
 
 STEPID = '__stepid__'
 
@@ -29,64 +37,52 @@ class Step(object):
             #    self.parent.init_stepid(schema)
 
 
-class Transition(object):
+class VisualisableElementSchema(Schema):
+    
+    title = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget()
+        )
 
-    def __init__(self, source, target, id, condition=(lambda x, y:True)):
-        self.wizard = source.wizard
-        self.source = source
-        self.target = target
-        self.source.add_outgoing(self)
-        self.target.add_incoming(self)
-        self.condition = condition
-        self.id = id
+    label = colander.SchemaNode(
+        colander.String(),
+        widget= deform.widget.TextInputWidget()
+        )
 
-    def validate(self):
-        return self.condition(self.wizard.context, self.wizard.request)
-
-
-class ValidationError(Exception):
-    principalmessage = u""
-    causes = []
-    solutions = []
-    type = 'danger'
-    template='templates/message.pt'
+    description = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextAreaWidget(rows=10, cols=60)
+        )
 
 
-class Validator(object):
+class VisualisableElement(object):
+    implements(IVisualisableElement)
 
-    @classmethod
-    def validate(cls, context, request ,args=None):
-        return True
+    template = 'templates/visualisable_templates/object.pt'
 
+    def __init__(self, **kwargs):
+        super(VisualisableElement, self).__init__()
+        self.title = ''
+        self.label = ''
+        self.description = ''
+        if kwargs.has_key('description'):
+            self.description = kwargs.get('description')
 
-class Behavior(object):
+        if kwargs.has_key('label'):
+            self.label = kwargs.get('label')
 
-    behaviorid = NotImplemented
-    title = NotImplemented
-    description = NotImplemented
+        if kwargs.has_key('title'):
+            self.title = kwargs.get('title')
 
-    @classmethod
-    def get_instance(cls, context, request, args=None):
-        return cls() #raise ValidationError if no action
+    def url(self, request, view=None, args=None):
+        if view is None:
+            return request.mgmt_path(self, '@@index')
+        else:
+            return request.mgmt_path(self, '@@'+view)
 
-    @classmethod
-    def get_validator(cls):
-        return Validator #defaultvalidator
+    def get_view(self, request, template=None):
+        if template is None:
+            template = self.template
+        body = renderers.render(template, {'object':self}, request)
 
-    def validate(self, context, request, args=None):
-        return True #action instance validation
-
-    def before_execution(self, context, request):
-        pass
-
-    def start(self, context, request, appstruct):
-        pass
-
-    def execute(self, context, request, appstruct):
-        pass
-
-    def after_execution(self, context, request):
-        pass
-
-    def redirect(self, context, request, appstruct):
-        pass
+        return Structure(body)

@@ -11,8 +11,10 @@ from pyramid_layout.layout import Structure
 
 from substanced.util import get_oid
 
+from dace.processinstance.core import  ValidationError
+
 from pontus.interfaces import IView
-from pontus.core import Step, Validator, ValidationError
+from pontus.core import Step
 
 
 class ViewError(Exception):
