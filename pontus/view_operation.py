@@ -486,7 +486,7 @@ class CallView(MultipleContextsOperation):
                 currentview = view_result['view']
 
             global_result = merge_dicts(view_result, global_result)
-            if len(view_result['coordinates']) == 1 and len(view_result['coordinates'].items()[0][1]) == 1:
+            if len(view_result['coordinates']) == 1 and len(view_result['coordinates'].items()[0][1]) == 1 and ('body' in view_result['coordinates'].items()[0][1][0]):
                 coordinate = view_result['coordinates'].items()[0][0]
                 item = view_result['coordinates'].items()[0][1][0]
                 if coordinate in result:
@@ -505,7 +505,7 @@ class CallView(MultipleContextsOperation):
                         result[coordinate] = [item]
 
         for coordinate, items in result.iteritems():
-            values = {'items': items, 'id':self.viewid+coordinate }           
+            values = {'items': items, 'id':self.viewid+coordinate }
             body = self.content(result=values, template=self.self_template)['body']
             item = self.adapt_item(body, self.viewid)
             global_result['coordinates'][coordinate]=[item]
@@ -577,6 +577,12 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         viewsschemanode.widget = widget
 
     def update(self,):
+        if not self.contexts:
+            e = ViewError()
+            e.principalmessage = CallViewErrorPrincipalmessage
+            e.causes = CallViewViewErrorCauses
+            raise e
+
         self.init_stepid(self.schema)
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
@@ -618,6 +624,12 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             _viewid = posted_viewid[0]
             if _viewid == self.viewid:
                 self.validated_items = [get_obj(int(o)) for o  in self.request.POST['__contextsoids__'].split(':')[1:]]
+                if not self.validated_items:
+                    e = ViewError()
+                    e.principalmessage = CallViewErrorPrincipalmessage
+                    e.causes = CallViewViewErrorCauses
+                    raise e
+
                 viewname = posted_viewid[1]
                 return self._call_callview(viewname)
 
