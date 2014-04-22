@@ -61,7 +61,7 @@ class VisualisableElement(object):
     template = 'templates/visualisable_templates/object.pt'
 
     def __init__(self, **kwargs):
-        super(VisualisableElement, self).__init__()
+        super(VisualisableElement, self).__init__(**kwargs)
         self.title = ''
         self.label = ''
         self.description = ''

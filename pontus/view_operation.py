@@ -149,7 +149,11 @@ class MultipleView(MultipleViewsOperation):
         super(MultipleView, self).__init__(context, request, parent, wizard, stepid)
         self.children = []
         self._coordinates = []
-        self.builder(self.views)
+        if self.views:
+            self._init_views(self.views)
+
+    def _init_views(self, views):
+        self.builder(views)
         self.define_executable()
 
     def define_executable(self):

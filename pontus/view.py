@@ -211,9 +211,10 @@ class ElementaryView(View):
             behavior.execute(self.context, self.request, appstruct)
 
     def after_update(self):
-        if self.finished_successfully:
-            for behavior in self.behaviorinstances.values():
-                behavior.after_execution(self.context, self.request)
+         pass
+#        if self.finished_successfully:
+#            for behavior in self.behaviorinstances.values():
+#                behavior.after_execution(self.context, self.request)
 
 
 class BasicView(ElementaryView):
