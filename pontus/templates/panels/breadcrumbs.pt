@@ -1,6 +1,4 @@
-        <div class="col-md-10 breadcrumbs-bounding"
-             tal:define="breadcrumbs request.sdiapi.breadcrumbs()">
-
+        <div class="col-md-10 breadcrumbs-bounding">
           <ul tal:condition="breadcrumbs"
               class="breadcrumb">
             <tal:breadcrumbs repeat="breadcrumb breadcrumbs">
@@ -20,5 +18,4 @@
                     alt="${sdititle}"
                     src="${request.static_url('substanced.sdi:static/img/capsule-icon-32.png')}"
                     />${sdititle}</a>
-
         </div>

@@ -1,0 +1,37 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+  tal:omit-tag="">
+<nav class="navbar navbar-default navbar-inverse navbar" role="navigation">
+  <div class="container">
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div  class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul tal:define="links start['links']; groups start['groups']" class="nav navbar-nav">
+        <li tal:condition="links" tal:repeat="l links" class="${(l in active_items) and 'active'}">
+            <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}"><span class="glyphicon glyphicon-play-circle"></span> ${l.title}</a>
+        </li>
+        <li tal:condition="groups" tal:repeat="(k, g) groups.iteritems()" class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-play-circle"></span> ${k} <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li  tal:repeat="a g" class="${(a in active_items) and 'active'}">
+              <a href="${a.url}" data-toggle="tooltip" data-placement="left" title="${a.action.informations}" >${a.title}</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <ul tal:define="links active['links']; groups active['groups']" class="nav navbar-nav navbar-right">
+        <li tal:condition="links" tal:repeat="l links" class="${(l in active_items) and 'active'}">
+          <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}">${l.title}</a>
+        </li>
+        <li tal:condition="groups" tal:repeat="(k, g) groups.iteritems()" class="dropdown ">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">${k} <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li tal:repeat="a g" class="${(a in active_items) and 'active'}">
+              <a href="${a.url}" data-toggle="tooltip" data-placement="left" title="${a.action.informations}">${a.title}</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+</html>
+<!-- bar -->

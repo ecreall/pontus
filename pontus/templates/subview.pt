@@ -1,6 +1,6 @@
 <div tal:omit-tag="" tal:define=" item subitem|nothing">
     <div tal:omit-tag="" tal:condition="item">
-    <div tal:omit-tag="parent is not None" class="panel panel-primary" >
+    <div tal:omit-tag="parent is not None" class="panel panel-default" >
          <div tal:condition="parent is None" class="panel-heading">${item['view'].title}</div>
          <div tal:omit-tag="parent is not None" class="panel-body">
 

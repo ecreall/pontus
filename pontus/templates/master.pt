@@ -50,13 +50,15 @@
          style="display:none;" 
          alt="Loading indicator"/>
 
-    <div class="navbar navbar-fixed-top nav-bordered-bottom">
+    <div class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         ${panel('breadcrumbs')}
         ${panel('usermenu')}
       </div>
     </div>
     <!--div class="container"-->
+<!-- bar  -->
+      ${panel('navbar')}
 
       <metal:slot metal:define-slot="outer-content">
 
@@ -67,15 +69,6 @@
           </div>
 
           <div class="col-md-5 column ui-sortable">
-            <ul class="nav nav-tabs"
-                tal:define="tabs request.sdiapi.mgmt_views(context)"
-                tal:condition="tabs">
-              <li tal:repeat="tab_data tabs"
-                  tal:attributes="class tab_data['class']">
-                <a href="${tab_data['url']}">${tab_data['title']}</a>
-              </li>
-            </ul>
-
             <div class="above-content">
             </div>
 

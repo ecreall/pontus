@@ -1,9 +1,6 @@
 <html xmlns:tal="http://xml.zope.org/namespaces/tal"
   tal:define="mp request.sdiapi.mgmt_path;"
   tal:omit-tag="">
-        <div class="col-md-2 user-dropdown-bounding">
-          <div class="pull-right hidden-xs hidden-sm visible-lg visible-md">
-
             <div tal:condition="request.user">
               <button type="button" class="btn btn-primary dropdown-toggle" 
                       data-toggle="dropdown">
@@ -20,7 +17,4 @@
                 </li>
               </ul>
             </div>
-
-          </div>
-        </div>
 </html>
