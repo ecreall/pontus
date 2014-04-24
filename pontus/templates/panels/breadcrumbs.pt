@@ -13,7 +13,7 @@
           <a tal:condition="not breadcrumbs"
              tal:define="sdititle request.sdiapi.sdi_title();
                          home_path request.sdiapi.mgmt_path(request.virtual_root)"
-             class="navbar-brand"
+             class="navbar"
              href="${home_path}"><img 
                     alt="${sdititle}"
                     src="${request.static_url('substanced.sdi:static/img/capsule-icon-32.png')}"

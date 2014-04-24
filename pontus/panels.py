@@ -32,10 +32,7 @@ class Breadcrumbs_panel(object):
             if isinstance(resource, Entity):
                 url = request.sdiapi.mgmt_path(resource, '@@index')
     
-            name = getattr(resource, 'sdi_title', None)
-            if hasattr(resource, 'title'):
-                name = resource.title
-
+            name = getattr(resource, 'title', None)
             if name is None:
                 name = resource.__name__ or 'Home'
 

@@ -44,6 +44,7 @@ class Index(View):
         if views:
             indexmultiview = MultipleView(self.context, self.request, self.parent)
             indexmultiview._init_views(views)
+            indexmultiview.before_update()
             return indexmultiview.update()
 
         e = ViewError()
