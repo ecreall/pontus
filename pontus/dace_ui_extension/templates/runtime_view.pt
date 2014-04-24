@@ -1,0 +1,42 @@
+          <div tal:condition="not processes" class="alert alert-dismissable alert-info">
+           <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+           <h4>Pas de processus en cours!</h4>
+		L'application ne contient pas de processus en cours.
+          </div>
+
+    <table tal:condition="processes" class="table table-striped">
+        <caption >
+            <h4 >Les processus de l'application</h4>
+        </caption>
+        <thead >
+            <th >Processus</th>
+            <th >Actions en cours</th>
+            <th >État du processus</th>
+        </thead>
+        <tbody >
+            <tr tal:repeat="p processes" >
+                <div tal:omit-tag="" tal:define="ws p['process'].getWorkItems().values(); vws set([w.node for w in ws if w.validate()])">
+                <td >
+                   <h4> <a tal:attributes="href p['url']">${p['process'].__name__.capitalize()}</a></h4>
+                </td>
+                <td >
+                    <ul class="list-group">
+                        <li class="list-group-item" tal:repeat="n vws">
+                            ${n.__name__.capitalize()+": "+n.description}
+                        </li>
+                    </ul>
+                </td>
+                <td >
+                    <div >
+                        <h4>
+                           <span class="label label-${(p['process']._finished and 'danger') or (not vws and 'warning') or 'success'}">
+                             ${(p['process']._finished and "Termine") or (not vws and "Bloque") or "En cours"}
+                           </span>
+                        </h4>
+                    </div>
+                </td>
+              </div>
+            </tr>
+        </tbody>
+    </table>
+

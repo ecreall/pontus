@@ -1,0 +1,57 @@
+
+     <div id="panel-158939" class="panel-group">
+       <div tal:repeat="p processes" class="panel panel-default">
+	 <div class="panel-heading">
+	   <a  href="#panel-element-${p['process'].__name__.capitalize()}" data-parent="#panel-158939" data-toggle="collapse" class="panel-title">
+              <span class="glyphicon glyphicon-log-in"> </span>  
+	   </a>
+           <a tal:attributes="href p['url']" class="nav navbar-nav navbar-right">${p['process'].__name__.capitalize()}</a>
+	 </div>
+	 <div tal:define="p_id p['process'].__name__.capitalize()" class="panel-collapse collapse" id="panel-element-${p_id}" style="height: auto;">
+           <div  class="panel-body">
+             <div tal:condition="not p['process'].started_processes" class="alert alert-dismissable alert-info">
+               <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+               <h4>Pas de processus en cours!</h4>
+	         L'application ne contient pas de processus <strong>${p_id}</strong> en cours.
+              </div>
+
+              <table tal:condition="p['process'].started_processes" class="table table-striped">
+                <caption >
+                  <h4 >Les processus <strong>${p_id}</strong> de l'application</h4>
+                </caption>
+                <thead >
+                   <th >Processus</th>
+                   <th >Actions en cours</th>
+                   <th >État du processus</th>
+                </thead>
+              <tbody >
+                 <tr tal:repeat="pp p['process'].started_processes" >
+                    <div tal:omit-tag="" tal:define="ws pp.getWorkItems().values(); vws set([w.node for w in ws if w.validate()])">
+                      <td >
+                        <h4>${pp.__name__.capitalize()}</h4>
+                      </td>
+                      <td >
+                        <ul class="list-group">
+                            <li class="list-group-item" tal:repeat="n vws">
+                                ${n.__name__.capitalize()+": "+n.description}
+                            </li>
+                        </ul>
+                       </td>
+                       <td >
+                         <div >
+                            <h4>
+                              <span class="label label-${(pp._finished and 'danger') or (not vws and 'warning') or 'success'}">
+                                 ${(pp._finished and "Termine") or (not vws and "Bloque") or "En cours"}
+                              </span>
+                            </h4>
+                         </div>
+                       </td>
+                     </div>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
