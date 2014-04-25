@@ -51,5 +51,3 @@ class Index(View):
         e.principalmessage = IndexViewErrorPrincipalmessage
         e.causes = IndexViewErrorCauses
         raise e
-
-

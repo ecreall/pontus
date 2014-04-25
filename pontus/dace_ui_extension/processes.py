@@ -12,36 +12,10 @@ from dace.processdefinition.eventdef import (
     ConditionalEventDefinition,
     TimerEventDefinition)
 from dace.objectofcollaboration.services.processdef_container import process_definition
-from dace.processinstance import workitem
 
 from pontus.core import VisualisableElement
 
 
-
-class WorkItemS(workitem.WorkItem):
-    def start(self):
-        pass
-
-@utility(name='runtime_pd.s')
-class WorkItemFactoryS(workitem.WorkItemFactory):
-    factory = WorkItemS
-
-class SeeProcesses_WorkItem(workitem.WorkItem):
-    def start(self):
-        pass
-
-@utility(name='runtime_pd.processes_run')
-class SeeProcesses_WorkItemFactory(workitem.WorkItemFactory):
-    factory = SeeProcesses_WorkItem
-
-
-class WorkItemE(workitem.WorkItem):
-    def start(self):
-        pass
-
-@utility(name='runtime_pd.e')
-class WorkItemFactoryE(workitem.WorkItemFactory):
-    factory = WorkItemE
 
 
 def relation_validationA(process, context):
@@ -93,30 +67,6 @@ class RuntimeProcessDefinition(ProcessDefinition, VisualisableElement):
                 TransitionDefinition('processes_run', 'e'),
         )
 
-
-class WorkItemSpdc(workitem.WorkItem):
-    def start(self):
-        pass
-
-@utility(name='pdc_pd.s')
-class WorkItemFactorySpdc(workitem.WorkItemFactory):
-    factory = WorkItemSpdc
-
-class SeeProcessesDef_WorkItem(workitem.WorkItem):
-    def start(self):
-        pass
-
-@utility(name='pdc_pd.processes_def')
-class SeeProcessesDef_WorkItemFactory(workitem.WorkItemFactory):
-    factory = SeeProcessesDef_WorkItem
-
-class WorkItemEpdc(workitem.WorkItem):
-    def start(self):
-        pass
-
-@utility(name='pdc_pd.e')
-class WorkItemFactoryEpdc(workitem.WorkItemFactory):
-    factory = WorkItemEpdc
 
 class SeeProcessesDef(InfiniteCardinality):
 
