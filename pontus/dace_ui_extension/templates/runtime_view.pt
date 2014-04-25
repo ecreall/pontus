@@ -10,6 +10,7 @@
         </caption>
         <thead >
             <th >Processus</th>
+            <th >Description</th>
             <th >Actions en cours</th>
             <th >État du processus</th>
         </thead>
@@ -17,12 +18,18 @@
             <tr tal:repeat="p processes" >
                 <div tal:omit-tag="" tal:define="ws p['process'].getWorkItems().values(); vws set([w.node for w in ws if w.validate()])">
                 <td >
-                   <h4> <a tal:attributes="href p['url']">${p['process'].__name__.capitalize()}</a></h4>
+                   <h4> <a tal:attributes="href p['url']">${p['process'].title.capitalize()}</a></h4>
+                </td>
+                <td >
+                   ${p['process'].description}
                 </td>
                 <td >
                     <ul class="list-group">
                         <li class="list-group-item" tal:repeat="n vws">
-                            ${n.__name__.capitalize()+": "+n.description}
+                                <dl>
+			          <dt>${n.title.capitalize()}</dt>
+			           <dd>${n.description}</dd>
+                                 </dl>
                         </li>
                     </ul>
                 </td>

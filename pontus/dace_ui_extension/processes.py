@@ -61,15 +61,9 @@ def state_validationA(process, context):
 
 
 class SeeProcesses(InfiniteCardinality):
-    #identification et classification
-    actionType = ActionType.automatic
-    groups = ['Voir']
-    process_id = 'runtime_pd'
-    node_id = 'processes_run'
-    title = 'Processus en cours'
+
     context = IRuntime
-    description = "L'action permet de voir les processus encours"
-    #validation
+    actionType = ActionType.automatic
     relation_validation = relation_validationA
     roles_validation = roles_validationA
     processsecurity_validation = processsecurity_validationA
@@ -82,11 +76,16 @@ class RuntimeProcessDefinition(ProcessDefinition, VisualisableElement):
 
     def __init__(self, **kwargs):
         super(RuntimeProcessDefinition, self).__init__(**kwargs)
+        self.title = 'Processus de gestion du runtime'
+        self.description = 'Ce processus permet de gerer les processus de l\'application'
 
     def _init_definition(self):
         self.defineNodes(
                 s = StartEventDefinition(),
-                processes_run = ActivityDefinition(contexts=[SeeProcesses]),
+                processes_run = ActivityDefinition(contexts=[SeeProcesses], 
+                                                   title="Voir les processus en cours",
+                                                   groups=['Voir'],
+                                                   description="L'action permet de voir les processus encours"),
                 e = EndEventDefinition(),
         )
         self.defineTransitions(
@@ -120,15 +119,9 @@ class WorkItemFactoryEpdc(workitem.WorkItemFactory):
     factory = WorkItemEpdc
 
 class SeeProcessesDef(InfiniteCardinality):
-    #identification et classification
-    actionType = ActionType.automatic
-    groups = ['Voir']
-    process_id = 'pdc_pd'
-    node_id = 'processes_def'
-    title = 'Definition des processus'
+
     context = IProcessDefinitionContainer
-    description = "L'action permet de voir les definition des processus"
-    #validation
+    actionType = ActionType.automatic
     relation_validation = relation_validationA
     roles_validation = roles_validationA
     processsecurity_validation = processsecurity_validationA
@@ -141,11 +134,16 @@ class PDCProcessDefinition(ProcessDefinition, VisualisableElement):
 
     def __init__(self, **kwargs):
         super(PDCProcessDefinition, self).__init__(**kwargs)
+        self.title = 'Processus de gestion des definitions des processus'
+        self.description = 'Ce processus permet de gerer les definition des processus de l\'application'
 
     def _init_definition(self):
         self.defineNodes(
                 s = StartEventDefinition(),
-                processes_def = ActivityDefinition(contexts=[SeeProcessesDef]),
+                processes_def = ActivityDefinition(contexts=[SeeProcessesDef],
+                                                   title="Voir les definitions des processus",
+                                                   groups=['Voir'],
+                                                   description="L'action permet de voir les definition des processus"),
                 e = EndEventDefinition(),
         )
         self.defineTransitions(

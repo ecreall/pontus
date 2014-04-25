@@ -28,7 +28,7 @@ class RuntimeView(BasicView):
         processes = self.context.processes
         allprocesses = []
         for p in processes:
-            processe = {'url':self.request.mgmt_path(p, '@@contents'), 'process':p}
+            processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p}
             allprocesses.append(processe) 
 
         return allprocesses
@@ -61,7 +61,7 @@ class ProcessDefinitionContainerView(BasicView):
         processes = self.context.definitions
         allprocesses = []
         for p in processes:
-            processe = {'url':self.request.mgmt_path(p, '@@contents'), 'process':p}
+            processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p}
             allprocesses.append(processe) 
 
         return allprocesses
