@@ -8,18 +8,18 @@
            <a tal:attributes="href p['url']" class="nav navbar-nav navbar-right">${p['process'].title.capitalize()}</a>
 	 </div>
 	 <div tal:define="p_id p['process'].title.capitalize()" class="panel-collapse collapse" id="panel-element-${p['process'].__name__.capitalize()}" style="height: auto;">
-           <div  class="panel-body">
+           <div  tal:define="startedps p['process'].started_processes" class="panel-body">
                                 <dl>
 			          <dt>Description</dt>
 			           <dd>${p['process'].description}</dd>
                                  </dl>
-             <div tal:condition="not p['process'].started_processes" class="alert alert-dismissable alert-info">
+             <div tal:condition="not startedps" class="alert alert-dismissable alert-info">
                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                <h4>Pas de processus en cours!</h4>
 	         L'application ne contient pas de processus <strong>${p_id}</strong> en cours.
               </div>
 
-              <table tal:condition="p['process'].started_processes" class="table table-striped">
+              <table  tal:condition="startedps" class="table table-striped">
                 <caption >
                   <h4 >Les processus <strong>"${p_id}"</strong> de l'application</h4>
                 </caption>
@@ -29,7 +29,7 @@
                    <th >État du processus</th>
                 </thead>
               <tbody >
-                 <tr tal:repeat="pp p['process'].started_processes" >
+                 <tr tal:repeat="pp startedps" >
                     <div tal:omit-tag="" tal:define="ws pp.getWorkItems().values(); vws set([w.node for w in ws if w.validate()])">
                       <td >
                         <h4>${pp.title.capitalize()}</h4>
