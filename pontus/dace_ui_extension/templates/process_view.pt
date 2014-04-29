@@ -1,0 +1,27 @@
+<h3>Informations sur la définition:</h3>
+<div tal:repeat="a actions" class="btn-group">
+  <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#${a['action'].node_id}">
+    ${a['action'].title}
+  </button>
+  <!-- Modal -->
+  <div class="modal fade" id="${a['action'].node_id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel"> ${a['action'].title}</h4>
+      </div>
+      <div class="modal-body">
+        ${structure:a['body']}
+
+      </div>
+    </div>
+   </div>
+ </div>
+</div>
+
+<h3>Le processus:</h3>
+
+<div>
+Le graph du processus avec les actions en cours
+</div>

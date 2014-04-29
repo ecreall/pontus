@@ -11,54 +11,46 @@
            <div  tal:define="startedps p['process'].started_processes" class="panel-body">
                                 <dl>
 			          <dt>Description</dt>
-			           <dd>${p['process'].description}</dd>
+			           <dd><p class="text-default">${p['process'].description}</p></dd>
                                  </dl>
-             <div tal:condition="not startedps" class="alert alert-dismissable alert-info">
-               <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-               <h4>Pas de processus en cours!</h4>
-	         L'application ne contient pas de processus <strong>${p_id}</strong> en cours.
-              </div>
 
-              <table  tal:condition="startedps" class="table table-striped">
-                <caption >
-                  <h4 >Les processus <strong>"${p_id}"</strong> de l'application</h4>
-                </caption>
-                <thead >
-                   <th >Processus</th>
-                   <th >Actions en cours</th>
-                   <th >État du processus</th>
-                </thead>
-              <tbody >
-                 <tr tal:repeat="pp startedps" >
-                    <div tal:omit-tag="" tal:define="ws pp.getWorkItems().values(); vws set([w.node for w in ws if w.validate()])">
-                      <td >
-                        <h4>${pp.title.capitalize()}</h4>
-                      </td>
-                      <td >
-                        <ul class="list-group">
-                            <li class="list-group-item" tal:repeat="n vws">
-                                <dl>
-			          <dt>${n.title.capitalize()}</dt>
-			           <dd>${n.description}</dd>
-                                 </dl>
-                            </li>
-                        </ul>
-                       </td>
-                       <td >
-                         <div >
-                            <h4>
-                              <span class="label label-${(pp._finished and 'danger') or (not vws and 'warning') or 'success'}">
-                                 ${(pp._finished and "Termine") or (not vws and "Bloque") or "En cours"}
-                              </span>
-                            </h4>
-                         </div>
-                       </td>
-                     </div>
-                  </tr>
-              </tbody>
-            </table>
+           <ul tal:define="start p['nav_bar']['start']; links start['links']; groups start['groups']" class="nav nav-list">
+              <li tal:condition="links" tal:repeat="l links" >
+                 <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}"><span class="glyphicon glyphicon-play-circle"></span>${l.title}</a>
+              </li>
+              <li tal:condition="groups" tal:repeat="(k, g) groups.iteritems()">
+              <div class="btn-group">
+               <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                 <span class="glyphicon glyphicon-play-circle"></span> ${k} <span class="caret"></span>
+               </button>
+              <ul class="dropdown-menu" role="menu" style="position: relative">
+              <li tal:repeat="a g">
+                 <a href="${a.url}" data-toggle="tooltip" data-placement="bottom" title="${a.action.informations}">${a.title}</a>
+              </li>
+              </ul>
+              </div>
+              </li>
+           </ul>
+
+           <ul tal:define="active p['nav_bar']['active']; links active['links']; groups active['groups']" class="nav nav-list">
+              <li tal:condition="links" tal:repeat="l links" >
+                 <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}">${l.title}</a>
+              </li>
+              <li tal:condition="groups" tal:repeat="(k, g) groups.iteritems()">
+              <div class="btn-group">
+               <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                 ${k} <span class="caret"></span>
+               </button>
+              <ul class="dropdown-menu" role="menu" style="position: relative">
+              <li tal:repeat="a g">
+                 <a href="${a.url}" data-toggle="tooltip" data-placement="bottom" title="${a.action.informations}">${a.title}</a>
+              </li>
+              </ul>
+              </div>
+              </li>
+           </ul>
+
           </div>
         </div>
       </div>
     </div>
-

@@ -1,0 +1,11 @@
+
+<div>
+  <dl>
+    <dt>Description</dt>
+    <dd><p class="text-primary">${processdef.description}</p></dd>
+  </dl>
+
+  <div>
+      Le graph de la définition
+  </div>
+</div>

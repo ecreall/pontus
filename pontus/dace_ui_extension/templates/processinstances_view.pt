@@ -1,0 +1,44 @@
+             <div tal:condition="not processes" class="alert alert-dismissable alert-info">
+               <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+               <h4>Pas de processus en cours!</h4>
+	         L'application ne contient pas de processus <strong>${p_id}</strong> en cours.
+              </div>
+
+              <table  tal:condition="processes" class="table table-striped">
+                <caption >
+                  Les processus <strong>"${p_id}"</strong> de l'application
+                </caption>
+                <thead >
+                   <th >Processus</th>
+                   <th >Actions en cours</th>
+                   <th >État du processus</th>
+                </thead>
+              <tbody >
+                 <tr tal:repeat="pp processes" >
+                    <div tal:omit-tag="" tal:define="ws pp['process'].getWorkItems().values(); vws set([w.node for w in ws if w.validate()])">
+                      <td >
+                        <a tal:attributes="href pp['url']">${pp['process'].title.capitalize()+' ('+pp['process'].__name__+')'}</a>
+                      </td>
+                      <td >
+                        <ul class="list-group">
+                            <li class="list-group-item" tal:repeat="n vws">
+                                <dl>
+			          <dt>${n.title.capitalize()}</dt>
+			           <dd>${n.description}</dd>
+                                 </dl>
+                            </li>
+                        </ul>
+                       </td>
+                       <td >
+                         <div >
+                            <h4>
+                              <span class="label label-${(pp['process']._finished and 'danger') or (not vws and 'warning') or 'success'}">
+                                 ${(pp['process']._finished and "Termine") or (not vws and "Bloque") or "En cours"}
+                              </span>
+                            </h4>
+                         </div>
+                       </td>
+                     </div>
+                  </tr>
+              </tbody>
+            </table>

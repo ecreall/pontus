@@ -1,0 +1,132 @@
+<h5> <i class="glyphicon glyphicon-stats"></i> Nombre des processus dans l'application:<span class="badge pull-right">${bloque+termine+encours}</span></h5>
+
+<div class="row">
+          <div class="col-lg-4">
+            <div class="panel panel-warning">
+              <div class="panel-heading">
+                <div class="row">
+                  <div class="col-xs-0 text-right">
+                    <p class="announcement-heading">${bloque}</p>
+                    <p class="announcement-text">Processus bloqués</p>
+                  </div>
+                  <div class="col-xs-1">
+                    <h1><i class="glyphicon glyphicon-minus-sign"></i></h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="panel panel-danger">
+              <div class="panel-heading">
+                <div class="row">
+                  <div class="col-xs-0 text-right">
+                    <p class="announcement-heading">${termine}</p>
+                    <p class="announcement-text">Processus terminés</p>
+                  </div>
+                  <div class="col-xs-1">
+                   <h1> <i class="glyphicon glyphicon-off"></i></h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="panel panel-success">
+              <div class="panel-heading">
+                <div class="row">
+                  <div class="col-xs-0 text-right">
+                    <p class="announcement-heading">${encours}</p>
+                    <p class="announcement-text">Processus en cours</p>
+                  </div>
+
+                  <div class="col-xs-1">
+                    <h1><i class="glyphicon glyphicon-play"></i></h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+</div>
+
+<h5> <i class="glyphicon glyphicon-stats"></i> Pourcentage de l'activité des processus:</h5>
+<div id="content">
+	<script type="text/javascript">
+
+	$(function() {
+	    var placeholder = $("#placeholder");
+            datapie = [
+                 {label: "En cours",  data: ${encours}, color: '#4aa241'},
+                 {label: "Bloques",  data: ${bloque}, color: '#ff7500'},
+                 {label: "Termines",  data: ${termine}, color: '#ef2f10'}
+                      ];
+
+            options = {series: {pie: {show: true,label: {show: true}}},
+                       legend: {show: true},
+                       grid: {hoverable: true, clickable: true}
+                      };
+    
+            $.plot(placeholder, datapie,options);
+
+            placeholder.bind("plotclick", function(event, pos, obj) {
+		if (!obj) {
+			return;
+			}
+                var code = 'encours';
+                if (obj.series.label == "Bloques") {code = 'bloques';}
+                if (obj.series.label == "Termines") {code = 'termines';}
+                $('#'+code).modal('show');
+			
+	    });
+        });
+	</script>
+	<div style="width:330px;height:300px;" >
+		<div id="placeholder" style="width:330px;height:300px;">.</div>
+	</div>
+</div>
+
+  <div class="modal fade" id="encours" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel"> Les processus en cours</h4>
+      </div>
+      <div class="modal-body">
+        ${structure:encoursBody}
+
+      </div>
+    </div>
+   </div>
+ </div>
+
+  <div class="modal fade" id="bloques" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel"> Les processus bloqués</h4>
+      </div>
+      <div class="modal-body">
+        ${structure:bloquesBody}
+
+      </div>
+    </div>
+   </div>
+ </div>
+
+  <div class="modal fade" id="termines" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel"> Les processus terminés</h4>
+      </div>
+      <div class="modal-body">
+        ${structure:terminesBody}
+
+      </div>
+    </div>
+   </div>
+ </div>
+
