@@ -72,6 +72,10 @@ class NavBarPanel(object):
         titels = {}
         links = []
         for a in actions:
+            if not a.action.groups:
+                links.append(a)
+                continue
+
             for g in groups:
                 if g in a.action.groups:
                     if not(g in actionsgroups):

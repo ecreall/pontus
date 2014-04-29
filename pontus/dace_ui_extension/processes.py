@@ -74,7 +74,7 @@ class RuntimeProcessDefinition(ProcessDefinition, VisualisableElement):
                                                    description="L'action permet de voir les processus encours"),
                 processes_stat = ActivityDefinition(contexts=[StatisticProcesses],
                                                    title="Voir les statistiques",
-                                                   groups=['Voir'],
+                                                   groups=['Statistique'],
                                                    description="L'action permet de voir les statistiques des processus en cours"),
                 eg = ExclusiveGatewayDefinition(),
                 e = EndEventDefinition(),
@@ -172,7 +172,7 @@ class PDProcessDefinition(ProcessDefinition, VisualisableElement):
                                                    description="L'action permet de voir les details de la definition de processus"),
                 processes_stat = ActivityDefinition(contexts=[StatisticProcessesDef],
                                                    title="Voir les statistiques",
-                                                   groups=['Voir'],
+                                                   groups=['Statistique'],
                                                    description="L'action permet de voir les statistiques des processus en cours"),
 
                 processes_run = ActivityDefinition(contexts=[InstanceProcessesDef],
@@ -215,6 +215,25 @@ class StatisticProcess(InfiniteCardinality):
     state_validation = state_validationA
 
 
+class SeeProcessDatas(InfiniteCardinality):
+
+    context = IProcess
+    actionType = ActionType.automatic
+    relation_validation = relation_validationA
+    roles_validation = roles_validationA
+    processsecurity_validation = processsecurity_validationA
+    state_validation = state_validationA
+
+class DoActivitiesProcess(InfiniteCardinality):
+
+    context = IProcess
+    actionType = ActionType.automatic
+    relation_validation = relation_validationA
+    roles_validation = roles_validationA
+    processsecurity_validation = processsecurity_validationA
+    state_validation = state_validationA
+
+
 @process_definition(name='p_pd', id='p_pd')
 class PProcessDefinition(ProcessDefinition, VisualisableElement):
     isUnique = True
@@ -234,8 +253,16 @@ class PProcessDefinition(ProcessDefinition, VisualisableElement):
                                                    description="L'action permet de voir les details du processus"),
                 processes_stat = ActivityDefinition(contexts=[StatisticProcess],
                                                    title="Voir les statistiques",
-                                                   groups=['Voir'],
+                                                   groups=['Statistique'],
                                                    description="L'action permet de voir les statistiques du processus en cours"),
+                processes_datas = ActivityDefinition(contexts=[SeeProcessDatas],
+                                                   title="Voir les donnees manipulees",
+                                                   groups=['Voir'],
+                                                   description="L'action permet de voir les donnees manipulees par le processus"),
+                processes_actions = ActivityDefinition(contexts=[DoActivitiesProcess],
+                                                   title="Les actions a realiser",
+                                                   groups=[],
+                                                   description="L'action permet de realiser les actions en relation avec le processus"),
                 eg = ExclusiveGatewayDefinition(),
                 e = EndEventDefinition(),
         )
@@ -243,7 +270,11 @@ class PProcessDefinition(ProcessDefinition, VisualisableElement):
                 TransitionDefinition('s', 'pg'),
                 TransitionDefinition('pg', 'processes_def'),
                 TransitionDefinition('pg', 'processes_stat'),
+                TransitionDefinition('pg', 'processes_datas'),
+                TransitionDefinition('pg', 'processes_actions'),
                 TransitionDefinition('processes_def', 'eg'),
                 TransitionDefinition('processes_stat', 'eg'),
+                TransitionDefinition('processes_datas', 'eg'),
+                TransitionDefinition('processes_actions', 'eg'),
                 TransitionDefinition('eg', 'e'),
         )

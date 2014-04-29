@@ -1,0 +1,47 @@
+<div tal:omit-tag="" tal:define="ws process.getWorkItems().values(); vws set([w.node for w in ws if w.validate()]); bloced (not vws)">
+          <div tal:condition="process._finished" class="alert alert-dismissable alert-danger">
+           <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+           <h4>Le processus est terminé!</h4>
+		Le processus est terminé, aucune action n'est plus réalisable.
+          </div>
+
+          <div tal:condition="not process._finished and not bloced and not actions" class="alert alert-dismissable alert-info">
+           <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+           <h4>Pas d'actions à réaliser actuellement!</h4>
+		Le processus n'a pas d'action à réaliser actuellement.
+          </div>
+
+          <div tal:condition="not process._finished and bloced" class="alert alert-dismissable alert-warning">
+           <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+           <h4>Le processus est bloqué!</h4>
+		Le processus n'a pas d'action à réaliser.
+          </div>
+</div>
+
+<ul tal:condition="actions" tal:repeat="a actions" class="nav nav-pills nav-stacked">
+ <li>
+   <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action'].behavior_id}">
+     <span class="glyphicon glyphicon-cog"></span> ${a['action'].title}
+   </a>
+ </li>
+  <!-- Modal -->
+  <div class="modal fade" id="${a['action'].behavior_id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel"> ${a['action'].title}</h4>
+      </div>
+      <div class="modal-body">
+        ${structure:a['body']}
+
+      </div>
+    </div>
+   </div>
+ </div>
+</ul>
+
+
+
+
+

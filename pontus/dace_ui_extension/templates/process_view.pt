@@ -1,8 +1,9 @@
 <h3>Informations sur la définition:</h3>
-<div tal:repeat="a actions" class="btn-group">
-  <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#${a['action'].node_id}">
-    ${a['action'].title}
-  </button>
+ <ul tal:condition="actions" tal:repeat="a actions" class="nav nav-pills nav-stacked">
+   <li><a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action'].node_id}">
+          <span class="glyphicon glyphicon-eye-open"></span> ${a['action'].title}
+        </a>
+    </li>
   <!-- Modal -->
   <div class="modal fade" id="${a['action'].node_id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
    <div class="modal-dialog">
@@ -18,9 +19,9 @@
     </div>
    </div>
  </div>
-</div>
+</ul>
 
-<h3>Le processus:</h3>
+<h3>Le modèle du processus:</h3>
 
 <div>
 Le graph du processus avec les actions en cours

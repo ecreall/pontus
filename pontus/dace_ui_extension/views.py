@@ -1,3 +1,4 @@
+import re
 from substanced.sdi import mgmt_view
 from substanced.sdi import LEFT
 
@@ -15,7 +16,9 @@ from .processes import (
            InstanceProcessesDef, 
            StatisticProcesses, 
            SeeProcess, 
-           StatisticProcess)
+           StatisticProcess,
+           SeeProcessDatas,
+           DoActivitiesProcess)
 from pontus.view import BasicView
 
 
@@ -86,21 +89,12 @@ class ProcessStatisticView(BasicView):
     coordinates = 'left'
     behaviors = [StatisticProcesses]
 
-    def _blocedprocesses(self, allprocesses):
-        return [p['process'] for p in  allprocesses if p['bloced'] and not p['process']._finished ]
-
-    def _terminetedprocesses(self, allprocesses):
-        return [ p['process'] for p in  allprocesses if p['process']._finished]
-
-    def _activeprocesses(self, allprocesses):
-        return [ p['process'] for p in  allprocesses if  not p['process']._finished and not p['bloced']]
-
     def _values(self, processes):
         runtime_view = RuntimeView(self.context, self.request)
         nb_encours, nb_bloque, nb_termine, allprocesses =  runtime_view._processes(processes)
-        blocedprocesses = self._blocedprocesses(allprocesses)
-        terminetedprocesses = self._terminetedprocesses(allprocesses)
-        activeprocesses = self._activeprocesses(allprocesses)
+        blocedprocesses = [p['process'] for p in  allprocesses if p['bloced'] and not p['process']._finished ]
+        terminetedprocesses = [ p['process'] for p in  allprocesses if p['process']._finished]
+        activeprocesses = [ p['process'] for p in  allprocesses if  not p['process']._finished and not p['bloced']]
 
         result_bloced_runtime_v = runtime_view._update(blocedprocesses)
         item = result_bloced_runtime_v['coordinates'][runtime_view.coordinates][0]
@@ -113,8 +107,6 @@ class ProcessStatisticView(BasicView):
         result_termines_runtime_v = runtime_view._update(terminetedprocesses)
         item = result_termines_runtime_v['coordinates'][runtime_view.coordinates][0]
         terminesBody =item['body']
-
-
         values = {'encours':nb_encours,
                   'bloque':nb_bloque,
                   'termine':nb_termine,
@@ -210,7 +202,6 @@ class ProcessDefinitionView(BasicView):
     #coordinates = 'left'
     behaviors = [SeeProcessDef]
 
-
     def update(self):
         self.execute(None)
         result = {}
@@ -272,10 +263,11 @@ class ProcessView(BasicView):
 
     def _actions(self):
         definition = self.context.definition
-        definition_actions = definition.actions
+        definition_actions = definition.actions #les action du group Voir @TODO !
+        definition_actions.sort()
         alldefinitions_actions = []
         for a in definition_actions:
-           view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action.__class__]
+           view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
            view_instance = view(definition, self.request) 
            view_result = view_instance.update()
            body = view_result['coordinates'][view.coordinates][0]['body']
@@ -304,7 +296,7 @@ class StatisticProcessView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/processstatistic_view.pt'
     viewid = 'Statistic'
     name='Statistic'
-    #coordinates = 'left'
+    coordinates = 'left'
     behaviors = [StatisticProcess]
 
     def _actions(self):
@@ -321,6 +313,90 @@ class StatisticProcessView(BasicView):
         return result
 
 
+@mgmt_view(
+    name = 'Les donnees manipulees',
+    context=Process,
+    renderer='pontus:templates/view.pt'
+    )
+class ProcessDataView(BasicView):
+
+    title = 'Les donnees manipulees'
+    self_template = 'pontus:dace_ui_extension/templates/processdatas_view.pt'
+    viewid = 'processdata'
+    name='Les donnees manipulees'
+    #coordinates = 'left'
+    behaviors = [SeeProcessDatas]
+
+    def _involved_datas(self):
+        datas = self.context.execution_context.all_involveds()
+        alldatas = []
+        for d in datas:
+            alldatas.append({'url':self.request.mgmt_path(d, '@@index'), 'data':d})
+
+        return alldatas
+
+    def update(self):
+        self.execute(None)
+        result = {}
+        values = {'datas': self._involved_datas()}
+        body = self.content(result=values, template=self.self_template)['body']
+        item = self.adapt_item(body, self.viewid)
+        result['coordinates'] = {self.coordinates:[item]}
+        return result
+
+
+@mgmt_view(
+    name = 'Les actions a realiser',
+    context=Process,
+    renderer='pontus:templates/view.pt'
+    )
+class DoActivitiesProcessView(BasicView):
+
+    title = 'Les actions a realiser'
+    self_template = 'pontus:dace_ui_extension/templates/processactions_view.pt'
+    viewid = 'processactions'
+    name='Les actions a realiser'
+    #coordinates = 'left'
+    behaviors = [DoActivitiesProcess]
+
+    def _actions(self):
+        datas = self.context.execution_context.all_involveds()
+        all_actions = []
+        resources = {}
+        resources['js_links'] = []
+        resources['css_links'] = []
+        for d in datas:
+            p_actions = [(d,a) for a in d.actions if a.action.process is self.context]
+            all_actions.extend(p_actions)
+
+        all_actions.sort()
+        allbodies_actions = []
+        for t in all_actions:
+           a = t[1]
+           c = t[0]
+           view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
+           view_instance = view(c, self.request, behaviors=[a.action])
+           view_result = view_instance()
+           if isinstance(view_result, dict):
+               body = view_result['coordinates'][view.coordinates][0]['body']
+               allbodies_actions.append({'body':body, 'action':a.action})
+               resources['js_links'].extend(view_result['js_links'])
+               resources['css_links'].extend(view_result['css_links'])
+
+        return resources, allbodies_actions
+
+    def update(self):
+        self.execute(None)
+        result = {}
+        resources, actions = self._actions()
+        values = {'actions': actions, 'process':self.context}
+        body = self.content(result=values, template=self.self_template)['body']
+        item = self.adapt_item(body, self.viewid)
+        result['coordinates'] = {self.coordinates:[item]}
+        result.update(resources)
+        return result
+
+
 DEFAULTMAPPING_ACTIONS_VIEWS.update({SeeProcessesDef:ProcessDefinitionContainerView,
                                      SeeProcesses:RuntimeView,
                                      StatisticProcessesDef:ProcessDefinitionStatisticView,
@@ -328,4 +404,6 @@ DEFAULTMAPPING_ACTIONS_VIEWS.update({SeeProcessesDef:ProcessDefinitionContainerV
                                      InstanceProcessesDef:ProcessesPDDefinitionView,
                                      StatisticProcesses: ProcessStatisticView,
                                      SeeProcess:ProcessView,
-                                     StatisticProcess:StatisticProcessView })
+                                     StatisticProcess:StatisticProcessView,
+                                     SeeProcessDatas:ProcessDataView,
+                                     DoActivitiesProcess:DoActivitiesProcessView})

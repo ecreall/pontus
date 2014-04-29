@@ -179,6 +179,10 @@ class ElementaryView(View):
         if self.validate_behaviors:
             self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors])
 
+        self.init_behaviorinstances= []
+        if 'behaviors' in kwargs:
+            self.init_behaviorinstances = kwargs['behaviors']
+    
         self.behaviorinstances = {}
         self._init_behaviors()
 
@@ -192,15 +196,31 @@ class ElementaryView(View):
         return True
 
     def _init_behaviors(self):
+        _behaviorinstances= {}
         for behavior in self.behaviors:
             try:
                 behavior.get_validator().validate(self.context, self.request)
                 behaviorinstance = behavior.get_instance(self.context, self.request)
                 if behaviorinstance is not None:
-                    key = re.sub(r'\s', '_', behaviorinstance.title)
-                    self.behaviorinstances[key] = behaviorinstance
+                    key = behaviorinstance.__class__.__name__
+                    _behaviorinstances[key] = behaviorinstance
             except ValidationError as e:
-                continue 
+                continue
+
+        for behaviorinstance in self.init_behaviorinstances:
+                key = behaviorinstance.__class__.__name__
+                _behaviorinstances[key] = behaviorinstance
+
+        if _behaviorinstances:
+            sorted_behaviors = _behaviorinstances.values()
+            sorted_behaviors.sort()
+            for behaviorinstance in sorted_behaviors:
+                key = re.sub(r'\s', '_', behaviorinstance.title)
+                self.behaviorinstances[key] = behaviorinstance
+                try:
+                    self.viewid = self.viewid+'_'+str(get_oid(behaviorinstance))
+                except Exception:
+                    continue
 
     def before_update(self):
         for behavior in self.behaviorinstances.values():

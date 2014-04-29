@@ -1,0 +1,35 @@
+          <div tal:condition="not datas" class="alert alert-dismissable alert-info">
+           <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+           <h4>Pas de données manipulées actuellement!</h4>
+		Le processus n'est pas en relation avec des données de l'application actuellement.
+          </div>
+
+    <table tal:condition="datas" class="table table-striped">
+        <caption >
+            Les données en relation avec le processus
+        </caption>
+        <thead >
+            <th >Donnée</th>
+            <th >Description</th>
+            <th >États</th>
+        </thead>
+        <tbody >
+            <tr tal:repeat="p datas" >
+                <div tal:omit-tag="" tal:define="states p['data'].state">
+                <td >
+                   <a tal:attributes="href p['url']">${p['data'].title.capitalize()}</a>
+                </td>
+                <td >
+                   ${p['data'].description}
+                </td>
+                <td >
+                    <ul class="list-group">
+                        <li class="list-group-item" tal:repeat="n states">
+                                ${n.capitalize()}
+                        </li>
+                    </ul>
+                </td>
+              </div>
+            </tr>
+        </tbody>
+    </table>
