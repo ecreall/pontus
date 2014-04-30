@@ -20,6 +20,7 @@
    </div>
  </div>
 </ul>
+<p><a href="${defurl}" class="btn">${definition.title} »</a></p>
 
 <h3>Le modèle du processus:</h3>
 

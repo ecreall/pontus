@@ -49,39 +49,55 @@
 </div>
 
 <h5> <i class="glyphicon glyphicon-stats"></i> Pourcentage de l'activité des processus:</h5>
-<div id="content">
-	<script type="text/javascript">
+<div id="chart">
+   <script type="text/javascript">
+      var data;
+      var chart;
 
-	$(function() {
-	    var placeholder = $("#placeholder");
-            datapie = [
-                 {label: "En cours",  data: ${encours}, color: '#4aa241'},
-                 {label: "Bloques",  data: ${bloque}, color: '#ff7500'},
-                 {label: "Termines",  data: ${termine}, color: '#ef2f10'}
-                      ];
+      // Load the Visualization API and the piechart package.
+      google.load('visualization', '1', {'packages':['corechart']});
 
-            options = {series: {pie: {show: true,label: {show: true}}},
-                       legend: {show: true},
-                       grid: {hoverable: true, clickable: true}
-                      };
-    
-            $.plot(placeholder, datapie,options);
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.setOnLoadCallback(drawChart);
 
-            placeholder.bind("plotclick", function(event, pos, obj) {
-		if (!obj) {
-			return;
-			}
-                var code = 'encours';
-                if (obj.series.label == "Bloques") {code = 'bloques';}
-                if (obj.series.label == "Termines") {code = 'termines';}
-                $('#'+code).modal('show');
-			
-	    });
-        });
-	</script>
-	<div style="width:330px;height:300px;" >
-		<div id="placeholder" style="width:330px;height:300px;">.</div>
-	</div>
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+        // Create our data table.
+        data = new google.visualization.DataTable();
+        data.addColumn('string', 'Topping');
+        data.addColumn('number', 'Slices');
+        data.addRows([
+          ['En cours', ${encours}],
+          ['Bloques', ${bloque}],
+          ['Termines', ${termine}],
+        ]);
+        // Set chart options
+        var options = { 'colors':['#4aa241','#ff7500', '#ef2f10'],
+                        'is3D': true,
+                       'width':300,
+                       'height':300
+                       };
+
+        // Instantiate and draw our chart, passing in some options.
+        chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        google.visualization.events.addListener(chart, 'select', selectHandler);
+        chart.draw(data, options);
+      }
+
+      function selectHandler() {
+        var selectedItem = chart.getSelection()[0];
+        var value = data.getValue(selectedItem.row, 0);
+        var code = 'encours';
+        if (value == "Bloques") {code = 'bloques';}
+        if (value == "Termines") {code = 'termines';}
+         $('#'+code).modal('show');
+      }
+
+    </script>
+  <div id="chart_div" style="width:300; height:300;"></div>
 </div>
 
 

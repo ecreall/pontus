@@ -4,12 +4,24 @@
 		Le processus n'est pas en relation avec des données de l'application actuellement.
           </div>
 
-    <table tal:condition="datas" class="table table-striped">
+
+<div id="datas tabel">
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $(function(){
+          $(${'\"#datas_'+tabid+'\"'}).tablesorter();
+        });
+      });
+    </script>
+
+    <table id="datas_${tabid}" tal:condition="datas" class="table table-striped">
         <caption >
             Les données en relation avec le processus
         </caption>
         <thead >
             <th >Donnée</th>
+            <th >Date de création</th>
+            <th >Type de la relation</th>
             <th >Description</th>
             <th >États</th>
         </thead>
@@ -18,6 +30,14 @@
                 <div tal:omit-tag="" tal:define="states p['data'].state">
                 <td >
                    <a tal:attributes="href p['url']">${p['data'].title.capitalize()}</a>
+                </td>
+                <td >
+                   ${p['data'].created_at.date()} ${p['data'].created_at.hour}:${p['data'].created_at.minute}:${p['data'].created_at.second}
+                </td>
+                <td >
+                    <h4><span class="label label-${(p['iscreator'] and 'success') or 'default'}">
+                       ${(p['iscreator'] and "Creation") or "Referencement"}
+                    </span><h4>
                 </td>
                 <td >
                    ${p['data'].description}
@@ -33,3 +53,5 @@
             </tr>
         </tbody>
     </table>
+
+<div>

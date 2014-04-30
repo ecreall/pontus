@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import re
 from substanced.sdi import mgmt_view
 from substanced.sdi import LEFT
@@ -19,7 +20,7 @@ from .processes import (
            StatisticProcess,
            SeeProcessDatas,
            DoActivitiesProcess)
-from pontus.view import BasicView
+from pontus.view import BasicView, ViewError
 
 
 
@@ -38,15 +39,14 @@ class RuntimeView(BasicView):
     behaviors = [SeeProcesses]
 
     def _processes(self, processes):
-        processes.sort()
+        processes = sorted(processes, key=lambda p: p.created_at)
         allprocesses = []
         nb_encours = 0
         nb_bloque = 0
-        nb_termine = 0
-       
+        nb_termine = 0 
         for p in processes:
             bloced = not [w for w in p.getWorkItems().values() if w.validate()]
-            processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'bloced':bloced}
+            processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'bloced':bloced, 'created_at': p.created_at}
             allprocesses.append(processe)
             if p._finished:
                 nb_termine += 1
@@ -57,21 +57,23 @@ class RuntimeView(BasicView):
 
         return nb_encours, nb_bloque, nb_termine, allprocesses
 
-    def _update(self, processes):
+    def _update(self, processes, tabid):
         result = {}
         nb_encours, nb_bloque, nb_termine, allprocesses = self._processes(processes)
         values = {'processes': allprocesses, 
                   'encours':nb_encours,
                   'bloque':nb_bloque,
-                  'termine':nb_termine}
+                  'termine':nb_termine,
+                  'tabid':tabid}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
         return result
 
     def update(self):
         self.execute(None)
-        result = self._update(self.context.processes)
+        result = self._update(self.context.processes, self.__class__.__name__+'AllProcesses')
         return result
 
 
@@ -89,22 +91,22 @@ class ProcessStatisticView(BasicView):
     coordinates = 'left'
     behaviors = [StatisticProcesses]
 
-    def _values(self, processes):
+    def _values(self, processes, tabid):
         runtime_view = RuntimeView(self.context, self.request)
         nb_encours, nb_bloque, nb_termine, allprocesses =  runtime_view._processes(processes)
         blocedprocesses = [p['process'] for p in  allprocesses if p['bloced'] and not p['process']._finished ]
         terminetedprocesses = [ p['process'] for p in  allprocesses if p['process']._finished]
         activeprocesses = [ p['process'] for p in  allprocesses if  not p['process']._finished and not p['bloced']]
 
-        result_bloced_runtime_v = runtime_view._update(blocedprocesses)
+        result_bloced_runtime_v = runtime_view._update(blocedprocesses, tabid+'BlocedProcesses')
         item = result_bloced_runtime_v['coordinates'][runtime_view.coordinates][0]
         bloquesBody =item['body']
 
-        result_encours_runtime_v = runtime_view._update(activeprocesses)
+        result_encours_runtime_v = runtime_view._update(activeprocesses, tabid+'RunProcesses')
         item = result_encours_runtime_v['coordinates'][runtime_view.coordinates][0]
         encoursBody =item['body']
 
-        result_termines_runtime_v = runtime_view._update(terminetedprocesses)
+        result_termines_runtime_v = runtime_view._update(terminetedprocesses, tabid+'TerminetedProcesses')
         item = result_termines_runtime_v['coordinates'][runtime_view.coordinates][0]
         terminesBody =item['body']
         values = {'encours':nb_encours,
@@ -120,10 +122,11 @@ class ProcessStatisticView(BasicView):
     def update(self):
         self.execute(None)
         result = {}
-        values = self._values(self.context.processes)   
+        values = self._values(self.context.processes, self.__class__.__name__)   
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
         return result
 
 
@@ -143,8 +146,7 @@ class ProcessDefinitionContainerView(BasicView):
 
     def _processes(self):
         from pontus.panels import NavBarPanel
-        processes = self.context.definitions
-        processes.sort()
+        processes = sorted(self.context.definitions, key=lambda p: p.__name__)
         allprocesses = []
         for p in processes:
             nav_bar = NavBarPanel(p, self.request)
@@ -161,6 +163,7 @@ class ProcessDefinitionContainerView(BasicView):
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
         return result
 
 
@@ -181,10 +184,11 @@ class ProcessDefinitionStatisticView(BasicView):
     def update(self):
         self.execute(None)
         result = {}
-        values = ProcessStatisticView(self.context, self.request)._values(self.context.started_processes)
+        values = ProcessStatisticView(self.context, self.request)._values(self.context.started_processes, self.__class__.__name__)
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
         return result
 
 
@@ -227,8 +231,7 @@ class ProcessesPDDefinitionView(BasicView):
     behaviors = [InstanceProcessesDef]
 
     def _processes(self):
-        processes = self.context.started_processes
-        processes.sort()
+        processes = sorted(self.context.started_processes, key=lambda p: p.created_at)
         allprocesses = []
         for p in processes:
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p}
@@ -240,10 +243,12 @@ class ProcessesPDDefinitionView(BasicView):
         self.execute(None)
         result = {}
         values = {'processes': self._processes(),
-                   'p_id': self.context.title}
+                   'p_id': self.context.title,
+                   'tabid':self.__class__.__name__+'AllProcesses'}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
         return result
 
 
@@ -263,8 +268,7 @@ class ProcessView(BasicView):
 
     def _actions(self):
         definition = self.context.definition
-        definition_actions = definition.actions #les action du group Voir @TODO !
-        definition_actions.sort()
+        definition_actions = sorted(definition.actions, key=lambda a: a.title) #les action du group Voir @TODO !
         alldefinitions_actions = []
         for a in definition_actions:
            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
@@ -278,7 +282,7 @@ class ProcessView(BasicView):
     def update(self):
         self.execute(None)
         result = {}
-        values = {'actions': self._actions()}
+        values = {'actions': self._actions(), 'definition':self.context.definition ,'defurl':self.request.mgmt_path(self.context.definition, '@@index')}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -331,17 +335,18 @@ class ProcessDataView(BasicView):
         datas = self.context.execution_context.all_involveds()
         alldatas = []
         for d in datas:
-            alldatas.append({'url':self.request.mgmt_path(d, '@@index'), 'data':d})
+            alldatas.append({'url':self.request.mgmt_path(d, '@@index'), 'data':d, 'iscreator':d.creator is self.context})
 
         return alldatas
 
     def update(self):
         self.execute(None)
         result = {}
-        values = {'datas': self._involved_datas()}
+        values = {'datas': self._involved_datas(), 'tabid':self.__class__.__name__+'AllDatas'}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
         return result
 
 
@@ -360,38 +365,57 @@ class DoActivitiesProcessView(BasicView):
     behaviors = [DoActivitiesProcess]
 
     def _actions(self):
-        datas = self.context.execution_context.all_involveds()
+        datas = list(self.context.execution_context.all_involveds())
+        datas = sorted(datas, key=lambda d: d.__name__)
         all_actions = []
         resources = {}
         resources['js_links'] = []
         resources['css_links'] = []
+        form_id = None
+        if '__formid__' in self.request.POST:
+            form_id = self.request.POST['__formid__']
+
         for d in datas:
-            p_actions = [(d,a) for a in d.actions if a.action.process is self.context]
+            actions = [a for a in d.actions if a.action.process is self.context]
+            actions = sorted(actions, key=lambda a: a.action.__name__)
+            p_actions = [(d,a) for a in actions]
             all_actions.extend(p_actions)
 
-        all_actions.sort()
+        action_updated = False
+        messages = {}
         allbodies_actions = []
         for t in all_actions:
            a = t[1]
            c = t[0]
            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
            view_instance = view(c, self.request, behaviors=[a.action])
-           view_result = view_instance()
+           if not action_updated and form_id is not None and form_id.startswith(view_instance.viewid):
+               action_updated = True
+          
+           view_result = view_instance.update() # il faut un traitement js pour bloquer les actions.
            if isinstance(view_result, dict):
                body = view_result['coordinates'][view.coordinates][0]['body']
                allbodies_actions.append({'body':body, 'action':a.action})
                resources['js_links'].extend(view_result['js_links'])
                resources['css_links'].extend(view_result['css_links'])
 
-        return resources, allbodies_actions
+           if form_id is not None and not action_updated:
+               error = ViewError()
+               error.principalmessage = u"Action non realisee"
+               error.causes = ["Vous n'avez plus le droit de realiser cette action.", "L'action est verouillee par un autre utilisateur."]
+               message = self._get_message(error)
+               messages = {error.type: [message]}
+
+        return messages, resources, allbodies_actions
 
     def update(self):
         self.execute(None)
         result = {}
-        resources, actions = self._actions()
+        messages, resources, actions = self._actions()
         values = {'actions': actions, 'process':self.context}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
+        item['messages']=messages
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
         return result

@@ -1,15 +1,24 @@
-          <div tal:condition="not processes" class="alert alert-dismissable alert-info">
-           <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-           <h4>Pas de processus en cours!</h4>
-		L'application ne contient pas de processus en cours.
-          </div>
+<div tal:condition="not processes" class="alert alert-dismissable alert-info">
+  <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+  <h4>Pas de processus en cours!</h4>
+  L'application ne contient pas de processus en cours.
+</div>
 
-    <table tal:condition="processes" class="table table-striped">
+<div id="processes tabel">
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $(function(){
+          $(${'\"#processes_'+tabid+'\"'}).tablesorter();
+        });
+      });
+    </script>
+    <table id="processes_${tabid}" tal:condition="processes"  class="table table-striped tablesorter">
         <caption >
             Les processus de l'application
         </caption>
         <thead >
             <th >Processus</th>
+            <th >Date de création</th>
             <th >Description</th>
             <th >Actions en cours</th>
             <th >État du processus</th>
@@ -19,6 +28,9 @@
                 <div tal:omit-tag="" tal:define="ws p['process'].getWorkItems().values(); vws set([w.node for w in ws if w.validate()])">
                 <td >
                    <a tal:attributes="href p['url']">${p['process'].title.capitalize()+' ('+p['process'].__name__+')'}</a>
+                </td>
+                <td >
+                   ${p['process'].created_at.date()} ${p['process'].created_at.hour}:${p['process'].created_at.minute}:${p['process'].created_at.second}
                 </td>
                 <td >
                    ${p['process'].description}
@@ -46,4 +58,5 @@
             </tr>
         </tbody>
     </table>
+</div>
 
