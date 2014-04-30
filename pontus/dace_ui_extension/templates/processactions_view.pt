@@ -1,4 +1,4 @@
-<div tal:omit-tag="" tal:define="ws process.getWorkItems().values(); vws set([w.node for w in ws if w.validate()]); bloced (not vws)">
+<div tal:omit-tag="" tal:define="ws process.getWorkItems().values(); vws set([w.node for w in ws if w.validate()]); bloced (not ws)">
           <div tal:condition="process._finished" class="alert alert-dismissable alert-danger">
            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
            <h4>Le processus est terminé!</h4>
@@ -14,7 +14,7 @@
           <div tal:condition="not process._finished and bloced" class="alert alert-dismissable alert-warning">
            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
            <h4>Le processus est bloqué!</h4>
-		Le processus n'a pas d'action à réaliser.
+		Le processus n'a pas d'action à réaliser. Voir la <a href="${defurl}" class="alert-link">définition</a> du processus pour plus d'informations
           </div>
 </div>
 

@@ -45,7 +45,7 @@ class RuntimeView(BasicView):
         nb_bloque = 0
         nb_termine = 0 
         for p in processes:
-            bloced = not [w for w in p.getWorkItems().values() if w.validate()]
+            bloced = not p.getWorkItems()
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'bloced':bloced, 'created_at': p.created_at}
             allprocesses.append(processe)
             if p._finished:
@@ -422,7 +422,7 @@ class DoActivitiesProcessView(BasicView):
         self.execute(None)
         result = {}
         messages, resources, actions = self._actions()
-        values = {'actions': actions, 'process':self.context}
+        values = {'actions': actions, 'process':self.context,'defurl':self.request.mgmt_path(self.context.definition, '@@index')}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         item['messages']=messages
