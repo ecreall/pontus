@@ -270,22 +270,32 @@ class ProcessView(BasicView):
         definition = self.context.definition
         definition_actions = sorted(definition.actions, key=lambda a: a.title) #les action du group Voir @TODO !
         alldefinitions_actions = []
+        resources = {}
+        resources['js_links'] = []
+        resources['css_links'] = []
         for a in definition_actions:
            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
            view_instance = view(definition, self.request) 
            view_result = view_instance.update()
            body = view_result['coordinates'][view.coordinates][0]['body']
            alldefinitions_actions.append({'body':body, 'action':a.action})
+           if 'js_links' in view_result:
+               resources['js_links'].extend(view_result['js_links'])
 
-        return alldefinitions_actions
+           if 'css_links' in view_result:
+               resources['css_links'].extend(view_result['css_links'])
+
+        return resources, alldefinitions_actions
 
     def update(self):
         self.execute(None)
         result = {}
-        values = {'actions': self._actions(), 'definition':self.context.definition ,'defurl':self.request.mgmt_path(self.context.definition, '@@index')}
+        resources, actions = self._actions()
+        values = {'actions': actions, 'definition':self.context.definition ,'defurl':self.request.mgmt_path(self.context.definition, '@@index')}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
+        result.update(resources)
         return result
 
 
