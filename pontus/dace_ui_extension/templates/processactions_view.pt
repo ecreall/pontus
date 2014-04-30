@@ -18,30 +18,48 @@
           </div>
 </div>
 
-<ul tal:condition="actions" tal:repeat="a actions" class="nav nav-pills nav-stacked">
- <li>
-   <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action'].behavior_id}">
-     <span class="glyphicon glyphicon-cog"></span> ${a['action'].title}
-   </a>
- </li>
-  <!-- Modal -->
-  <div class="modal fade" id="${a['action'].behavior_id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-   <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel"> ${a['action'].title}</h4>
-      </div>
-      <div class="modal-body">
-        ${structure:a['body']}
 
-      </div>
-    </div>
-   </div>
- </div>
-</ul>
+<div tal:condition="actions" id="actions_tabel">
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $(function(){
+          $(${'\"#actions_'+tabid+'\"'}).tablesorter();
+        });
+      });
+    </script>
 
+    <table id="actions_${tabid}" class="table table-striped tablesorter">
+        <thead >
+            <th >Action</th>
+            <th >Description</th>
+        </thead>
+        <tbody >
+            <tr tal:repeat="a actions" >
+                <td >
+                   <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action'].behavior_id}">
+                     <span class="glyphicon glyphicon-cog"></span> ${a['action'].title}
+                   </a>
+                </td>
+                <td >
+                   ${a['action'].description}
+                   <small><blockquote tal:condition="a['ismultiinstance']"> Cette action est une instance de l'action <strong>${a['action'].principalaction.title}</strong></blockquote></small>
+                </td>
+                <!-- Modal -->
+                <div class="modal fade" id="${a['action'].behavior_id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                 <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                     <h4 class="modal-title" id="myModalLabel"> ${a['action'].title}</h4>
+                    </div>
+                    <div class="modal-body">
+                      ${structure:a['body']}
 
-
-
-
+                    </div>
+                  </div>
+                 </div>
+               </div>
+            </tr>
+        </tbody>
+    </table>
+</div>

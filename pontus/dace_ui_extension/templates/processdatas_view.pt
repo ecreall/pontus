@@ -14,7 +14,7 @@
       });
     </script>
 
-    <table id="datas_${tabid}" tal:condition="datas" class="table table-striped">
+    <table id="datas_${tabid}" tal:condition="datas" class="table table-striped tablesorter">
         <caption >
             Les données en relation avec le processus
         </caption>
@@ -53,5 +53,4 @@
             </tr>
         </tbody>
     </table>
-
-<div>
+</div>

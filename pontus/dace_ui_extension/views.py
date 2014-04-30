@@ -405,7 +405,11 @@ class DoActivitiesProcessView(BasicView):
            view_result = view_instance.update() # il faut un traitement js pour bloquer les actions.
            if isinstance(view_result, dict):
                body = view_result['coordinates'][view.coordinates][0]['body']
-               allbodies_actions.append({'body':body, 'action':a.action})
+               multi_instance = False
+               if hasattr(a.action,'principalaction'):
+                   multi_instance = True
+
+               allbodies_actions.append({'body':body, 'action':a.action, 'ismultiinstance':multi_instance})
                resources['js_links'].extend(view_result['js_links'])
                resources['css_links'].extend(view_result['css_links'])
 
@@ -422,7 +426,7 @@ class DoActivitiesProcessView(BasicView):
         self.execute(None)
         result = {}
         messages, resources, actions = self._actions()
-        values = {'actions': actions, 'process':self.context,'defurl':self.request.mgmt_path(self.context.definition, '@@index')}
+        values = {'actions': actions, 'process':self.context,'defurl':self.request.mgmt_path(self.context.definition, '@@index'), 'tabid':self.__class__.__name__+'AllActions'}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         item['messages']=messages
