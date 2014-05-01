@@ -62,7 +62,7 @@ class View(Step):
         self.request = request
         self.parent = parent
         if self.viewid is None:
-            self.viewid = re.sub(r'\s', '_', self.title)
+            self.viewid = re.sub(r'\s', '_', self.title).replace('\'','').replace('-','') #y a plus simple...expression reguliere
 
         if self.parent is not None:
             self.viewid = self.parent.viewid+'_'+self.viewid

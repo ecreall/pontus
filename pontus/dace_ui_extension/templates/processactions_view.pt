@@ -32,20 +32,56 @@
         <thead >
             <th >Action</th>
             <th >Description</th>
+            <th >Administration</th>
         </thead>
         <tbody >
             <tr tal:repeat="a actions" >
                 <td >
-                   <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action'].behavior_id}">
+                   <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action_id']}">
                      <span class="glyphicon glyphicon-cog"></span> ${a['action'].title}
                    </a>
+                      <script tal:condition="'toreplay' in a">       
+                        $(document).ready(function(){
+                            $(${'\"#'+a['action_id']+'\"'}).modal('show');
+                        });
+                      </script>
                 </td>
                 <td >
                    ${a['action'].description}
                    <small><blockquote tal:condition="a['ismultiinstance']"> Cette action est une instance de l'action <strong>${a['action'].principalaction.title}</strong></blockquote></small>
                 </td>
+                <td tal:condition="'actions' in a">
+                  <ul class="nav nav-pills nav-stacked" tal:repeat="aa a['actions']">
+                    <li >
+                      <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${aa['action_id']}">
+                        <span class="glyphicon glyphicon-cog"></span> ${aa['action'].title}
+                      </a>
+                      <script tal:condition="'toreplay' in aa">       
+                        $(document).ready(function(){
+                            $(${'\"#'+aa['action_id']+'\"'}).modal('show');
+                        });
+                      </script>
+                    </li>
+
                 <!-- Modal -->
-                <div class="modal fade" id="${a['action'].behavior_id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="${aa['action_id']}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                       <div class="modal-content">
+                         <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                          <h4 class="modal-title" id="myModalLabel"> ${aa['action'].title}</h4>
+                         </div>
+                         <div class="modal-body">
+                           ${structure:aa['body']}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                  </ul>
+                </td>
+
+                <!-- Modal -->
+                <div class="modal fade" id="${a['action_id']}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                  <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">

@@ -38,6 +38,9 @@ class FormView(ElementaryView, FV):
         self.init_stepid(self.schema) # dans le before_update?!
         form, reqts = self._build_form()
         form.formid = self.viewid+'_'+form.formid
+        for c in form.children:
+            c.oid = c.oid+form.formid
+ 
         item = None
         result = {}
         posted_formid = None

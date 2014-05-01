@@ -205,7 +205,11 @@ def _normalize_choices(values):
         else:
             value, description = item
             if not isinstance(value, string_types):
-                value = str(get_oid(value))
+                try:
+                    value = str(get_oid(value))
+                except Exception:
+                    pass
+
             result.append((value, description))
     return result
 
@@ -215,6 +219,13 @@ class SelectWidget(SelectW):
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
             cstruct = self.null_value
+
+        if cstruct and not isinstance(cstruct[0], string_types):
+            try:
+                cstruct = [str(get_oid(value)) for value in cstruct]
+            except Exception:
+                pass
+            
         readonly = kw.get('readonly', self.readonly)
         values = kw.get('values', self.values)
         template = readonly and self.readonly_template or self.template
@@ -225,7 +236,7 @@ class SelectWidget(SelectW):
     def deserialize(self, field, pstruct):
         if pstruct in (null, self.null_value):
             return null
-
+        
         result = []
         for item in pstruct:
             ob = None
@@ -267,6 +278,13 @@ class CheckboxChoiceWidget(CheckboxChoiceW):
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
             cstruct = ()
+
+        if cstruct and not isinstance(cstruct[0], string_types):
+            try:
+                cstruct = [str(get_oid(value)) for value in cstruct]
+            except Exception:
+                pass
+
         readonly = kw.get('readonly', self.readonly)
         values = kw.get('values', self.values)
         kw['values'] = _normalize_choices(values)
