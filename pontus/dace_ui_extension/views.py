@@ -356,8 +356,8 @@ class ProcessDataView(BasicView):
         involveds = self.context.execution_context.all_active_involveds().values()
         datas = []
         for inv in involveds:
-            if not(inv in datas):
-                datas.extend(inv)
+            if not(inv[1] in datas):
+                datas.extend(inv[1])
 
         alldatas = []
         for d in datas:
@@ -416,7 +416,7 @@ class DoActivitiesProcessView(BasicView):
                    _item['toreplay'] = True
 
                if caa:
-                   actions_as = sorted(a.action.actions, key=lambda aa: aa.action.__name__)
+                   actions_as = sorted(a.action.actions, key=lambda aa: aa.action.behavior_id)
                    a_actions = [(a.action, aa) for aa in actions_as]
                    toreplay, action_updated_as, resources_as, allbodies_actions_as = self._modal_views(a_actions, form_id)
                    if toreplay:
@@ -460,8 +460,8 @@ class DoActivitiesProcessView(BasicView):
         involveds = self.context.execution_context.all_active_involveds().values()
         datas = []
         for inv in involveds:
-            if not(inv in datas):
-                datas.extend(inv)
+            if not(inv[1] in datas):
+                datas.extend(inv[1])
 
         datas = sorted(datas, key=lambda d: d.__name__)
         all_actions = []
