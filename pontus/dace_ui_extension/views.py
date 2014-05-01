@@ -26,8 +26,8 @@ from .processes import (
            StatisticProcess,
            SeeProcessDatas,
            DoActivitiesProcess,
-           AssigneToUsers,
-           AssigneActionToUsers)
+           AssignToUsers,
+           AssignActionToUsers)
 from pontus.view import BasicView, ViewError
 from pontus.form import FormView
 from pontus.schema import Schema
@@ -521,7 +521,7 @@ def listchoice(node, kw):
     return Select2Widget(values=values, multiple=True)
 
 
-class AssigneToUsersViewSchema(Schema):
+class AssignToUsersViewSchema(Schema):
 
         users = colander.SchemaNode(
                 colander.Set(),
@@ -532,34 +532,34 @@ class AssigneToUsersViewSchema(Schema):
 
 
 @mgmt_view(
-    name='assigne_activity',
+    name='assign_activity',
     context=IActivity,
     renderer='pontus:templates/view.pt',
     )
-class AssigneToUsersView(FormView):
+class AssignToUsersView(FormView):
 
     title = 'Assigner l\'activitee'
-    schema = AssigneToUsersViewSchema()
-    formid = 'assigne_activity_form'
+    schema = AssignToUsersViewSchema()
+    formid = 'assign_activity_form'
     #coordinates = 'left'
-    behaviors = [AssigneToUsers]
-    name='assigne_activity'
+    behaviors = [AssignToUsers]
+    name='assign_activity'
     #use_ajax = True
 
 
 @mgmt_view(
-    name='assigne_action',
+    name='assign_action',
     context=IBusinessAction,
     renderer='pontus:templates/view.pt',
     )
-class AssigneActionToUsersView(FormView):
+class AssignActionToUsersView(FormView):
 
     title = 'Assigner l\'action'
-    schema = AssigneToUsersViewSchema()
+    schema = AssignToUsersViewSchema()
     formid = 'assigne_action_form'
     #coordinates = 'left'
-    behaviors = [AssigneActionToUsers]
-    name='assigne_action'
+    behaviors = [AssignActionToUsers]
+    name='assign_action'
     #use_ajax = True
 
 
@@ -573,5 +573,5 @@ DEFAULTMAPPING_ACTIONS_VIEWS.update({SeeProcessesDef:ProcessDefinitionContainerV
                                      StatisticProcess:StatisticProcessView,
                                      SeeProcessDatas:ProcessDataView,
                                      DoActivitiesProcess:DoActivitiesProcessView,
-                                     AssigneToUsers:AssigneToUsersView,
-                                     AssigneActionToUsers:AssigneActionToUsersView})
+                                     AssignToUsers:AssignToUsersView,
+                                     AssignActionToUsers:AssignActionToUsersView})

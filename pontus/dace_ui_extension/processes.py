@@ -286,7 +286,7 @@ class PProcessDefinition(ProcessDefinition, VisualisableElement):
         )
 
 
-class AssigneToUsers(InfiniteCardinality):
+class AssignToUsers(InfiniteCardinality):
 
     isSequential = True
     context = IActivity
@@ -297,10 +297,10 @@ class AssigneToUsers(InfiniteCardinality):
 
     def start(self, context, request, appstruct, **kw):
         users = list(appstruct.pop('users'))
-        context.set_assignement(users)
+        context.set_assignment(users)
         return True
 
-class AssigneActionToUsers(InfiniteCardinality):
+class AssignActionToUsers(InfiniteCardinality):
 
     isSequential = True
     context = IBusinessAction
@@ -311,7 +311,7 @@ class AssigneActionToUsers(InfiniteCardinality):
 
     def start(self, context, request, appstruct, **kw):
         users = list(appstruct.pop('users'))
-        context.set_assignement(users)
+        context.set_assignment(users)
         return True
 
 
@@ -328,11 +328,11 @@ class ActivityProcessDefinition(ProcessDefinition, VisualisableElement):
         self.defineNodes(
                 s = StartEventDefinition(),
                 pg = ParallelGatewayDefinition(),
-                activity_ass = ActivityDefinition(contexts=[AssigneToUsers],
+                activity_ass = ActivityDefinition(contexts=[AssignToUsers],
                                                    title="Assigner l'activitee",
                                                    groups=['Administration'],
                                                    description="L'action permet d\' assigner l'activitee a des utlisateurs"),
-                action_ass = ActivityDefinition(contexts=[AssigneActionToUsers],
+                action_ass = ActivityDefinition(contexts=[AssignActionToUsers],
                                                    title="Assigner l'action",
                                                    groups=['Administration'],
                                                    description="L'action permet d\' assigner l'action a des utlisateurs"),
