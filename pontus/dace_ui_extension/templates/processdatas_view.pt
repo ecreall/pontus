@@ -1,8 +1,8 @@
-          <div tal:condition="not datas" class="alert alert-dismissable alert-info">
-           <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-           <h4>Pas de données manipulées actuellement!</h4>
-		Le processus n'est pas en relation avec des données de l'application actuellement.
-          </div>
+<div tal:condition="not datas" class="alert alert-dismissable alert-info">
+  <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+  <h4>Pas de données manipulées actuellement!</h4>
+  Le processus n'est pas en relation avec des données de l'application actuellement.
+</div>
 
 
 <div id="datas tabel">
@@ -14,15 +14,17 @@
       });
     </script>
 
-    <table id="datas_${tabid}" tal:condition="datas" class="table table-striped tablesorter">
+    <table id="datas_${tabid}" tal:condition="datas" class="table table-striped table-hover tablesorter">
         <caption >
             Les données en relation avec le processus
         </caption>
         <thead >
             <th >Donnée</th>
-            <th >Date de création</th>
-            <th >Type de la relation</th>
             <th >Description</th>
+            <th >Date de création</th>
+            <th >Nom de la relation</th>
+            <th >Type de la relation</th>
+            <th >Iteration</th>
             <th >États</th>
         </thead>
         <tbody >
@@ -32,15 +34,21 @@
                    <a tal:attributes="href p['url']">${p['data'].title.capitalize()}</a>
                 </td>
                 <td >
+                   ${p['data'].description}
+                </td>
+                <td >
                    ${p['data'].created_at.date()} ${p['data'].created_at.hour}:${p['data'].created_at.minute}:${p['data'].created_at.second}
                 </td>
                 <td >
-                    <h4><span class="label label-${(p['iscreator'] and 'success') or 'default'}">
-                       ${(p['iscreator'] and "Creation") or "Referencement"}
-                    </span><h4>
+                       ${p['relationname']}
                 </td>
                 <td >
-                   ${p['data'].description}
+                       <h4><span class="label label-${(p['iscreator'] and 'success') or 'default'}">
+                          ${(p['iscreator'] and "Creation") or "Referencement"}
+                       </span></h4> ${(p['iscollection'] and "Collection") or "Elementaire"}
+                </td>
+                <td >
+                       ${p['index']}
                 </td>
                 <td >
                     <ul class="list-group">
@@ -53,4 +61,75 @@
             </tr>
         </tbody>
     </table>
+</div>
+
+
+
+<div tal:condition="alldatas" id="panel-158939" class="panel-group">
+       <div class="panel panel-default">
+	 <div class="panel-heading">
+	   <a  href="#panel-element-Dataotheriteration" data-parent="#panel-158939" data-toggle="collapse" class="panel-title">
+              <span class="glyphicon glyphicon-th-list"> </span> Les données en relation avec le processus (toutes les itérations)  
+	   </a>
+	 </div>
+	 <div class="panel-collapse collapse" id="panel-element-Dataotheriteration" style="height: auto;">
+           <div  class="panel-body">
+             <div id="datas other tabel">
+                 <script type="text/javascript">
+                   $(document).ready(function(){
+                     $(function(){
+                       $(${'\"#datas_'+tabid+'_otherdata\"'}).tablesorter();
+                     });
+                   });
+                 </script>
+
+                 <table id="datas_${tabid}_otherdata"  class="table table-striped table-hover tablesorter">
+                     <thead >
+                         <th >Donnée</th>
+                         <th >Description</th>
+                         <th >Date de création</th>
+                         <th >Nom de la relation</th>
+                         <th >Type de la relation</th>
+                         <th >Iteration</th>
+                         <th >États</th>
+                     </thead>
+                     <tbody >
+                         <tr tal:repeat="p alldatas" class="${(p['iscurrent'] and 'success') or ''}">
+                             <div tal:omit-tag="" tal:define="states p['data'].state">
+                             <td >
+                                <a tal:attributes="href p['url']">${p['data'].title.capitalize()}</a>
+                             </td>
+                             <td >
+                                ${p['data'].description}
+                             </td>
+                             <td >
+                                ${p['data'].created_at.date()} ${p['data'].created_at.hour}:${p['data'].created_at.minute}:${p['data'].created_at.second}
+                             </td>
+                             <td >
+                                    ${p['relationname']}
+                             </td>
+                             <td >
+
+                               <h4><span class="label label-${(p['iscreator'] and 'success') or 'default'}">
+                                   ${(p['iscreator'] and "Creation") or "Referencement"}
+                                </span></h4> ${(p['iscollection'] and "Collection") or "Elementaire"}
+                             </td>
+                             <td >
+                                    ${p['index']}
+                             </td>
+                             <td >
+                                 <ul class="list-group">
+                                     <li class="list-group-item" tal:repeat="n states">
+                                             ${n.capitalize()}
+                                     </li>
+                                 </ul>
+                             </td>
+                           </div>
+                         </tr>
+                     </tbody>
+                 </table>
+             </div>
+          </div>
+        </div>
+      </div>
 </div>

@@ -64,6 +64,7 @@ class SeeProcesses(InfiniteCardinality):
 @process_definition(name='runtime_pd', id='runtime_pd')
 class RuntimeProcessDefinition(ProcessDefinition, VisualisableElement):
     isUnique = True
+    discriminator = 'DaceManager'
 
     def __init__(self, **kwargs):
         super(RuntimeProcessDefinition, self).__init__(**kwargs)
@@ -109,6 +110,7 @@ class SeeProcessesDef(InfiniteCardinality):
 @process_definition(name='pdc_pd', id='pdc_pd')
 class PDCProcessDefinition(ProcessDefinition, VisualisableElement):
     isUnique = True
+    discriminator = 'DaceManager'
 
     def __init__(self, **kwargs):
         super(PDCProcessDefinition, self).__init__(**kwargs)
@@ -162,6 +164,7 @@ class InstanceProcessesDef(InfiniteCardinality):
 @process_definition(name='pd_pd', id='pd_pd')
 class PDProcessDefinition(ProcessDefinition, VisualisableElement):
     isUnique = True
+    discriminator = 'DaceManager'
 
     def __init__(self, **kwargs):
         super(PDProcessDefinition, self).__init__(**kwargs)
@@ -243,6 +246,7 @@ class DoActivitiesProcess(InfiniteCardinality):
 @process_definition(name='p_pd', id='p_pd')
 class PProcessDefinition(ProcessDefinition, VisualisableElement):
     isUnique = True
+    discriminator = 'DaceManager'
 
     def __init__(self, **kwargs):
         super(PProcessDefinition, self).__init__(**kwargs)
@@ -318,6 +322,7 @@ class AssignActionToUsers(InfiniteCardinality):
 @process_definition(name='activity_pd', id='activity_pd')
 class ActivityProcessDefinition(ProcessDefinition, VisualisableElement):
     isUnique = True
+    discriminator = 'DaceManager'
 
     def __init__(self, **kwargs):
         super(ActivityProcessDefinition, self).__init__(**kwargs)

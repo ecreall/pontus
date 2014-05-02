@@ -12,7 +12,7 @@
         });
       });
     </script>
-              <table  id="processes_${tabid}" tal:condition="processes" class="table table-striped">
+              <table  id="processes_${tabid}" tal:condition="processes" class="table table-striped table-hover tablesorter">
                 <caption >
                   Les processus <strong>"${p_id}"</strong> de l'application
                 </caption>

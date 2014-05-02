@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import re
 import colander
+import datetime
 from substanced.sdi import mgmt_view
 from substanced.sdi import LEFT
 from substanced.util import get_oid
@@ -54,7 +55,7 @@ class RuntimeView(BasicView):
         allprocesses = []
         nb_encours = 0
         nb_bloque = 0
-        nb_termine = 0 
+        nb_termine = 0
         for p in processes:
             bloced = not p.getWorkItems()
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'bloced':bloced, 'created_at': p.created_at}
@@ -102,9 +103,23 @@ class ProcessStatisticView(BasicView):
     coordinates = 'left'
     behaviors = [StatisticProcesses]
 
+    def _dates(self, processes):
+        dates = {}
+        for p in processes:
+            created_at = p.created_at
+            date = str(datetime.datetime(created_at.year, created_at.month, created_at.day, created_at.hour, created_at.minute))
+            if date in dates:
+                dates[date] += 1
+            else:
+                dates[date] = 1
+
+        dates = sorted(dates.iteritems(), key=lambda i: i[0])
+        return dates
+
     def _values(self, processes, tabid):
         runtime_view = RuntimeView(self.context, self.request)
         nb_encours, nb_bloque, nb_termine, allprocesses =  runtime_view._processes(processes)
+        
         blocedprocesses = [p['process'] for p in  allprocesses if p['bloced'] and not p['process']._finished ]
         terminetedprocesses = [ p['process'] for p in  allprocesses if p['process']._finished]
         activeprocesses = [ p['process'] for p in  allprocesses if  not p['process']._finished and not p['bloced']]
@@ -133,11 +148,15 @@ class ProcessStatisticView(BasicView):
     def update(self):
         self.execute(None)
         result = {}
-        values = self._values(self.context.processes, self.__class__.__name__)   
+        values = self._values(self.context.processes, self.__class__.__name__)
+        dates = self._dates(self.context.processes)
+        values['dates'] = dates
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js',
+                            'pontus.dace_ui_extension:static/dygraph/dygraph-combined.js']
+
         return result
 
 
@@ -158,19 +177,23 @@ class ProcessDefinitionContainerView(BasicView):
     def _processes(self):
         from pontus.panels import NavBarPanel
         processes = sorted(self.context.definitions, key=lambda p: p.__name__)
-        allprocesses = []
+        allprocesses = {}
         for p in processes:
             nav_bar = NavBarPanel(p, self.request)
             actions = nav_bar()
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'nav_bar':actions}
-            allprocesses.append(processe) 
+            if p.discriminator in allprocesses:
+                allprocesses[p.discriminator].append(processe)
+            else:  
+                allprocesses[p.discriminator] = [processe]
 
         return allprocesses
 
     def update(self):
         self.execute(None)
         result = {}
-        values = {'processes': self._processes()}
+        allprocessesdef = [{'title':k, 'processes':v} for k, v in self._processes().iteritems()]
+        values = {'allprocessesdef': allprocessesdef}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -195,11 +218,15 @@ class ProcessDefinitionStatisticView(BasicView):
     def update(self):
         self.execute(None)
         result = {}
-        values = ProcessStatisticView(self.context, self.request)._values(self.context.started_processes, self.__class__.__name__)
+        processStatisticView_instance = ProcessStatisticView(self.context, self.request)
+        values = processStatisticView_instance._values(self.context.started_processes, self.__class__.__name__)
+        dates = processStatisticView_instance._dates(self.context.started_processes)
+        values['dates'] = dates
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
+        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js',
+                            'pontus.dace_ui_extension:static/dygraph/dygraph-combined.js']
         return result
 
 
@@ -352,23 +379,41 @@ class ProcessDataView(BasicView):
     #coordinates = 'left'
     behaviors = [SeeProcessDatas]
 
-    def _involved_datas(self):
-        involveds = self.context.execution_context.all_active_involveds().values()
-        datas = []
-        for inv in involveds:
-            if not(inv[1] in datas):
-                datas.extend(inv[1])
-
+    def _datas(self, involveds):
         alldatas = []
-        for d in datas:
-            alldatas.append({'url':self.request.mgmt_path(d, '@@index'), 'data':d, 'iscreator':d.creator is self.context})
+        for pname, inv in involveds.iteritems():
+            name = pname
+            for i, d in enumerate(inv[1]):
+                iscollection =  (inv[0] == 'collection')
+                iscurrent = inv[4]
+                index = inv[3]
+                name = inv[2]
+                if index == -1:
+                    index = i+1
+       
+                if iscurrent is None:
+                    if i == (len(inv[1]) - 1):
+                        iscurrent = True
+                    
+                alldatas.append({'url':self.request.mgmt_path(d, '@@index'),
+                                 'data':d,
+                                 'iscreator': inv[5] == 'created',
+                                 'iscollection': inv[0] == 'collection',
+                                 'relationname': name,
+                                 'index': index,
+                                 'iscurrent': iscurrent})
 
         return alldatas
+
 
     def update(self):
         self.execute(None)
         result = {}
-        values = {'datas': self._involved_datas(), 'tabid':self.__class__.__name__+'AllDatas'}
+        
+        all_involveds = self._datas(self.context.execution_context.all_classified_involveds())
+        involveds = [a for a in all_involveds if a['iscurrent']] #self._datas(self.context.execution_context.all_active_involveds())
+        
+        values = {'datas': involveds, 'alldatas':all_involveds , 'tabid':self.__class__.__name__+'AllDatas'}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -441,10 +486,18 @@ class DoActivitiesProcessView(BasicView):
                    except Exception:
                        action_id = action_id+'Start'
 
+               assigned_to = sorted(a.action.assigned_to, key=lambda u: u.__name__)
+               users= []
+               for user in assigned_to:
+                   users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
+
                _item.update({'body':body,
                              'action':a.action,
                              'ismultiinstance':hasattr(a.action,'principalaction'),
-                             'action_id':action_id})
+                             'action_id':action_id,
+                             'data': c,
+                             'dataurl': self.request.mgmt_path(c, '@@index'),
+                             'assignedto': users})
                allbodies_actions.append(_item)
                if 'js_links' in view_result:
                    resources['js_links'].extend(view_result['js_links'])
@@ -463,6 +516,8 @@ class DoActivitiesProcessView(BasicView):
             if not(inv[1] in datas):
                 datas.extend(inv[1])
 
+
+        datas = list(set(datas))
         datas = sorted(datas, key=lambda d: d.__name__)
         all_actions = []
         messages = {}
