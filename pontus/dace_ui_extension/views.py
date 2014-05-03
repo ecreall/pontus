@@ -96,7 +96,8 @@ class RuntimeView(BasicView):
     )
 class ProcessStatisticView(BasicView):
 
-    title = 'Statistic'
+    title = 'Tableau de bord'
+    item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/runtimeprocesses_statistic_view.pt'
     viewid = 'statistic'
     name='StatisticRun'
@@ -208,7 +209,8 @@ class ProcessDefinitionContainerView(BasicView):
     )
 class ProcessDefinitionStatisticView(BasicView):
 
-    title = 'Statistic'
+    title = 'Tableau de bord'
+    item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/processdef_statistic_view.pt'
     viewid = 'statistic'
     name='StatisticDef'
@@ -344,7 +346,8 @@ class ProcessView(BasicView):
     )
 class StatisticProcessView(BasicView):
 
-    title = 'Statistic'
+    title = 'Tableau de bord'
+    item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/processstatistic_view.pt'
     viewid = 'Statistic'
     name='Statistic'
@@ -453,7 +456,7 @@ class DoActivitiesProcessView(BasicView):
           
            view_result = view_instance.update() # il faut un traitement js pour bloquer les actions.
            if updated_view is view_instance and view_instance.finished_successfully:
-               return True, None, None, None
+               return True, True, None, None
               
            if isinstance(view_result, dict):
                _item = {}
@@ -465,7 +468,7 @@ class DoActivitiesProcessView(BasicView):
                    a_actions = [(a.action, aa) for aa in actions_as]
                    toreplay, action_updated_as, resources_as, allbodies_actions_as = self._modal_views(a_actions, form_id)
                    if toreplay:
-                       return True, None, None, None
+                       return True, True, None, None
  
                    if action_updated_as:
                        action_updated = True 
@@ -534,7 +537,8 @@ class DoActivitiesProcessView(BasicView):
         toreplay, action_updated, resources, allbodies_actions = self._modal_views(all_actions, form_id, True)
         if toreplay:
             self.request.POST.clear()
-            return self._actions()
+            action_updated, messages, resources, allbodies_actions = self._actions()
+            return True , messages, resources, allbodies_actions
 
         if form_id is not None and not action_updated:
             error = ViewError()
@@ -543,12 +547,12 @@ class DoActivitiesProcessView(BasicView):
             message = self._get_message(error)
             messages.update({error.type: [message]})
 
-        return messages, resources, allbodies_actions
+        return action_updated, messages, resources, allbodies_actions
 
     def update(self):
         self.execute(None)
         result = {}
-        messages, resources, actions = self._actions()
+        action_updated, messages, resources, actions = self._actions()
         values = {'actions': actions,
                   'process':self.context,
                   'defurl':self.request.mgmt_path(self.context.definition, '@@index'),
@@ -556,6 +560,7 @@ class DoActivitiesProcessView(BasicView):
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         item['messages']=messages
+        item['isactive'] = action_updated
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
         return result

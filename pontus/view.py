@@ -98,6 +98,10 @@ class View(Step):
         pass
 
     def __call__(self):
+        coordinates = self.params('coordinates')
+        if coordinates is not None:
+            self.coordinates = coordinates
+
         result = None
         try:
             self.validate()

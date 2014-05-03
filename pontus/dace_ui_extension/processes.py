@@ -1,4 +1,7 @@
 # definition of VoirPropositionDAction process
+from substanced.util import get_oid
+from pyramid.threadlocal import get_current_request
+
 from dace.util import utility
 from dace.processinstance.activity import InfiniteCardinality, ActionType
 from dace.interfaces import (
@@ -50,6 +53,17 @@ class StatisticProcesses(InfiniteCardinality):
     processsecurity_validation = processsecurity_validationA
     state_validation = state_validationA
 
+    def url(self, obj):
+        query = {}
+        try:
+            actionuid = get_oid(self)
+            query={'action_uid':actionuid}
+        except AttributeError:
+            query={'isstart':'True'} 
+
+        query['coordinates'] = 'main'
+        return get_current_request().mgmt_path(obj, '@@'+self.view_name,  query=query)
+
 
 class SeeProcesses(InfiniteCardinality):
 
@@ -76,12 +90,12 @@ class RuntimeProcessDefinition(ProcessDefinition, VisualisableElement):
                 s = StartEventDefinition(),
                 pg = ParallelGatewayDefinition(),
                 processes_run = ActivityDefinition(contexts=[SeeProcesses], 
-                                                   title="Voir les processus en cours",
+                                                   title="Les processus en cours",
                                                    groups=['Voir'],
                                                    description="L'action permet de voir les processus encours"),
                 processes_stat = ActivityDefinition(contexts=[StatisticProcesses],
-                                                   title="Voir les statistiques",
-                                                   groups=['Statistique'],
+                                                   title="Tableau de bord",
+                                                   groups=['Voir','Statistique'],
                                                    description="L'action permet de voir les statistiques des processus en cours"),
                 eg = ExclusiveGatewayDefinition(),
                 e = EndEventDefinition(),
@@ -121,7 +135,7 @@ class PDCProcessDefinition(ProcessDefinition, VisualisableElement):
         self.defineNodes(
                 s = StartEventDefinition(),
                 processes_def = ActivityDefinition(contexts=[SeeProcessesDef],
-                                                   title="Voir les definitions des processus",
+                                                   title="Les definitions des processus",
                                                    groups=['Voir'],
                                                    description="L'action permet de voir les definition des processus"),
                 e = EndEventDefinition(),
@@ -151,6 +165,17 @@ class StatisticProcessesDef(InfiniteCardinality):
     processsecurity_validation = processsecurity_validationA
     state_validation = state_validationA
 
+    def url(self, obj):
+        query = {}
+        try:
+            actionuid = get_oid(self)
+            query={'action_uid':actionuid}
+        except AttributeError:
+            query={'isstart':'True'} 
+
+        query['coordinates'] = 'main'
+        return get_current_request().mgmt_path(obj, '@@'+self.view_name,  query=query)
+
 class InstanceProcessesDef(InfiniteCardinality):
 
     context = IProcessDefinition
@@ -176,16 +201,16 @@ class PDProcessDefinition(ProcessDefinition, VisualisableElement):
                 s = StartEventDefinition(),
                 pg = ParallelGatewayDefinition(),
                 processes_def = ActivityDefinition(contexts=[SeeProcessDef],
-                                                   title="Voir la definition de processus",
+                                                   title="La definition de processus",
                                                    groups=['Voir'],
                                                    description="L'action permet de voir les details de la definition de processus"),
                 processes_stat = ActivityDefinition(contexts=[StatisticProcessesDef],
-                                                   title="Voir les statistiques",
-                                                   groups=['Statistique'],
+                                                   title="Tableau de bord",
+                                                   groups=['Voir','Statistique'],
                                                    description="L'action permet de voir les statistiques des processus en cours"),
 
                 processes_run = ActivityDefinition(contexts=[InstanceProcessesDef],
-                                                   title="Voir les processus en cours",
+                                                   title="Les processus en cours",
                                                    groups=['Voir'],
                                                    description="L'action permet de voir les details des processus en cours"),
                 eg = ExclusiveGatewayDefinition(),
@@ -223,6 +248,17 @@ class StatisticProcess(InfiniteCardinality):
     processsecurity_validation = processsecurity_validationA
     state_validation = state_validationA
 
+    def url(self, obj):
+        query = {}
+        try:
+            actionuid = get_oid(self)
+            query={'action_uid':actionuid}
+        except AttributeError:
+            query={'isstart':'True'} 
+
+        query['coordinates'] = 'main'
+        return get_current_request().mgmt_path(obj, '@@'+self.view_name,  query=query)
+
 
 class SeeProcessDatas(InfiniteCardinality):
 
@@ -258,15 +294,15 @@ class PProcessDefinition(ProcessDefinition, VisualisableElement):
                 s = StartEventDefinition(),
                 pg = ParallelGatewayDefinition(),
                 processes_def = ActivityDefinition(contexts=[SeeProcess],
-                                                   title="Voir le processus",
+                                                   title="Details",
                                                    groups=['Voir'],
                                                    description="L'action permet de voir les details du processus"),
                 processes_stat = ActivityDefinition(contexts=[StatisticProcess],
-                                                   title="Voir les statistiques",
-                                                   groups=['Statistique'],
+                                                   title="Tableau de bord",
+                                                   groups=['Voir','Statistique'],
                                                    description="L'action permet de voir les statistiques du processus en cours"),
                 processes_datas = ActivityDefinition(contexts=[SeeProcessDatas],
-                                                   title="Voir les donnees manipulees",
+                                                   title="Les donnees manipulees",
                                                    groups=['Voir'],
                                                    description="L'action permet de voir les donnees manipulees par le processus"),
                 processes_actions = ActivityDefinition(contexts=[DoActivitiesProcess],

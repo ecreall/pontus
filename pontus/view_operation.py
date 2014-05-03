@@ -226,6 +226,9 @@ class MultipleView(MultipleViewsOperation):
                                       'view': self,
                                       'id':self.viewid}]
 
+        #@TODO
+        #avoir un seul item par coordinate: calculer les vues par coordinate ici
+        # la vue.pt ne fait que integrer dans la bonne position. Voir aussi avec le merged View. Ne pas le mettre dans le builder!!
         return result
 
     def after_update(self):

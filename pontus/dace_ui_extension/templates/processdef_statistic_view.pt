@@ -1,8 +1,8 @@
     <div id="panel-RutimeStat" class="panel-group">
-      <div class="panel panel-default">
+      <div class="panel panel-primary">
 	 <div class="panel-heading">
-	   <a  href="#panel-element-numbers" data-parent="#panel-RutimeStat" data-toggle="collapse" class="panel-title" style="font-size: 14px">
-              <i class="glyphicon glyphicon-stats"></i> Nombre des processus dans l'application: <span class="badge pull">${bloque+termine+encours}</span>
+	   <a  href="#panel-element-numbers" data-parent="#panel-RutimeStat" data-toggle="collapse" class="panel-title" style="font-size: 12px; color:#FFFFFF">
+              <i class="glyphicon glyphicon-stats"></i> Nombre des processus dans l'application <span class="badge pull">${bloque+termine+encours}</span>
 	   </a>
 	 </div>
          <div class="panel-collapse collapse" id="panel-element-numbers" style="height: auto;">
@@ -54,10 +54,10 @@
           </div>
        </div>
       </div>
-      <div class="panel panel-default">
+      <div class="panel panel-primary" >
 	 <div class="panel-heading">
-	   <a  href="#panel-element-piechart" data-parent="#panel-RutimeStat" data-toggle="collapse" class="panel-title" style="font-size: 14px">
-              <i class="glyphicon glyphicon-stats"></i> Pourcentage de l'activité des processus:
+	   <a  href="#panel-element-piechart" data-parent="#panel-RutimeStat" data-toggle="collapse" class="panel-title" style="font-size: 12px; color:#FFFFFF">
+              <i class="glyphicon glyphicon-stats"></i> Pourcentage de l'activité des processus
 	   </a>
 	 </div>
 	 <div class="panel-collapse collapse" id="panel-element-piechart" style="height: auto;">
@@ -87,9 +87,11 @@
                 ]);
                 // Set chart options
                 var options = { 'colors':['#4aa241','#ff7500', '#ef2f10'],
-                                'is3D': true,
-                               'width':300,
-                               'height':300
+                                'is3D':true,
+                                'width':300,
+                                'height':300,
+                               chartArea : {width:280},
+                               legend: {position:'left'},
                                };
 
                 // Instantiate and draw our chart, passing in some options.
@@ -108,25 +110,25 @@
               }
 
             </script>
-           <div id="chart_div" style="width:300; height:300;"></div>
+           <div id="chart_div" style="width:300px; height:300px;"></div>
          </div>
       </div>
-      <div class="panel panel-default">
+      <div class="panel panel-primary">
 	 <div class="panel-heading">
-	   <a  href="#panel-element-evolution" data-parent="#panel-RutimeStat" data-toggle="collapse" class="panel-title" style="font-size: 14px">
-             <i class="glyphicon glyphicon-stats"></i> Évolution du contenu dans le temps:
+	   <a  href="#panel-element-evolution" data-parent="#panel-RutimeStat" data-toggle="collapse" class="panel-title" style="font-size: 12px; color:#FFFFFF">
+             <i class="glyphicon glyphicon-stats"></i> Évolution du contenu dans le temps
 	   </a>
 	 </div>
          <div class="panel-collapse collapse" id="panel-element-evolution" style="height: auto;">
-          <div id="graphdiv" style="width:300px; height:300px; left:-39px"></div>
+          <div id="graphdiv" style="width:220px; height:200px; left:-40px"></div>
             <script type="text/javascript">
               g = new Dygraph(
               // containing div
               document.getElementById("graphdiv"),
               // CSV or path to a CSV file.
-              ${ '\"Date, Nombre \\n \" +'+'+'.join(['\"'+d[0]+','+str(d[1])+'\\n \"' for d in dates])}
+              ${ '\"Date, Nombre \\n \" +'+'+'.join(['\"'+d[0]+','+str(d[1])+'\\n \"' for d in dates])},
+              {drawPoints : true}
             );
-                        $(document).ready(function(){});
            </script>
         </div>
     </div>
