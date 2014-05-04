@@ -35,6 +35,30 @@ from pontus.schema import Schema
 from pontus.widget import  SequenceWidget, Select2Widget
 
 
+def calculatePage(elements, view, tabid):
+    page = view.params('page'+tabid)
+    number = view.params('number'+tabid)
+    if number is None:
+        number = 7
+    else:
+        number = int(number)
+
+    import numpy as np
+    pages = int(np.ceil(float(len(elements))/number))
+    if pages > 0:
+        if page is None:
+            page = 1
+        else:
+            page = int(page)
+
+        endpage = page*number
+        if (endpage) > len(elements):
+            endpage = len(elements)
+
+        elements = elements[((page-1)*number):endpage]
+
+    return page, pages, elements
+
 
 @mgmt_view(
     name = 'Processes',
@@ -71,27 +95,7 @@ class RuntimeView(BasicView):
     def _update(self, processes, tabid):
         result = {}
         processes = sorted(processes, key=lambda p: p.created_at)
-        page = self.params('page'+tabid)
-        number = self.params('number'+tabid)
-        if number is None:
-            number = 7
-        else:
-            number = int(number)
-
-        import numpy as np
-        pages = int(np.ceil(float(len(processes))/number))
-        if pages > 0:
-            if page is None:
-                page = 1
-            else:
-                page = int(page)
-
-            endpage = page*number
-            if (endpage) > len(processes):
-                endpage = len(processes)
-
-            processes = processes[((page-1)*number):endpage]
-
+        page, pages, processes = calculatePage(processes, self, tabid)
         nb_encours, nb_bloque, nb_termine, allprocesses = self._processes(processes)
         #import pdb; pdb.set_trace()
         values = {'processes': allprocesses, 
@@ -297,26 +301,7 @@ class ProcessesPDDefinitionView(BasicView):
 
     def _processes(self, tabid):
         processes = sorted(self.context.started_processes, key=lambda p: p.created_at)
-        page = self.params('page'+tabid)
-        number = self.params('number'+tabid)
-        if number is None:
-            number = 2
-        else:
-            number = int(number)
-
-        import numpy as np
-        pages = int(np.ceil(float(len(processes))/number))
-        if pages > 0:
-            if page is None:
-                page = 1
-            else:
-                page = int(page)
-
-            endpage = page*number
-            if (endpage) > len(processes):
-                endpage = len(processes)
-
-            processes = processes[((page-1)*number):endpage]
+        page, pages, processes = calculatePage(processes, self, tabid)
         allprocesses = []
         for p in processes:
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p}
