@@ -51,7 +51,6 @@ class RuntimeView(BasicView):
     behaviors = [SeeProcesses]
 
     def _processes(self, processes):
-        processes = sorted(processes, key=lambda p: p.created_at)
         allprocesses = []
         nb_encours = 0
         nb_bloque = 0
@@ -71,12 +70,38 @@ class RuntimeView(BasicView):
 
     def _update(self, processes, tabid):
         result = {}
+        processes = sorted(processes, key=lambda p: p.created_at)
+        page = self.params('page'+tabid)
+        number = self.params('number'+tabid)
+        if number is None:
+            number = 7
+        else:
+            number = int(number)
+
+        import numpy as np
+        pages = int(np.ceil(float(len(processes))/number))
+        if pages > 0:
+            if page is None:
+                page = 1
+            else:
+                page = int(page)
+
+            endpage = page*number
+            if (endpage) > len(processes):
+                endpage = len(processes)
+
+            processes = processes[((page-1)*number):endpage]
+
         nb_encours, nb_bloque, nb_termine, allprocesses = self._processes(processes)
+        #import pdb; pdb.set_trace()
         values = {'processes': allprocesses, 
                   'encours':nb_encours,
                   'bloque':nb_bloque,
                   'termine':nb_termine,
-                  'tabid':tabid}
+                  'tabid':tabid,
+                  'page': page,
+                  'pages': pages,
+                  'url': self.request.relative_url(None)}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -270,21 +295,46 @@ class ProcessesPDDefinitionView(BasicView):
     #coordinates = 'left'
     behaviors = [InstanceProcessesDef]
 
-    def _processes(self):
+    def _processes(self, tabid):
         processes = sorted(self.context.started_processes, key=lambda p: p.created_at)
+        page = self.params('page'+tabid)
+        number = self.params('number'+tabid)
+        if number is None:
+            number = 2
+        else:
+            number = int(number)
+
+        import numpy as np
+        pages = int(np.ceil(float(len(processes))/number))
+        if pages > 0:
+            if page is None:
+                page = 1
+            else:
+                page = int(page)
+
+            endpage = page*number
+            if (endpage) > len(processes):
+                endpage = len(processes)
+
+            processes = processes[((page-1)*number):endpage]
         allprocesses = []
         for p in processes:
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p}
             allprocesses.append(processe) 
 
-        return allprocesses
+        return page, pages, allprocesses
 
     def update(self):
         self.execute(None)
         result = {}
-        values = {'processes': self._processes(),
-                   'p_id': self.context.title,
-                   'tabid':self.__class__.__name__+'AllProcesses'}
+        tabid = self.__class__.__name__+'AllProcesses'
+        page, pages, allprocesses = self._processes(tabid) 
+        values = {'processes': allprocesses,
+                  'p_id': self.context.title,
+                  'tabid':tabid,
+                  'page': page, 
+                  'pages': pages,
+                  'url': self.request.relative_url(None)}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}

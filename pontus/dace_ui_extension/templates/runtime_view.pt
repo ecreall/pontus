@@ -58,5 +58,11 @@
             </tr>
         </tbody>
     </table>
+<ul tal:condition="pages>0" class="pager">
+  <li tal:condition="(page-1)>0"><a href="${url+'?page'+tabid+'='+str(page-1)}">Previous</a></li>
+  <li><span class="badge pull" style="background-color:#428BCA">${page}/${pages}</span></li>
+  <li tal:condition="(page+1)<=pages"><a href="${url+'?page'+tabid+'='+str(page+1)}">Next</a></li>
+</ul>
+
 </div>
 
