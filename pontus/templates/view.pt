@@ -23,7 +23,8 @@
    <div tal:omit-tag="" tal:define="slot coordinates['left']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'left', None)" />   
+           <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
+                tal:replace="item['view'].render_item(item, 'left', parent)" />   
      </div>
    </div>
  </div>
@@ -33,7 +34,8 @@
    <div tal:omit-tag="" tal:define="slot coordinates['main']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'main', None)" />   
+           <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
+                tal:replace="item['view'].render_item(item, 'main', parent)" />   
      </div>        
    </div>
  </div>
@@ -43,7 +45,8 @@
    <div tal:omit-tag="" tal:define="slot coordinates['right']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'right', None)" />   
+           <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
+                tal:replace="item['view'].render_item(item, 'right', parent)" />   
      </div>      
    </div>
  </div>
@@ -53,7 +56,8 @@
    <div tal:omit-tag="" tal:define="slot coordinates['footer']|nothing"
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
-           <div tal:define="item slot[0]" tal:replace="item['view'].render_item(item, 'footer', None)" />   
+           <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
+                tal:replace="item['view'].render_item(item, 'footer', parent)" />   
      </div>       
    </div>
  </div>

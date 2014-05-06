@@ -142,7 +142,6 @@ class MultipleView(MultipleViewsOperation):
     
     title = 'Multiple View'
     builder = default_builder
-    item_template = 'templates/submultipleview.pt'
     self_template = 'templates/submultipleview.pt'
     
     def __init__(self, context, request, parent=None, wizard=None, stepid=None):
@@ -224,15 +223,23 @@ class MultipleView(MultipleViewsOperation):
                 if self.parent is None:
                     isactive = True
 
-            result['coordinates'][coordinate] = [{'isactive':isactive,
-                                      'items': items,
-                                      'view': self,
-                                      'id':self.viewid}]
+            _item = {'isactive':isactive,
+                      'items': items,
+                      'view': self,
+                      'id':self.viewid}
+            values = {'coordinates':coordinate,'subitem':_item, 'parent': self}
+            body = self.content(result=values, template=self.self_template)['body']
+            item = self.adapt_item(body, self.viewid)
+            item['isactive'] = isactive
+            result['coordinates'][coordinate] = [item]
 
-        #@TODO
-        #avoir un seul item par coordinate: calculer les vues par coordinate ici
-        # la vue.pt ne fait que integrer dans la bonne position. Voir aussi avec le merged View. Ne pas le mettre dans le builder!!
         return result
+
+
+    def adapt_item(self, render, id, isactive=True):
+        item  = super(MultipleView, self).adapt_item(render, id, isactive)
+        item['ismultipleview'] = True
+        return item
 
     def after_update(self):
         if self.finished_successfully:
@@ -496,7 +503,7 @@ class CallView(MultipleContextsOperation):
                 currentview = view_result['view']
 
             global_result = merge_dicts(view_result, global_result)
-            if len(view_result['coordinates']) == 1 and len(view_result['coordinates'].items()[0][1]) == 1 and ('body' in view_result['coordinates'].items()[0][1][0]):
+            if len(view_result['coordinates']) == 1 and len(view_result['coordinates'].items()[0][1]) == 1:
                 coordinate = view_result['coordinates'].items()[0][0]
                 item = view_result['coordinates'].items()[0][1][0]
                 if coordinate in result:
@@ -505,10 +512,9 @@ class CallView(MultipleContextsOperation):
                     result[coordinate] = [item]
             else:
                 for coordinate, values in view_result['coordinates'].iteritems():
+                    item = values[0]
                     subviewid = currentview.viewid+'_'+coordinate
-                    item = {'view':currentview,'items': values, 'id': subviewid}
-                    subbody = currentview.render_item(coordinates='globalcoordinates'+'_'+coordinate, item=item, parent=None)
-                    item = {'view':currentview,'body': subbody, 'id':subviewid }
+                    item['id'] = subviewid
                     if coordinate in result:
                         result[coordinate].append(item) 
                     else:
@@ -556,12 +562,10 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         self.schema = self.schema(widget=self.form_widget())
         self.schema = self.schema.clone()
         super(CallSelectedContextsViews, self).__init__(context, request, parent, wizard, stepid, **kwargs)
-        #MultipleContextsViewsOperation.__init__(self, context, request, parent, wizard, stepid, **kwargs)
         self.validated_items = []
         self.children = {}
         self._additemswidget()
         self._init_children()
-        #self.buttons.extend([b.title for b in self.views])
         self.buttons = [b.title for b in self.views]
 
     def _init_children(self):

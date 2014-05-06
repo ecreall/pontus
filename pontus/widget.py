@@ -261,9 +261,21 @@ class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
     readonly_template = 'deform:templates/readonly/radio_choice.pt'
 
+    def serialize(self, field, cstruct, **kw):
+        if cstruct in (null, None):
+            cstruct = self.null_value
+
+        if self.multiple and not isinstance(cstruct, (tuple, list)):
+                cstruct = [cstruct]
+        
+        return super(RadioChoiceWidget, self).serialize(field, cstruct, **kw)
+
     def deserialize(self, field, pstruct):
         if pstruct in (null, self.null_value):
             return null
+
+        if not self.multiple and isinstance(pstruct, (list, tuple)):
+            pstruct = pstruct[0]
 
         try:
             return get_obj(int(pstruct))
@@ -278,6 +290,9 @@ class CheckboxChoiceWidget(CheckboxChoiceW):
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
             cstruct = ()
+
+        if self.multiple and not isinstance(cstruct,(list,tuple)):
+            cstruct = [cstruct]
 
         if cstruct and not isinstance(cstruct[0], string_types):
             try:

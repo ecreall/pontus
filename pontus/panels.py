@@ -26,7 +26,7 @@ class Breadcrumbs_panel(object):
         breadcrumbs = []
         for resource in lineage(request.context):
             if not has_permission('sdi.view', resource, request):
-                return []
+                return {'breadcrumbs':[]}
             
             url = request.sdiapi.mgmt_path(resource, '@@manage_main')
             if isinstance(resource, Entity):
