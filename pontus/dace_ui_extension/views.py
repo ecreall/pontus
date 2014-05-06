@@ -2,6 +2,8 @@
 import re
 import colander
 import datetime
+from pyramid.response import Response
+
 from substanced.sdi import mgmt_view
 from substanced.sdi import LEFT
 from substanced.util import get_oid
@@ -11,7 +13,7 @@ from dace.objectofcollaboration.services.processdef_container import ProcessDefi
 from dace.processdefinition.processdef import ProcessDefinition
 from dace.processinstance.core import DEFAULTMAPPING_ACTIONS_VIEWS
 from dace.processinstance.process import Process
-from dace.util import getSite
+from dace.util import getSite, get_obj
 from dace.interfaces import (
     IActivity,
     IBusinessAction)
@@ -487,9 +489,10 @@ class DoActivitiesProcessView(BasicView):
            view_instance = view(c, self.request, behaviors=[a.action])
            if not action_updated and form_id is not None and form_id.startswith(view_instance.viewid):
                action_updated = True
-               updated_view =  view_instance
-          
-           view_result = view_instance.update() # il faut un traitement js pour bloquer les actions.
+               updated_view = view_instance
+
+           view_result = {}
+           view_result = view_instance.update()
            if updated_view is view_instance and view_instance.finished_successfully:
                return True, True, None, None
               
@@ -512,7 +515,7 @@ class DoActivitiesProcessView(BasicView):
                    resources['js_links'] = list(set(resources['js_links']))
                    resources['css_links'].extend(resources_as['css_links'])
                    resources['css_links'] =list(set(resources['css_links']))
-                   _item['actions']=allbodies_actions_as
+                   _item['actions'] = allbodies_actions_as
 
                body = view_result['coordinates'][view.coordinates][0]['body']
                action_id = a.action.behavior_id
@@ -533,7 +536,9 @@ class DoActivitiesProcessView(BasicView):
                              'action':a.action,
                              'ismultiinstance':hasattr(a.action,'principalaction'),
                              'action_id':action_id,
+                             #'action_oid': get_oid(a.action),
                              'data': c,
+                             'actionurl': a.url,
                              'dataurl': self.request.mgmt_path(c, '@@index'),
                              'assignedto': users})
                allbodies_actions.append(_item)
@@ -554,7 +559,6 @@ class DoActivitiesProcessView(BasicView):
             if not(inv[1] in datas):
                 datas.extend(inv[1])
 
-
         datas = list(set(datas))
         datas = sorted(datas, key=lambda d: d.__name__)
         all_actions = []
@@ -570,6 +574,7 @@ class DoActivitiesProcessView(BasicView):
             form_id = self.request.POST['__formid__']
 
         toreplay, action_updated, resources, allbodies_actions = self._modal_views(all_actions, form_id, True)
+
         if toreplay:
             self.request.POST.clear()
             action_updated, messages, resources, allbodies_actions = self._actions()
@@ -578,7 +583,7 @@ class DoActivitiesProcessView(BasicView):
         if form_id is not None and not action_updated:
             error = ViewError()
             error.principalmessage = u"Action non realisee"
-            error.causes = ["Vous n'avez plus le droit de realiser cette action.", "L'action est verouillee par un autre utilisateur."]
+            error.causes = ["Vous n'avez plus le droit de realiser cette action.", "L'action est verrouillée par un autre utilisateur."]
             message = self._get_message(error)
             messages.update({error.type: [message]})
 
@@ -594,7 +599,7 @@ class DoActivitiesProcessView(BasicView):
                   'tabid':self.__class__.__name__+'AllActions'}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
-        item['messages']=messages
+        item['messages'] = messages
         item['isactive'] = action_updated
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)

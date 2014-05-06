@@ -200,6 +200,9 @@ class MultipleView(MultipleViewsOperation):
                 self.finished_successfully = True
                 return self.success(view_result)
 
+            if not isinstance(view_result, dict):
+                return view_result
+
             result = merge_dicts(view_result, result)
 
         if not result:
