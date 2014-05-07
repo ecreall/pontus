@@ -33,7 +33,7 @@
  <div metal:fill-slot="main">
    <div tal:omit-tag="" tal:define="slot coordinates['main']|nothing"
                         tal:condition="slot">
-      <div tal:omit-tag="" tal:define="item slot[0]">
+      <div class="pontus-main" tal:define="item slot[0]">
            <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
                 tal:replace="item['view'].render_item(item, 'main', parent)" />   
      </div>        

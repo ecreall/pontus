@@ -39,18 +39,33 @@
         <tbody >
             <tr tal:repeat="a actions">
                 <td >
-                   <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action_id']}">
+                   <a id="${a['action_id']}-btn" 
+                      class="btn btn-primary btn-sm dace-action" 
+                      style="max-width: 300px;" 
+                      data-toggle="modal" href="${a['actionurl']}" 
+                      data-target="#${a['action_id']}">
                      <span class="glyphicon glyphicon-cog"></span> ${a['action'].title}
                    </a>
                       <script tal:condition="'toreplay' in a">
                         $(document).ready(function(){
-                            $(${'\"#'+a['action_id']+'\"'}).modal('show');
+                            $(${'\"#'+a['action_id']+'-modal\"'}).modal('show');
+                        });
+                      </script>     
+                      <script>
+                        $(document).ready(function(){
+                            $(${'\'#'+a['action_id']+'-modal\''}).on('hidden.bs.modal', function (e) {
+                               after_execution(${'\"'+a['afterurl']+'\"'})
+                              })
                         });
                       </script>
                 </td>
                 <td >
                    ${a['action'].description}
-                   <small><blockquote tal:condition="a['ismultiinstance']"> Cette action est une instance de l'action <strong>${a['action'].principalaction.title}</strong></blockquote></small>
+                   <small>
+                     <blockquote tal:condition="a['ismultiinstance']"> 
+                        Cette action est une instance de l'action <strong>${a['action'].principalaction.title}</strong>
+                     </blockquote>
+                   </small>
                 </td>
                 <td >
                    <a href="${a['dataurl']}">${a['data'].title}</a>
@@ -65,18 +80,30 @@
                 <td tal:condition="'actions' in a">
                   <ul class="nav nav-pills nav-stacked" tal:repeat="aa a['actions']">
                     <li >
-                      <a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${aa['action_id']}">
+                      <a id="${aa['action_id']}-btn" 
+                         class="btn btn-primary btn-sm dace-action" 
+                         style="max-width: 300px;" 
+                         data-toggle="modal" 
+                         href="${aa['actionurl']}" 
+                         data-target="#${aa['action_id']}">
                         <span class="glyphicon glyphicon-cog"></span> ${aa['action'].title}
                       </a>
                       <script tal:condition="'toreplay' in aa">       
                         $(document).ready(function(){
-                            $(${'\"#'+aa['action_id']+'\"'}).modal('show');
+                             $(${'\'#'+aa['action_id']+'-btn\''}).click();
+                        });
+                      </script>
+                      <script >       
+                        $(document).ready(function(){
+                            $(${'\'#'+aa['action_id']+'-modal\''}).on('hidden.bs.modal', function (e) {
+                               after_execution(${'\"'+aa['afterurl']+'\"'})
+                              })
                         });
                       </script>
                     </li>
 
                 <!-- Modal -->
-                    <div class="modal fade" id="${aa['action_id']}" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="${aa['action_id']}-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                       <div class="modal-dialog">
                        <div class="modal-content">
                          <div class="modal-header">
@@ -93,7 +120,7 @@
                 </td>
 
                 <!-- Modal -->
-                <div class="modal fade" id="${a['action_id']}" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal fade" id="${a['action_id']}-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                  <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">

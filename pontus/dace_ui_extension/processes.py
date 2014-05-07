@@ -172,7 +172,7 @@ class StatisticProcessesDef(InfiniteCardinality):
             query={'action_uid':actionuid}
         except AttributeError:
             query={'isstart':'True'} 
-
+  
         query['coordinates'] = 'main'
         return get_current_request().mgmt_path(obj, '@@'+self.view_name,  query=query)
 

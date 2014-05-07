@@ -461,8 +461,10 @@ class ProcessDataView(BasicView):
         return result
 
 
+
+
 @mgmt_view(
-    name = 'Les actions a realiser',
+    name = 'actionsrealiser',
     context=Process,
     renderer='pontus:templates/view.pt'
     )
@@ -471,9 +473,13 @@ class DoActivitiesProcessView(BasicView):
     title = 'Les actions a realiser'
     self_template = 'pontus:dace_ui_extension/templates/processactions_view.pt'
     viewid = 'processactions'
-    name='Les actions a realiser'
+    name='actionsrealiser'
     #coordinates = 'left'
     behaviors = [DoActivitiesProcess]
+
+
+
+
 
     def _modal_views(self, all_actions, form_id, caa=False):
         action_updated=False
@@ -487,12 +493,14 @@ class DoActivitiesProcessView(BasicView):
            c = t[0]
            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
            view_instance = view(c, self.request, behaviors=[a.action])
+           view_result = {}
            if not action_updated and form_id is not None and form_id.startswith(view_instance.viewid):
                action_updated = True
                updated_view = view_instance
+               view_result = view_instance()
+           else:
+               view_result = view_instance.view_resources()
 
-           view_result = {}
-           view_result = view_instance.update()
            if updated_view is view_instance and view_instance.finished_successfully:
                return True, True, None, None
               
@@ -517,7 +525,10 @@ class DoActivitiesProcessView(BasicView):
                    resources['css_links'] =list(set(resources['css_links']))
                    _item['actions'] = allbodies_actions_as
 
-               body = view_result['coordinates'][view.coordinates][0]['body']
+               body = ''
+               if 'coordinates' in view_result:
+                   body = view_instance.render_item(view_result['coordinates'][view.coordinates][0], view_instance.coordinates, None)
+
                action_id = a.action.behavior_id
                try:
                    action_id = action_id+str(get_oid(a.action))+'_'+str(get_oid(c))
@@ -532,6 +543,8 @@ class DoActivitiesProcessView(BasicView):
                for user in assigned_to:
                    users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
 
+               a_url = self.request.mgmt_path(self.context, '@@'+self.name)+'?action_uid='+str(get_oid(a.action))
+               
                _item.update({'body':body,
                              'action':a.action,
                              'ismultiinstance':hasattr(a.action,'principalaction'),
@@ -539,6 +552,7 @@ class DoActivitiesProcessView(BasicView):
                              #'action_oid': get_oid(a.action),
                              'data': c,
                              'actionurl': a.url,
+                             'afterurl':a_url,
                              'dataurl': self.request.mgmt_path(c, '@@index'),
                              'assignedto': users})
                allbodies_actions.append(_item)
@@ -604,6 +618,17 @@ class DoActivitiesProcessView(BasicView):
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
         return result
+
+
+@mgmt_view(name='actionsrealiser', context=Process, xhr=True, renderer='json')
+class DoActivitiesProcessView_json(DoActivitiesProcessView):
+
+    def __call__(self):
+        import pdb; pdb.set_trace()
+        action = get_obj(int(self.params('action_uid')))
+        action.after_execution(None, self.request)
+         
+        return {}
 
 
 @colander.deferred

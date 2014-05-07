@@ -29,6 +29,14 @@ class FormView(ElementaryView, FV):
         View.setviewid(self,viewid)
         self.formid = viewid
 
+    def view_resources(self):
+        form, reqts = self._build_form()
+        result = {}
+        result['js_links'] = reqts['js']
+        result['css_links'] = reqts['css']
+        return result
+        
+
     def update(self,):
         #if not self.buttons:
         #    e = ViewError()

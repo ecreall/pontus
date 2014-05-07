@@ -123,6 +123,9 @@ class View(Step):
 
         return result
 
+    def view_resources(self):
+        pass
+
     def content(self, result, template=None, main_template=None):
         if template is None:
             template = self_template
