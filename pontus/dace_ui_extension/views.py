@@ -624,7 +624,7 @@ class DoActivitiesProcessView(BasicView):
 class DoActivitiesProcessView_json(DoActivitiesProcessView):
 
     def __call__(self):
-        import pdb; pdb.set_trace()
+        #merge views
         action = get_obj(int(self.params('action_uid')))
         action.after_execution(None, self.request)
          
