@@ -51,10 +51,6 @@ class ViewOperation(View):
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(ViewOperation, self).__init__(context, request, parent, wizard, stepid, **kwargs)
-        tomerge = self.params('tomerge')
-        if tomerge is not None:
-            self.merged = bool(tomerge) 
- 
         if hasattr(self.views, '__func__'):
             self.views = self.views.__func__
 
@@ -65,6 +61,13 @@ class ViewOperation(View):
             self.views = [self.views]
 
         self.contexts = self.contexts()
+
+
+    def _request_configuration(self):
+        super(ViewOperation, self)._request_configuration()
+        tomerge = self.params('tomerge')
+        if tomerge is not None:
+            self.merged = bool(tomerge) 
 
     #l'operation renvoie une vue qui peut etre executable ou non. 
     #Il faut donc une fonction qui fixe si la vue renvoyee est executable ou non.
@@ -108,13 +111,6 @@ class MultipleContextsOperation(ViewOperation):
 
             self.children.append(subview)
             self.allviews.append(subview)
-
-    def view_resources(self):
-        result = {}
-        for view in self.children:
-            result.update(view.view_resources())
-     
-        return result
 
 
 class MultipleContextsViewsOperation(ViewOperation):
@@ -189,14 +185,7 @@ class MultipleView(MultipleViewsOperation):
     def before_update(self):
         for view in self.children:
             view.before_update()
-
-    def view_resources(self):
-        result = {}
-        for view in self.children:
-            result.update(view.view_resources())
- 
-        return result      
-
+     
     def update(self,):
         #validation
         if not self.children:
@@ -786,18 +775,7 @@ class Wizard(MultipleViewsOperation):
             if not view._outgoing:
                 result.append(view)
 
-        return result
-
-    def view_resources(self):
-        stepidkey = STEPID+self.viewid
-        if stepidkey in self.request.session:
-            self.currentsteps = [self.viewsinstances[self.request.session.pop(stepidkey)]]
-
-        result = {}
-        for view in self.currentsteps:
-            result.update(view.view_resources())
- 
-        return result  
+        return result 
 
     def update(self):
         stepidkey = STEPID+self.viewid

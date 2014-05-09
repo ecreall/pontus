@@ -41,20 +41,24 @@
                 <td >
                    <a id="${a['action_id']}-btn" 
                       class="btn btn-primary btn-sm dace-action" 
-                      style="max-width: 300px;" 
-                      data-toggle="modal" href="${a['actionurl']}" 
-                      data-target="#${a['action_id']}">
+                      style="max-width: 300px;"
+                      href="${a['actionurl']}"   
+                      data-toggle="modal"
+                      data-actionid ="${a['action_id']}" 
+                      data-target="#${a['action_id']}"
+                      data-updateurl="${a['actionurl_update']}"
+                      data-toreplay="${'toreplay' in a}">
                      <span class="glyphicon glyphicon-cog"></span> ${a['action'].title}
-                   </a>
-                      <script tal:condition="'toreplay' in a">
+                   </a>  
+                      <script tal:condition="'toreplay' in a">       
                         $(document).ready(function(){
-                            $(${'\"#'+a['action_id']+'-modal\"'}).modal('show');
+                             $(${'\'#'+a['action_id']+'-btn\''}).click();
                         });
-                      </script>     
+                      </script>  
                       <script>
                         $(document).ready(function(){
                             $(${'\'#'+a['action_id']+'-modal\''}).on('hidden.bs.modal', function (e) {
-                               after_execution(${'\"'+a['afterurl']+'\"'})
+                               after_execution(${'\"'+a['actionurl_after']+'\"'})
                               })
                         });
                       </script>
@@ -80,23 +84,26 @@
                 <td tal:condition="'actions' in a">
                   <ul class="nav nav-pills nav-stacked" tal:repeat="aa a['actions']">
                     <li >
-                      <a id="${aa['action_id']}-btn" 
-                         class="btn btn-primary btn-sm dace-action" 
-                         style="max-width: 300px;" 
-                         data-toggle="modal" 
-                         href="${aa['actionurl']}" 
-                         data-target="#${aa['action_id']}">
-                        <span class="glyphicon glyphicon-cog"></span> ${aa['action'].title}
+                   <a id="${aa['action_id']}-btn" 
+                      class="btn btn-primary btn-sm dace-action" 
+                      style="max-width: 300px;"
+                      href="${aa['actionurl']}"   
+                      data-toggle="modal"
+                      data-actionid ="${aa['action_id']}" 
+                      data-target="#${aa['action_id']}"
+                      data-updateurl="${aa['actionurl_update']}"
+                      data-toreplay="${'toreplay' in aa}">
+                     <span class="glyphicon glyphicon-cog"></span> ${aa['action'].title}
                       </a>
                       <script tal:condition="'toreplay' in aa">       
                         $(document).ready(function(){
                              $(${'\'#'+aa['action_id']+'-btn\''}).click();
                         });
-                      </script>
-                      <script >       
+                      </script>  
+                      <script>
                         $(document).ready(function(){
                             $(${'\'#'+aa['action_id']+'-modal\''}).on('hidden.bs.modal', function (e) {
-                               after_execution(${'\"'+aa['afterurl']+'\"'})
+                               after_execution(${'\"'+aa['actionurl_after']+'\"'})
                               })
                         });
                       </script>

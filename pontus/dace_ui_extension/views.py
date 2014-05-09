@@ -35,6 +35,7 @@ from pontus.view import BasicView, ViewError
 from pontus.form import FormView
 from pontus.schema import Schema
 from pontus.widget import  SequenceWidget, Select2Widget
+from pontus.dace_ui_extension import Dace_ui_api
 
 
 def calculatePage(elements, view, tabid):
@@ -354,7 +355,7 @@ class ProcessView(BasicView):
            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
            view_instance = view(definition, self.request) 
            view_result = view_instance.update()
-           body = view_result['coordinates'][view.coordinates][0]['body']
+           body = view_result['coordinates'][view_instance .coordinates][0]['body']
            alldefinitions_actions.append({'body':body, 'action':a.action})
            if 'js_links' in view_result:
                resources['js_links'].extend(view_result['js_links'])
@@ -478,9 +479,6 @@ class DoActivitiesProcessView(BasicView):
     behaviors = [DoActivitiesProcess]
 
 
-
-
-
     def _modal_views(self, all_actions, form_id, caa=False):
         action_updated=False
         resources = {}
@@ -489,80 +487,97 @@ class DoActivitiesProcessView(BasicView):
         allbodies_actions = []
         updated_view = None
         for t in all_actions:
-           a = t[1]
-           c = t[0]
-           view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
-           view_instance = view(c, self.request, behaviors=[a.action])
-           view_result = {}
-           if not action_updated and form_id is not None and form_id.startswith(view_instance.viewid):
-               action_updated = True
-               updated_view = view_instance
-               view_result = view_instance()
-           else:
-               view_result = view_instance.view_resources()
+            a = t[1]
+            c = t[0]
+            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
+            view_instance = view(c, self.request, behaviors=[a.action])
+            view_result = {}
+            if not action_updated and form_id is not None and form_id.startswith(view_instance.viewid):
+                action_updated = True
+                updated_view = view_instance
+                view_result = view_instance()
+            else:
+                view_result = view_instance.view_resources()
 
-           if updated_view is view_instance and view_instance.finished_successfully:
-               return True, True, None, None
+            if updated_view is view_instance and view_instance.finished_successfully:
+                return True, True, None, None
               
-           if isinstance(view_result, dict):
-               _item = {}
-               if updated_view is view_instance and not view_instance.finished_successfully:
-                   _item['toreplay'] = True
+            if isinstance(view_result, dict):
+                _item = {}
+                if updated_view is view_instance and not view_instance.finished_successfully:
+                    _item['toreplay'] = True
 
-               if caa:
-                   actions_as = sorted(a.action.actions, key=lambda aa: aa.action.behavior_id)
-                   a_actions = [(a.action, aa) for aa in actions_as]
-                   toreplay, action_updated_as, resources_as, allbodies_actions_as = self._modal_views(a_actions, form_id)
-                   if toreplay:
-                       return True, True, None, None
+                if caa:
+                    actions_as = sorted(a.action.actions, key=lambda aa: aa.action.behavior_id)
+                    a_actions = [(a.action, aa) for aa in actions_as]
+                    toreplay, action_updated_as, resources_as, allbodies_actions_as = self._modal_views(a_actions, form_id)
+                    if toreplay:
+                        return True, True, None, None
  
-                   if action_updated_as:
-                       action_updated = True 
+                    if action_updated_as:
+                        action_updated = True 
                    
-                   resources['js_links'].extend(resources_as['js_links'])
-                   resources['js_links'] = list(set(resources['js_links']))
-                   resources['css_links'].extend(resources_as['css_links'])
-                   resources['css_links'] =list(set(resources['css_links']))
-                   _item['actions'] = allbodies_actions_as
+                    resources['js_links'].extend(resources_as['js_links'])
+                    resources['js_links'] = list(set(resources['js_links']))
+                    resources['css_links'].extend(resources_as['css_links'])
+                    resources['css_links'] =list(set(resources['css_links']))
+                    _item['actions'] = allbodies_actions_as
 
-               body = ''
-               if 'coordinates' in view_result:
-                   body = view_instance.render_item(view_result['coordinates'][view.coordinates][0], view_instance.coordinates, None)
+                body = ''
+                if 'coordinates' in view_result:
+                    body = view_result['coordinates'][view_instance.coordinates][0]['body']
 
-               action_id = a.action.behavior_id
-               try:
-                   action_id = action_id+str(get_oid(a.action))+'_'+str(get_oid(c))
-               except Exception:
-                   try:
-                       action_id = action_id+'Start'+'_'+str(get_oid(c))
-                   except Exception:
-                       action_id = action_id+'Start'
+                action_id = a.action.behavior_id
+                action_oid = 'start'
+                context_oid = ''
+                try:
+                    action_oid = get_oid(a.action)
+                except Exception:
+                    pass
 
-               assigned_to = sorted(a.action.assigned_to, key=lambda u: u.__name__)
-               users= []
-               for user in assigned_to:
-                   users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
+                try:
+                    context_oid = get_oid(c)
+                except Exception:
+                    pass
 
-               a_url = self.request.mgmt_path(self.context, '@@'+self.name)+'?action_uid='+str(get_oid(a.action))
-               
-               _item.update({'body':body,
+                action_id= action_id+str(action_oid)+'_'+str(context_oid)
+                assigned_to = sorted(a.action.assigned_to, key=lambda u: u.__name__)
+                users= []
+                for user in assigned_to:
+                    users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
+
+                after_url = Dace_ui_api.afterexecution_viewurl(action_uid=str(action_oid), context_uid=str(context_oid)) 
+                actionurl_update = Dace_ui_api.updateaction_viewurl(action_uid=str(action_oid), context_uid=str(context_oid))
+                if action_oid == 'start':
+                    after_url = Dace_ui_api.afterexecution_viewurl(action_uid=str(action_oid),
+                                                                   context_uid=str(context_oid),
+                                                                   pd_id=a.action.process.id,
+                                                                   action_id=a.action.definition.id,
+                                                                   behavior_id=a.action.behavior_id) 
+                    actionurl_update = Dace_ui_api.updateaction_viewurl(action_uid=str(action_oid),
+                                                                   context_uid=str(context_oid),
+                                                                   pd_id=a.action.process.id,
+                                                                   action_id=a.action.definition.id,
+                                                                   behavior_id=a.action.behavior_id) 
+
+                _item.update({'body':body,
                              'action':a.action,
                              'ismultiinstance':hasattr(a.action,'principalaction'),
                              'action_id':action_id,
-                             #'action_oid': get_oid(a.action),
-                             'data': c,
                              'actionurl': a.url,
-                             'afterurl':a_url,
+                             'actionurl_update': actionurl_update,
+                             'actionurl_after':after_url,
+                             'data': c,
                              'dataurl': self.request.mgmt_path(c, '@@index'),
                              'assignedto': users})
-               allbodies_actions.append(_item)
-               if 'js_links' in view_result:
-                   resources['js_links'].extend(view_result['js_links'])
-                   resources['js_links'] = list(set(resources['js_links']))
+                allbodies_actions.append(_item)
+                if 'js_links' in view_result:
+                    resources['js_links'].extend(view_result['js_links'])
+                    resources['js_links'] = list(set(resources['js_links']))
 
-               if 'css_links' in view_result:
-                   resources['css_links'].extend(view_result['css_links'])
-                   resources['css_links'] =list(set(resources['css_links']))
+                if 'css_links' in view_result:
+                    resources['css_links'].extend(view_result['css_links'])
+                    resources['css_links'] =list(set(resources['css_links']))
 
         return False, action_updated, resources, allbodies_actions
 
@@ -617,18 +632,12 @@ class DoActivitiesProcessView(BasicView):
         item['isactive'] = action_updated
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
+        if 'js_links' in result:
+            result['js_links'].append('pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js')
+        else:
+            result['js_links'] = ['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
+
         return result
-
-
-@mgmt_view(name='actionsrealiser', context=Process, xhr=True, renderer='json')
-class DoActivitiesProcessView_json(DoActivitiesProcessView):
-
-    def __call__(self):
-        #merge views
-        action = get_obj(int(self.params('action_uid')))
-        action.after_execution(None, self.request)
-         
-        return {}
 
 
 @colander.deferred

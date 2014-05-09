@@ -72,6 +72,13 @@ class View(Step):
         
         if self.context is not None:
             self.viewid = self.viewid+'_'+str(get_oid(self.context))
+     
+        self._request_configuration()
+
+    def _request_configuration(self):
+        coordinates = self.params('coordinates') #++
+        if coordinates is not None:
+            self.coordinates = coordinates
 
     def validate(self):
         for validator in self.validators:
@@ -101,10 +108,6 @@ class View(Step):
         pass
 
     def __call__(self):
-        coordinates = self.params('coordinates')
-        if coordinates is not None:
-            self.coordinates = coordinates
-
         result = None
         try:
             self.validate()
@@ -122,9 +125,6 @@ class View(Step):
                 result['css_links'] = []
 
         return result
-
-    def view_resources(self):
-        pass
 
     def content(self, result, template=None, main_template=None):
         if template is None:
