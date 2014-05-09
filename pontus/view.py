@@ -18,6 +18,11 @@ from dace.processinstance.core import  ValidationError
 
 from pontus.interfaces import IView
 from pontus.core import Step
+from pontus.resources import (
+                BehaviorViewErrorPrincipalmessage,
+                BehaviorViewErrorCauses,
+                BehaviorViewErrorSolutions)
+
 
 
 class ViewError(Exception):
@@ -188,6 +193,7 @@ class ElementaryView(View):
         self._allvalidators = list(self.validators)
         if self.validate_behaviors:
             self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors])
+            
 
         self.init_behaviorinstances= []
         if 'behaviors' in kwargs:
@@ -200,8 +206,17 @@ class ElementaryView(View):
         for validator in self._allvalidators:
             try:
                 validator.validate(self.context, self.request)
+                if self.validate_behaviors and self.init_behaviorinstances:
+                    for init_v in self.init_behaviorinstances:
+                        if not init_v.validate(self.context, self.request):
+                            raise ValidationError()
+                    
             except ValidationError as e:
-                raise ViewError()
+                ve = ViewError()
+                ve.principalmessage = BehaviorViewErrorPrincipalmessage
+                ve.causes = BehaviorViewErrorCauses
+                ve.solutions = BehaviorViewErrorSolutions
+                raise ve
 
         return True
 
@@ -218,8 +233,9 @@ class ElementaryView(View):
                 continue
 
         for behaviorinstance in self.init_behaviorinstances:
-                key = behaviorinstance.__class__.__name__
-                _behaviorinstances[key] = behaviorinstance
+                if behaviorinstance.validate(self.context, self.request):
+                    key = behaviorinstance.__class__.__name__
+                    _behaviorinstances[key] = behaviorinstance
 
         if _behaviorinstances:
             sorted_behaviors = _behaviorinstances.values()

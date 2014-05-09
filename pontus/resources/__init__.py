@@ -14,3 +14,10 @@ CallViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour app
 CallViewErrorCildrenNotValidatedmessage = u"Certaines informations n'ont pas été prises en compte!"
 CallViewViewErrorCauses =  [u"Vous ne disposez pas des rôles nécessaires.",
                             u"Certaines conditions ne sont pas encore satisfaites."]
+
+
+BehaviorViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour réaliser l'action demandée."
+BehaviorViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
+                        u"Certaines conditions ne sont pas encore satisfaites.",
+                        u"L'action est vérouiée par un autre utilisateur."]
+BehaviorViewErrorSolutions = [u"Contactez l'administrateur..."]

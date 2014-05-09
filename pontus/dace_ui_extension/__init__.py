@@ -53,6 +53,7 @@ class Dace_ui_api_json(BasicView):
         action = None
         context = None
         result = {}
+        error_messages = ''
         try:
             if action_uid is not None:
                 if action_uid != 'start':
@@ -71,25 +72,26 @@ class Dace_ui_api_json(BasicView):
         if action is not None:
             view = DEFAULTMAPPING_ACTIONS_VIEWS[action._class]
             view_instance = view(context, self.request, behaviors=[action])
-            result = view_instance()
+            view_result = view_instance()
+            body = ''
+            if 'coordinates' in view_result:
+                body = view_instance.render_item(view_result['coordinates'][view.coordinates][0], view_instance.coordinates, None)
 
+            result['body'] = body
             if isinstance(result, dict):
-                if 'js_links' in result and result['js_links']:
+                if 'js_links' in view_result and view_result['js_links']:
                     js_links = []
-                    for js in result['js_links']:
+                    for js in view_result['js_links']:
                         js_links.append(self.request.static_url(js))
            
-                result['js_links']
-                if 'css_links' in result and result['css_links']:
+                    result['js_links'] = js_links
+                if 'css_links' in view_result and view_result['css_links']:
                     css_links = []
-                    for css in result['css_links']:
+                    for css in view_result['css_links']:
                         css_links.append(self.request.static_url(css))
            
-                result['css_links']
-                for coordinate, items in result['coordinates'].iteritems():
-                    for item in items:
-                        if 'view' in item:
-                            item.pop('view')
+                    result['css_links'] = css_links
+
 
         return result
 

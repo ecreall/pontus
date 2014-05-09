@@ -525,7 +525,8 @@ class DoActivitiesProcessView(BasicView):
 
                 body = ''
                 if 'coordinates' in view_result:
-                    body = view_result['coordinates'][view_instance.coordinates][0]['body']
+                    body = view_instance.render_item(view_result['coordinates'][view.coordinates][0], view_instance.coordinates, None)
+                    #body = view_result['coordinates'][view_instance.coordinates][0]['body']
 
                 action_id = a.action.behavior_id
                 action_oid = 'start'

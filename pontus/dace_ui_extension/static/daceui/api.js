@@ -10,7 +10,7 @@ function update_action(url){
               if (Boolean(toreplay)){$(target).modal('show'); return false}
               var url = $(this).closest('.dace-action').data('updateurl');
               $.getJSON(url,{tomerge:'True', coordinates:'main'}, function(data) {
-                var action_body = data['coordinates']['main'][0]['body'];
+                var action_body = data['body']
                 var js_links = data['js_links'];
                 var css_links = data['css_links'];
                 //start: source (http://www.hunlock.com/blogs/Howto_Dynamically_Insert_Javascript_And_CSS)
