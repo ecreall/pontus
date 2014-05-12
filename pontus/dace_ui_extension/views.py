@@ -40,10 +40,6 @@ from pontus.dace_ui_extension import calculatePage
 from pontus.view_operation import MultipleView
 
 
-class DaceBasicMultipleView(MultipleView):
-    self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
-   # item_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
-
 
 @mgmt_view(
     name = 'Processes',
@@ -598,12 +594,13 @@ class AssignActionToUsersView(FormView):
     context=IBusinessAction,
     renderer='pontus:templates/view.pt',
     )
-class AssignActionToUsersMultipleView(DaceBasicMultipleView):
+class AssignActionToUsersMultipleView(MultipleView):
     title = 'Assigner l\'action'
     viewid = 'assigne_users_view'
+    name='assign_action'
+    self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
     views = (AssignedUsersView, AssignActionToUsersView)
     validators = [AssignActionToUsers.get_validator()]
-    name='assign_action'
 
 
 DEFAULTMAPPING_ACTIONS_VIEWS.update({SeeProcessesDef:ProcessDefinitionContainerView,
