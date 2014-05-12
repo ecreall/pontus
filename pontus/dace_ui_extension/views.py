@@ -40,6 +40,11 @@ from pontus.dace_ui_extension import calculatePage
 from pontus.view_operation import MultipleView
 
 
+class DaceBasicMultipleView(MultipleView):
+    self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
+   # item_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
+
+
 @mgmt_view(
     name = 'Processes',
     context=Runtime,
@@ -51,7 +56,6 @@ class RuntimeView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/runtime_view.pt'
     viewid = 'processes'
     name='Processes'
-    #coordinates = 'left'
     behaviors = [SeeProcesses]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -106,7 +110,6 @@ class ProcessDefinitionContainerView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/defcontainer_view.pt'
     viewid = 'processes'
     name='ProcessesDef'
-    #coordinates = 'left'
     behaviors = [SeeProcessesDef]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -181,7 +184,6 @@ class ProcessDefinitionView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/processdef_view.pt'
     viewid = 'processdef'
     name='ProcessDef'
-    #coordinates = 'left'
     behaviors = [SeeProcessDef]
 
     def update(self):
@@ -205,7 +207,6 @@ class ProcessesPDDefinitionView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/processinstances_view.pt'
     viewid = 'processinstances'
     name='ProcessInst'
-    #coordinates = 'left'
     behaviors = [InstanceProcessesDef]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -249,7 +250,6 @@ class ProcessView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/process_view.pt'
     viewid = 'process'
     name='Process'
-    #coordinates = 'left'
     behaviors = [SeeProcess]
 
     def _actions(self):
@@ -331,7 +331,6 @@ class ProcessDataView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/processdatas_view.pt'
     viewid = 'processdata'
     name='Les donnees manipulees'
-    #coordinates = 'left'
     behaviors = [SeeProcessDatas]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -391,7 +390,6 @@ class DoActivitiesProcessView(BasicView):
     self_template = 'pontus:dace_ui_extension/templates/processactions_view.pt'
     viewid = 'processactions'
     name='actionsrealiser'
-    #coordinates = 'left'
     behaviors = [DoActivitiesProcess]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -559,10 +557,8 @@ class AssignToUsersView(FormView):
     title = 'Assigner l\'activitee'
     schema = AssignToUsersViewSchema()
     formid = 'assign_activity_form'
-    #coordinates = 'left'
     behaviors = [AssignToUsers]
     name='assign_activity'
-    #use_ajax = True
 
 
 class AssignedUsersView(BasicView):
@@ -592,10 +588,9 @@ class AssignActionToUsersView(FormView):
     title = 'Assigner l\'action'
     schema = AssignToUsersViewSchema()
     formid = 'assigne_action_form'
-    #coordinates = 'left'
     behaviors = [AssignActionToUsers]
+    validate_behaviors = False
     name='assign_action_form'
-    #use_ajax = True
 
 
 @mgmt_view(
@@ -603,10 +598,9 @@ class AssignActionToUsersView(FormView):
     context=IBusinessAction,
     renderer='pontus:templates/view.pt',
     )
-class AssignActionToUsersMultipleView(MultipleView):
-    viewid = 'assigne_users_view'
+class AssignActionToUsersMultipleView(DaceBasicMultipleView):
     title = 'Assigner l\'action'
-    self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
+    viewid = 'assigne_users_view'
     views = (AssignedUsersView, AssignActionToUsersView)
     validators = [AssignActionToUsers.get_validator()]
     name='assign_action'
