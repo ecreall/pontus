@@ -342,7 +342,6 @@ class AssignToUsers(InfiniteCardinality):
 
 class AssignActionToUsers(InfiniteCardinality):
 
-    isSequential = True
     context = IBusinessAction
     relation_validation = relation_validationA
     roles_validation = roles_validationA

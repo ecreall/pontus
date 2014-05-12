@@ -62,11 +62,12 @@
 	 </div>
 	 <div class="panel-collapse collapse" id="panel-element-piechart" style="height: auto;">
           <script type="text/javascript">
+             
               var data;
               var chart;
 
               // Load the Visualization API and the piechart package.
-              google.load('visualization', '1', {'packages':['corechart']});
+              google.load('visualization', '1', {'callback':'drawChart','packages':['corechart']});
 
               // Set a callback to run when the Google Visualization API is loaded.
               google.setOnLoadCallback(drawChart);
@@ -108,7 +109,6 @@
                 if (value == "Termines") {code = 'termines';}
                  $('#'+code).modal('show');
               }
-
             </script>
            <div id="chart_div" style="width:300px; height:300px;"></div>
          </div>

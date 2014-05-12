@@ -34,16 +34,19 @@ class ViewError(Exception):
 
     
 def merge_dicts(source, target):
-    result = target
+    result = dict(target)
     for k in source.keys():
         if k in result.keys():
             if isinstance(result[k], list):
-                result[k].extend(source[k])
+                result[k].extend(list(source[k]))
             elif isinstance(result[k], dict):
                 result[k] = merge_dicts(source[k], result[k])
         else:
-            result[k] = source[k]
-       
+            if isinstance(source[k], list):
+                result[k] = list(source[k])
+            else:
+                result[k] = source[k]
+
     return result
 
 
@@ -59,6 +62,7 @@ class View(Step):
     validators = []
     item_template = 'templates/subview.pt'
     self_template = None
+    requirements = None
 
     def render_item(self, item, coordinates, parent):
         body = renderers.render(self.item_template, {'coordinates':coordinates,'subitem':item, 'parent': parent}, self.request)
@@ -84,6 +88,24 @@ class View(Step):
         coordinates = self.params('coordinates') #++
         if coordinates is not None:
             self.coordinates = coordinates
+    
+    @property
+    def requirements_copy(self):
+        if self.requirements is None:
+            return {'css_links':[], 'js_links':[]}
+        else:
+            copy = {}
+            if 'css_links' in self.requirements:
+                copy['css_links'] = list(self.requirements['css_links'])
+
+            if 'js_links' in self.requirements:
+                copy['js_links'] = list(self.requirements['js_links'])
+
+            return copy
+
+    def get_view_requirements(self):
+
+        return self.requirements_copy
 
     def validate(self):
         for validator in self.validators:

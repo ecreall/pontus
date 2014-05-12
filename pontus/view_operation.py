@@ -112,6 +112,13 @@ class MultipleContextsOperation(ViewOperation):
             self.children.append(subview)
             self.allviews.append(subview)
 
+    def get_view_requirements(self):
+        result = self.requirements_copy
+        for view in self.children:
+            view_requirements = view.get_view_requirements()
+            result = merge_dicts(view_requirements, result)
+
+        return result
 
 class MultipleContextsViewsOperation(ViewOperation):
     pass
@@ -151,8 +158,8 @@ class MultipleView(MultipleViewsOperation):
     builder = default_builder
     self_template = 'templates/submultipleview.pt'
     
-    def __init__(self, context, request, parent=None, wizard=None, stepid=None):
-        super(MultipleView, self).__init__(context, request, parent, wizard, stepid)
+    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+        super(MultipleView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.children = []
         self._coordinates = []
         if self.views:
@@ -161,6 +168,14 @@ class MultipleView(MultipleViewsOperation):
     def _init_views(self, views):
         self.builder(views)
         self.define_executable()
+
+    def get_view_requirements(self):
+        result = self.requirements_copy
+        for view in self.children:
+            view_requirements = view.get_view_requirements()
+            result = merge_dicts(view_requirements, result)
+
+        return result 
 
     def define_executable(self):
         _isexecutable =False
@@ -746,6 +761,17 @@ class Wizard(MultipleViewsOperation):
         self._add_endnode()
         self.currentsteps = [t.target for t in self.startnode._outgoing]
 
+    def get_view_requirements(self):
+        stepidkey = STEPID+self.viewid
+        if stepidkey in self.request.session:
+            self.currentsteps = [self.viewsinstances[self.request.session.pop(stepidkey)]]
+
+        result = self.requirements_copy
+        for view in self.currentsteps:
+            view_requirements = view.get_view_requirements()
+            result = merge_dicts(view_requirements, result)
+
+        return result 
 
     def _add_startnode(self):
         initnodes = self._getinitnodes()

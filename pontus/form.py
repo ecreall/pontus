@@ -8,7 +8,7 @@ import colander
 from substanced.form import FormView as FV, FormError
 
 from pontus.interfaces import IFormView
-from pontus.view import ElementaryView, ViewError
+from pontus.view import ElementaryView, ViewError, merge_dicts
 from pontus.resources import CallViewErrorPrincipalmessage, CallViewViewErrorCauses
 
 
@@ -29,14 +29,15 @@ class FormView(ElementaryView, FV):
         View.setviewid(self,viewid)
         self.formid = viewid
 
-    def view_resources(self):
+    def get_view_requirements(self):
         form, reqts = self._build_form()
         result = {}
-        result['js_links'] = reqts['js']
-        result['css_links'] = reqts['css']
+        result['js_links'] = list(reqts['js'])
+        result['css_links'] = list(reqts['css'])
+        _requirements = self.requirements_copy
+        result = merge_dicts(_requirements, result)
         return result
         
-
     def update(self,):
         #if not self.buttons:
         #    e = ViewError()
@@ -93,8 +94,8 @@ class FormView(ElementaryView, FV):
                 item['isactive'] = True
 
             result['coordinates'] = {self.coordinates:[item]}
-            result['js_links'] = reqts['js']
-            result['css_links'] = reqts['css']
+            result['js_links'] = list(reqts['js'])
+            result['css_links'] = list(reqts['css'])
         else:
             result = item
 

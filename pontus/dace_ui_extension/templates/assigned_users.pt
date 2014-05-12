@@ -1,0 +1,14 @@
+<div tal:condition="users" class="alert alert-info">
+Cette action est assignée à la liste des utlisateurs suivante:
+                  <ul  class="list-inline" tal:repeat="u users">
+                    <li >
+                       <a href="${u['userurl']}" class="alert-link">${u['title']}</a>
+                    </li>
+                  </ul>
+Seulement ces utilisateurs ont le droit de réaliser cette action.
+</div>
+<div tal:condition="not users" class="alert alert-warning">
+L'action n'est pas assignée. Les utilisateurs ayant les rôles nécessaires peuvent effectuer cette action.
+Une fois l'action est assignée, seulement les utilisateurs à qui on a assigné l'action auront le droit de l'exécuter.
+</div>
+

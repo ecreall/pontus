@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
 import re
 import colander
-import datetime
 from pyramid.response import Response
+from pyramid.threadlocal import get_current_registry
 
 from substanced.sdi import mgmt_view
 from substanced.sdi import LEFT
@@ -31,36 +31,13 @@ from .processes import (
            DoActivitiesProcess,
            AssignToUsers,
            AssignActionToUsers)
-from pontus.view import BasicView, ViewError
+from pontus.view import BasicView, ViewError, merge_dicts
 from pontus.form import FormView
 from pontus.schema import Schema
 from pontus.widget import  SequenceWidget, Select2Widget
-from pontus.dace_ui_extension import Dace_ui_api
-
-
-def calculatePage(elements, view, tabid):
-    page = view.params('page'+tabid)
-    number = view.params('number'+tabid)
-    if number is None:
-        number = 7
-    else:
-        number = int(number)
-
-    import numpy as np
-    pages = int(np.ceil(float(len(elements))/number))
-    if pages > 0:
-        if page is None:
-            page = 1
-        else:
-            page = int(page)
-
-        endpage = page*number
-        if (endpage) > len(elements):
-            endpage = len(elements)
-
-        elements = elements[((page-1)*number):endpage]
-
-    return page, pages, elements
+from pontus.dace_ui_extension.interfaces import IDaceUIAPI
+from pontus.dace_ui_extension import calculatePage
+from pontus.view_operation import MultipleView
 
 
 @mgmt_view(
@@ -76,48 +53,13 @@ class RuntimeView(BasicView):
     name='Processes'
     #coordinates = 'left'
     behaviors = [SeeProcesses]
-
-    def _processes(self, processes):
-        allprocesses = []
-        nb_encours = 0
-        nb_bloque = 0
-        nb_termine = 0
-        for p in processes:
-            bloced = not p.getWorkItems()
-            processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'bloced':bloced, 'created_at': p.created_at}
-            allprocesses.append(processe)
-            if p._finished:
-                nb_termine += 1
-            elif bloced:
-                nb_bloque += 1
-            else:
-                nb_encours += 1
-
-        return nb_encours, nb_bloque, nb_termine, allprocesses
-
-    def _update(self, processes, tabid):
-        result = {}
-        processes = sorted(processes, key=lambda p: p.created_at)
-        page, pages, processes = calculatePage(processes, self, tabid)
-        nb_encours, nb_bloque, nb_termine, allprocesses = self._processes(processes)
-        #import pdb; pdb.set_trace()
-        values = {'processes': allprocesses, 
-                  'encours':nb_encours,
-                  'bloque':nb_bloque,
-                  'termine':nb_termine,
-                  'tabid':tabid,
-                  'page': page,
-                  'pages': pages,
-                  'url': self.request.relative_url(None)}
-        body = self.content(result=values, template=self.self_template)['body']
-        item = self.adapt_item(body, self.viewid)
-        result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
-        return result
+    requirements = {'css_links':[],
+                    'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
 
     def update(self):
         self.execute(None)
-        result = self._update(self.context.processes, self.__class__.__name__+'AllProcesses')
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
+        result = dace_ui_api.update_processes(self, self.context.processes, self.__class__.__name__+'AllProcesses')
         return result
 
 
@@ -135,61 +77,21 @@ class ProcessStatisticView(BasicView):
     name='StatisticRun'
     coordinates = 'left'
     behaviors = [StatisticProcesses]
-
-    def _dates(self, processes):
-        dates = {}
-        for p in processes:
-            created_at = p.created_at
-            date = str(datetime.datetime(created_at.year, created_at.month, created_at.day, created_at.hour, created_at.minute))
-            if date in dates:
-                dates[date] += 1
-            else:
-                dates[date] = 1
-
-        dates = sorted(dates.iteritems(), key=lambda i: i[0])
-        return dates
-
-    def _values(self, processes, tabid):
-        runtime_view = RuntimeView(self.context, self.request)
-        nb_encours, nb_bloque, nb_termine, allprocesses =  runtime_view._processes(processes)
-        
-        blocedprocesses = [p['process'] for p in  allprocesses if p['bloced'] and not p['process']._finished ]
-        terminetedprocesses = [ p['process'] for p in  allprocesses if p['process']._finished]
-        activeprocesses = [ p['process'] for p in  allprocesses if  not p['process']._finished and not p['bloced']]
-
-        result_bloced_runtime_v = runtime_view._update(blocedprocesses, tabid+'BlocedProcesses')
-        item = result_bloced_runtime_v['coordinates'][runtime_view.coordinates][0]
-        bloquesBody =item['body']
-
-        result_encours_runtime_v = runtime_view._update(activeprocesses, tabid+'RunProcesses')
-        item = result_encours_runtime_v['coordinates'][runtime_view.coordinates][0]
-        encoursBody =item['body']
-
-        result_termines_runtime_v = runtime_view._update(terminetedprocesses, tabid+'TerminetedProcesses')
-        item = result_termines_runtime_v['coordinates'][runtime_view.coordinates][0]
-        terminesBody =item['body']
-        values = {'encours':nb_encours,
-                  'bloque':nb_bloque,
-                  'termine':nb_termine,
-                  'terminesBody':terminesBody,
-                  'encoursBody':encoursBody,
-                  'bloquesBody':bloquesBody
-                }
-        return values
-        
+    requirements = {'css_links':[],
+                    'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js',
+                                 'pontus.dace_ui_extension:static/dygraph/dygraph-combined.js' ]}
 
     def update(self):
         self.execute(None)
         result = {}
-        values = self._values(self.context.processes, self.__class__.__name__)
-        dates = self._dates(self.context.processes)
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
+        values = dace_ui_api.statistic_processes(self, self.context.processes, self.__class__.__name__)
+        dates = dace_ui_api.statistic_dates(self, self.context.processes)
         values['dates'] = dates
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js',
-                            'pontus.dace_ui_extension:static/dygraph/dygraph-combined.js']
-
+        result  = merge_dicts(self.requirements_copy, result) 
         return result
 
 
@@ -206,6 +108,8 @@ class ProcessDefinitionContainerView(BasicView):
     name='ProcessesDef'
     #coordinates = 'left'
     behaviors = [SeeProcessesDef]
+    requirements = {'css_links':[],
+                    'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
 
     def _processes(self):
         from pontus.panels import NavBarPanel
@@ -230,7 +134,7 @@ class ProcessDefinitionContainerView(BasicView):
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
+        result  = merge_dicts(self.requirements_copy, result) 
         return result
 
 
@@ -248,19 +152,21 @@ class ProcessDefinitionStatisticView(BasicView):
     name='StatisticDef'
     coordinates = 'left'
     behaviors = [StatisticProcessesDef]
+    requirements = {'css_links':[],
+                    'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js',
+                                 'pontus.dace_ui_extension:static/dygraph/dygraph-combined.js' ]}
 
     def update(self):
         self.execute(None)
         result = {}
-        processStatisticView_instance = ProcessStatisticView(self.context, self.request)
-        values = processStatisticView_instance._values(self.context.started_processes, self.__class__.__name__)
-        dates = processStatisticView_instance._dates(self.context.started_processes)
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
+        values = dace_ui_api.statistic_processes(self, self.context.started_processes, self.__class__.__name__)
+        dates = dace_ui_api.statistic_dates(self, self.context.started_processes)
         values['dates'] = dates
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js',
-                            'pontus.dace_ui_extension:static/dygraph/dygraph-combined.js']
+        result  = merge_dicts(self.requirements_copy, result) 
         return result
 
 
@@ -301,6 +207,8 @@ class ProcessesPDDefinitionView(BasicView):
     name='ProcessInst'
     #coordinates = 'left'
     behaviors = [InstanceProcessesDef]
+    requirements = {'css_links':[],
+                    'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
 
     def _processes(self, tabid):
         processes = sorted(self.context.started_processes, key=lambda p: p.created_at)
@@ -322,11 +230,11 @@ class ProcessesPDDefinitionView(BasicView):
                   'tabid':tabid,
                   'page': page, 
                   'pages': pages,
-                  'url': self.request.relative_url(None)}
+                  'url': self.request.mgmt_path(self.context, '@@ProcessInst')}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
+        result  = merge_dicts(self.requirements_copy, result) 
         return result
 
 
@@ -351,17 +259,23 @@ class ProcessView(BasicView):
         resources = {}
         resources['js_links'] = []
         resources['css_links'] = []
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
         for a in definition_actions:
-           view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
-           view_instance = view(definition, self.request) 
-           view_result = view_instance.update()
-           body = view_result['coordinates'][view_instance .coordinates][0]['body']
-           alldefinitions_actions.append({'body':body, 'action':a.action})
-           if 'js_links' in view_result:
-               resources['js_links'].extend(view_result['js_links'])
+            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
+            view_instance = view(definition, self.request) 
+            view_result = view_instance.get_view_requirements()
+            body = ''
+            if 'coordinates' in view_result:
+                body = view_result['coordinates'][view_instance .coordinates][0]['body']
 
-           if 'css_links' in view_result:
-               resources['css_links'].extend(view_result['css_links'])
+            action_infos = dace_ui_api.action_infomrations(action=a.action, context=definition, request=self.request)
+            action_infos.update({'body':body, 'actionurl': a.url}) 
+            alldefinitions_actions.append(action_infos)
+            if 'js_links' in view_result:
+                resources['js_links'].extend(view_result['js_links'])
+
+            if 'css_links' in view_result:
+                resources['css_links'].extend(view_result['css_links'])
 
         return resources, alldefinitions_actions
 
@@ -419,6 +333,8 @@ class ProcessDataView(BasicView):
     name='Les donnees manipulees'
     #coordinates = 'left'
     behaviors = [SeeProcessDatas]
+    requirements = {'css_links':[],
+                    'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
 
     def _datas(self, involveds):
         alldatas = []
@@ -458,7 +374,7 @@ class ProcessDataView(BasicView):
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result['js_links']=['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
+        result  = merge_dicts(self.requirements_copy, result)  
         return result
 
 
@@ -477,7 +393,8 @@ class DoActivitiesProcessView(BasicView):
     name='actionsrealiser'
     #coordinates = 'left'
     behaviors = [DoActivitiesProcess]
-
+    requirements = {'css_links':[],
+                    'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
 
     def _modal_views(self, all_actions, form_id, caa=False):
         action_updated=False
@@ -486,6 +403,7 @@ class DoActivitiesProcessView(BasicView):
         resources['css_links'] = []
         allbodies_actions = []
         updated_view = None
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
         for t in all_actions:
             a = t[1]
             c = t[0]
@@ -497,15 +415,15 @@ class DoActivitiesProcessView(BasicView):
                 updated_view = view_instance
                 view_result = view_instance()
             else:
-                view_result = view_instance.view_resources()
+                view_result = view_instance.get_view_requirements()
 
             if updated_view is view_instance and view_instance.finished_successfully:
                 return True, True, None, None
               
             if isinstance(view_result, dict):
-                _item = {}
+                action_infos = {}
                 if updated_view is view_instance and not view_instance.finished_successfully:
-                    _item['toreplay'] = True
+                    action_infos['toreplay'] = True
 
                 if caa:
                     actions_as = sorted(a.action.actions, key=lambda aa: aa.action.behavior_id)
@@ -521,57 +439,25 @@ class DoActivitiesProcessView(BasicView):
                     resources['js_links'] = list(set(resources['js_links']))
                     resources['css_links'].extend(resources_as['css_links'])
                     resources['css_links'] =list(set(resources['css_links']))
-                    _item['actions'] = allbodies_actions_as
+                    action_infos['actions'] = allbodies_actions_as
 
                 body = ''
                 if 'coordinates' in view_result:
                     body = view_instance.render_item(view_result['coordinates'][view.coordinates][0], view_instance.coordinates, None)
-                    #body = view_result['coordinates'][view_instance.coordinates][0]['body']
 
-                action_id = a.action.behavior_id
-                action_oid = 'start'
-                context_oid = ''
-                try:
-                    action_oid = get_oid(a.action)
-                except Exception:
-                    pass
-
-                try:
-                    context_oid = get_oid(c)
-                except Exception:
-                    pass
-
-                action_id= action_id+str(action_oid)+'_'+str(context_oid)
                 assigned_to = sorted(a.action.assigned_to, key=lambda u: u.__name__)
                 users= []
                 for user in assigned_to:
                     users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
 
-                after_url = Dace_ui_api.afterexecution_viewurl(action_uid=str(action_oid), context_uid=str(context_oid)) 
-                actionurl_update = Dace_ui_api.updateaction_viewurl(action_uid=str(action_oid), context_uid=str(context_oid))
-                if action_oid == 'start':
-                    after_url = Dace_ui_api.afterexecution_viewurl(action_uid=str(action_oid),
-                                                                   context_uid=str(context_oid),
-                                                                   pd_id=a.action.process.id,
-                                                                   action_id=a.action.definition.id,
-                                                                   behavior_id=a.action.behavior_id) 
-                    actionurl_update = Dace_ui_api.updateaction_viewurl(action_uid=str(action_oid),
-                                                                   context_uid=str(context_oid),
-                                                                   pd_id=a.action.process.id,
-                                                                   action_id=a.action.definition.id,
-                                                                   behavior_id=a.action.behavior_id) 
-
-                _item.update({'body':body,
-                             'action':a.action,
+                action_infos.update(dace_ui_api.action_infomrations(action=a.action, context=c, request=self.request))
+                action_infos.update({'body':body,
                              'ismultiinstance':hasattr(a.action,'principalaction'),
-                             'action_id':action_id,
                              'actionurl': a.url,
-                             'actionurl_update': actionurl_update,
-                             'actionurl_after':after_url,
                              'data': c,
                              'dataurl': self.request.mgmt_path(c, '@@index'),
-                             'assignedto': users})
-                allbodies_actions.append(_item)
+                             'assignedto': users}) 
+                allbodies_actions.append(action_infos)
                 if 'js_links' in view_result:
                     resources['js_links'].extend(view_result['js_links'])
                     resources['js_links'] = list(set(resources['js_links']))
@@ -633,11 +519,7 @@ class DoActivitiesProcessView(BasicView):
         item['isactive'] = action_updated
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
-        if 'js_links' in result:
-            result['js_links'].append('pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js')
-        else:
-            result['js_links'] = ['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']
-
+        result  = merge_dicts(self.requirements_copy, result)  
         return result
 
 
@@ -662,6 +544,7 @@ class AssignToUsersViewSchema(Schema):
                 colander.Set(),
                 widget=listchoice,
                 default=defaultusers,
+                title = 'Les utilisateurs',
                 required=False
                 )
 
@@ -682,11 +565,28 @@ class AssignToUsersView(FormView):
     #use_ajax = True
 
 
-@mgmt_view(
-    name='assign_action',
-    context=IBusinessAction,
-    renderer='pontus:templates/view.pt',
-    )
+class AssignedUsersView(BasicView):
+    title = 'Les utilisateurs assignies'
+    name='assigned_users'
+    self_template = 'pontus.dace_ui_extension:templates/assigned_users.pt'
+    viewid = 'assigned_users_view'      
+    
+    def update(self):
+        assigned_to = sorted(self.context.assigned_to, key=lambda u: u.__name__)
+        users= []
+        for user in assigned_to:
+            users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
+
+        result = {}
+        values = {
+                'users': users,
+               }
+        body = self.content(result=values, template=self.self_template)['body']
+        item = self.adapt_item(body, self.viewid)
+        result['coordinates'] = {self.coordinates:[item]}
+        return result
+
+
 class AssignActionToUsersView(FormView):
 
     title = 'Assigner l\'action'
@@ -694,8 +594,22 @@ class AssignActionToUsersView(FormView):
     formid = 'assigne_action_form'
     #coordinates = 'left'
     behaviors = [AssignActionToUsers]
-    name='assign_action'
+    name='assign_action_form'
     #use_ajax = True
+
+
+@mgmt_view(
+    name='assign_action',
+    context=IBusinessAction,
+    renderer='pontus:templates/view.pt',
+    )
+class AssignActionToUsersMultipleView(MultipleView):
+    viewid = 'assigne_users_view'
+    title = 'Assigner l\'action'
+    self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
+    views = (AssignedUsersView, AssignActionToUsersView)
+    validators = [AssignActionToUsers.get_validator()]
+    name='assign_action'
 
 
 DEFAULTMAPPING_ACTIONS_VIEWS.update({SeeProcessesDef:ProcessDefinitionContainerView,
@@ -709,4 +623,4 @@ DEFAULTMAPPING_ACTIONS_VIEWS.update({SeeProcessesDef:ProcessDefinitionContainerV
                                      SeeProcessDatas:ProcessDataView,
                                      DoActivitiesProcess:DoActivitiesProcessView,
                                      AssignToUsers:AssignToUsersView,
-                                     AssignActionToUsers:AssignActionToUsersView})
+                                     AssignActionToUsers:AssignActionToUsersMultipleView})

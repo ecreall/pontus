@@ -1,25 +1,47 @@
 <h3>Informations sur la définition:</h3>
- <ul tal:condition="actions" tal:repeat="a actions" class="nav nav-pills nav-stacked">
-   <li><a class="btn btn-primary btn-sm" style="max-width: 300px;" data-toggle="modal" href="#" data-target="#${a['action'].node_id}">
-          <span class="glyphicon glyphicon-eye-open"></span> ${a['action'].title}
-        </a>
-    </li>
-  <!-- Modal -->
-  <div class="modal fade" id="${a['action'].node_id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-   <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel"> ${a['action'].title}</h4>
-      </div>
-      <div class="modal-body">
-        ${structure:a['body']}
+<ul tal:condition="actions" tal:repeat="aa actions" class="nav nav-pills nav-stacked">
+                    <li >
+                   <a id="${aa['action_id']}-btn" 
+                      class="btn btn-primary btn-sm dace-action" 
+                      style="max-width: 300px;"
+                      href="${aa['actionurl']}"   
+                      data-toggle="modal"
+                      data-actionid ="${aa['action_id']}" 
+                      data-target="#${aa['action_id']}"
+                      data-updateurl="${aa['actionurl_update']}"
+                      data-toreplay="${'toreplay' in aa}">
+                     <span class="glyphicon glyphicon-eye-open"></span> ${aa['action'].title}
+                      </a>
+                      <script tal:condition="'toreplay' in aa">       
+                        $(document).ready(function(){
+                             $(${'\'#'+aa['action_id']+'-btn\''}).click();
+                        });
+                      </script>  
+                      <script>
+                        $(document).ready(function(){
+                            $(${'\'#'+aa['action_id']+'-modal\''}).on('hidden.bs.modal', function (e) {
+                               after_execution(${'\"'+aa['actionurl_after']+'\"'})
+                              })
+                        });
+                      </script>
+                    </li>
 
-      </div>
-    </div>
-   </div>
- </div>
-</ul>
+                <!-- Modal -->
+                    <div class="modal fade" id="${aa['action_id']}-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                       <div class="modal-content">
+                         <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                          <h4 class="modal-title" id="myModalLabel"> ${aa['action'].title}</h4>
+                         </div>
+                         <div class="modal-body">
+                            ${structure:aa['body']}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                  </ul>
+
 <p><a href="${defurl}" class="btn">Voir plus de détails »</a></p>
 
 <h3>Le modèle du processus:</h3>
