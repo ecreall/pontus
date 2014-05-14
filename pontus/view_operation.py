@@ -220,6 +220,7 @@ class MultipleView(MultipleViewsOperation):
 
             if self.isexecutable and view.isexecutable and view.finished_successfully:
                 self.finished_successfully = True
+                view.init_stepid()
                 return self.success(view_result)
 
             if not isinstance(view_result, dict):
@@ -723,18 +724,31 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         return validated
 
 
+def default_condition(context, request):
+    return True
+
+
 class Transition(object):
 
-    def __init__(self, source, target, id, condition=(lambda x, y:True)):
+    def __init__(self, source, target, id, condition=(lambda x, y:True), isdefault=False):
         self.wizard = source.wizard
         self.source = source
         self.target = target
         self.source.add_outgoing(self)
         self.target.add_incoming(self)
         self.condition = condition
+        self.isdefault = isdefault
         self.id = id
 
     def validate(self):
+        behavior_transition = None 
+        if self.wizard.behaviorinstance is not None:
+            behavior_transitions = dict(self.wizard.behaviorinstance.transitionsinstances)
+            if self.id in behavior_transitions:
+                behavior_transition = behavior_transitions[self.id]
+        if behavior_transition is not None:
+            return self.condition(self.wizard.context, self.wizard.request) and  behavior_transition.condition(self.wizard.context, self.wizard.request)
+
         return self.condition(self.wizard.context, self.wizard.request)
 
 
@@ -768,7 +782,19 @@ class Wizard(MultipleViewsOperation):
             sourceinstance = self.viewsinstances[transition[0]]
             targetinstance = self.viewsinstances[transition[1]]
             transitionid = transition[0]+'->'+transition[1]
-            transitioninstance = Transition(sourceinstance, targetinstance, transitionid, transition[2])            
+            condition = None
+            try:
+                condition = transition[3]
+            except Exception:
+                condition = default_condition
+
+            default = False
+            try:
+                default = transition[2]
+            except Exception:
+                pass
+
+            transitioninstance = Transition(sourceinstance, targetinstance, transitionid, condition, default)            
             self.transitionsinstances[transitionid] = transitioninstance
 
         self._add_startnode()
@@ -834,7 +860,10 @@ class Wizard(MultipleViewsOperation):
             result = None
             while(result is None and not(viewinstance._outgoing[0].target == self.endnode)):
                 viewinstance.after_update()
-                nextsteps = [transition.target for transition in viewinstance._outgoing if transition.validate()]
+                nextsteps = [transition.target for transition in viewinstance._outgoing if (transition.validate() and not transition.isdefault)]
+                if not nextsteps:
+                    nextsteps = [transition.target for transition in viewinstance._outgoing if transition.isdefault]
+
                 viewinstance, fs, result = self._get_result(nextsteps)
                 self.isexecutable = viewinstance.isexecutable
 
@@ -862,13 +891,16 @@ class Wizard(MultipleViewsOperation):
             return viewinstance, viewinstance.finished_successfully, result
         else:
             multipleviewinstance = MultipleView(self.context, self.request, self, self)
-            multipleviewinstance.views = sourceviews
-            viewinstance.before_update()
+            multipleviewinstance.children = sourceviews
+            multipleviewinstance.define_executable()
+            multipleviewinstance.before_update()
             result = multipleviewinstance.update()
             viewinstance = None
             for v in sourceviews:
                 if v.finished_successfully:
                     viewinstance = v
+                else:
+                    viewinstance = multipleviewinstance 
 
             if isinstance(result,dict):
                 result['view'] = viewinstance
