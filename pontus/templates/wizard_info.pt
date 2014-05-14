@@ -1,0 +1,17 @@
+<div class="alert alert-dismissable">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+<div class="view clearfix">
+    <blockquote  class="">
+	  <p><span class="glyphicon glyphicon-cog"></span> Étape ${current} sur ${total}</p>
+          <div class="progress progress-striped active">
+             <div class="progress-bar ${((width == 100) and 'progress-bar-success') or ''} "  
+                  role="progressbar" 
+                  aria-valuenow="${current}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="${total}" 
+                  style="width: ${width}%"></div>
+          </div>
+	  <small>${title}</small>
+    </blockquote>
+</div>
+</div>
