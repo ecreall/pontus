@@ -21,9 +21,9 @@
 <div tal:define="afinished [ac for ac in actions if ('finished' in ac)]" tal:condition="afinished" tal:repeat="a afinished">
           <div class="alert alert-success alert-dismissable">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                   Le rapport de l'action 
+                   <span class="glyphicon glyphicon-bell btn-lg"></span> Le rapport de l'action 
                    <a id="${a['action_id']}-btn" 
-                      class="btn btn-success btn-sm dace-action" 
+                      class="alert-link dace-action" 
                       style="max-width: 300px;"
                       href="${a['actionurl']}"   
                       data-toggle="modal"
@@ -31,7 +31,7 @@
                       data-target="#${a['action_id']}-result"
                       data-updateurl="${a['actionurl_update']}"
                       data-toreplay="${'toreplay' in a}">
-                     <span class="glyphicon glyphicon-bell"></span> ${a['action'].title}
+                      ${a['action'].title}
                    </a>!
                       <script tal:condition="'toreplay' in a">       
                         $(document).ready(function(){

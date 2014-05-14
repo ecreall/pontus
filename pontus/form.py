@@ -93,6 +93,15 @@ class FormView(ElementaryView, FV):
             if error:
                 item['isactive'] = True
 
+            if self.wizard is not None: # changer pour un truc plus souple
+                wizardinfo = self.wizard.getwizardinformationsview()
+                result['wizardinformations'] = wizardinfo['body']
+                reqts['js'].extend(list(wizardinfo['js_links']))
+                reqts['css'].extend(list(wizardinfo['css_links']))
+                body = item['body']
+                body = wizardinfo['body']+body
+                item['body'] = body
+
             result['coordinates'] = {self.coordinates:[item]}
             result['js_links'] = list(reqts['js'])
             result['css_links'] = list(reqts['css'])

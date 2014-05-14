@@ -759,6 +759,8 @@ class Wizard(MultipleViewsOperation):
     name = 'wizard'
     durable = False # session ou pas?
     behavior = None
+    informations_template = 'pontus:templates/wizard_info.pt'
+    informations_requirements = None
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(Wizard, self).__init__(context, request, parent, wizard, stepid, **kwargs)
@@ -842,6 +844,46 @@ class Wizard(MultipleViewsOperation):
                 result.append(view)
 
         return result 
+
+    def _count_path(self, source, target):
+        nsteps = 1
+        listincomming = source._incoming
+        if not listincomming:
+            return None
+
+        if target in [s.source for s in listincomming]:
+            return nsteps
+        
+        maxsteps = 1000
+        for inct in listincomming:
+            incs = self._count_path(inct.source, target)
+            if incs is None:
+                continue
+
+            if incs < maxsteps:
+                maxsteps = incs
+
+        nsteps = nsteps + maxsteps
+        return nsteps
+
+    def getwizardinformationsview(self):
+        stepidkey = STEPID+self.viewid
+        currentsteps = [] 
+        if stepidkey in self.request.session:
+            currentsteps = [self.viewsinstances[self.request.session[stepidkey]]]
+
+        currentstep = currentsteps[0]
+        par = self._count_path(currentstep, self.startnode)-1
+        rest = self._count_path(self.endnode, currentstep)-1
+        total = par + rest
+        width = par * 100 /total  
+        values = {'total':total, 'current': par, 'title': currentstep.title, 'width':width}
+        body = self.content(result=values, template=self.informations_template)['body']
+        result = {'body':body, 'js_links':[], 'css_links':[]}
+        if self.informations_requirements is not None:
+            result.update(self.informations_requirements) 
+   
+        return result
 
     def update(self):
         stepidkey = STEPID+self.viewid
