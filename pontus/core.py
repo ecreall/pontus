@@ -27,7 +27,7 @@ class Step(object):
     def add_incoming(self, transition):
         self._incoming.append(transition)
 
-    def init_stepid(self, schema, wizard=None):
+    def init_stepid(self, schema=None, wizard=None):
         if self.wizard is not None:
             self.wizard.request.session[STEPID+self.wizard.viewid] = self.stepid
             #if self.id is not None:

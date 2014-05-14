@@ -56,16 +56,16 @@ class Dace_ui_api(object):
         actionurl_update = self.updateaction_viewurl(request=request, action_uid=str(action_oid), context_uid=str(context_oid))
         if action_oid == 'start':
             after_url = self.afterexecution_viewurl(request=request,
-                                                           action_uid=str(action_oid),
+                                                           isstart=True,
                                                            context_uid=str(context_oid),
-                                                           pd_id=action.process.id,
-                                                           action_id=action.definition.id,
+                                                           pd_id=action.node.process.id,
+                                                           action_id=action.node.__name__,
                                                            behavior_id=action.behavior_id) 
             actionurl_update = self.updateaction_viewurl(request=request,
-                                                           action_uid=str(action_oid),
+                                                           isstart=True,
                                                            context_uid=str(context_oid),
-                                                           pd_id=action.process.id,
-                                                           action_id=action.definition.id,
+                                                           pd_id=action.node.process.id,
+                                                           action_id=action.node.__name__,
                                                            behavior_id=action.behavior_id) 
         informations = {}
         informations.update({'action':action,
@@ -194,10 +194,9 @@ class Dace_ui_api_json(BasicView):
         error_messages = ''
         try:
             if action_uid is not None:
-                if action_uid != 'start':
-                    action = get_obj(int(action_uid ))
-                else:
-                    action = self._get_start_action()
+                action = get_obj(int(action_uid ))
+            else:
+                action = self._get_start_action()
         except Exception:
             return {}#message erreur
 
@@ -208,7 +207,7 @@ class Dace_ui_api_json(BasicView):
             pass
 
         if action is not None:
-            view = DEFAULTMAPPING_ACTIONS_VIEWS[action._class]
+            view = DEFAULTMAPPING_ACTIONS_VIEWS[action._class_]
             view_instance = view(context, self.request, behaviors=[action])
             view_result = view_instance()
             body = ''
@@ -241,10 +240,9 @@ class Dace_ui_api_json(BasicView):
         context = None
         try:
             if action_uid is not None:
-                if action_uid != 'start':
-                    action = get_obj(int(action_uid ))
-                else:
-                    action = self._get_start_action()
+                action = get_obj(int(action_uid ))
+            else:
+                action = self._get_start_action()
                     
         except Exception:
             return {}#message erreur

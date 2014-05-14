@@ -124,13 +124,13 @@ class MultipleContextsViewsOperation(ViewOperation):
     pass
     
 
-def default_builder(parent, views):
+def default_builder(parent, views, **kwargs):
     if views is None:
         return
 
     for view in views:
         if isinstance(view, tuple):
-            viewinstance = MultipleView(parent.context, parent.request, parent, parent.wizard, parent.stepid)
+            viewinstance = MultipleView(parent.context, parent.request, parent, parent.wizard, parent.stepid, **kwargs)
             viewinstance.merged = parent.merged
             if parent.merged:
                 viewinstance.coordinates = parent.coordinates
@@ -140,7 +140,7 @@ def default_builder(parent, views):
             if viewinstance.children:
                 parent.children.append(viewinstance)
         else:
-            viewinstance = view(parent.context, parent.request, parent, parent.wizard, parent.stepid)
+            viewinstance = view(parent.context, parent.request, parent, parent.wizard, parent.stepid, **kwargs)
             try:
                 viewinstance.validate()
             except ViewError as e:
@@ -155,6 +155,7 @@ def default_builder(parent, views):
 class MultipleView(MultipleViewsOperation):
     
     title = 'Multiple View'
+    name = 'multipleview'
     builder = default_builder
     self_template = 'templates/submultipleview.pt'
     
@@ -163,10 +164,10 @@ class MultipleView(MultipleViewsOperation):
         self.children = []
         self._coordinates = []
         if self.views:
-            self._init_views(self.views)
+            self._init_views(self.views, **kwargs)
 
-    def _init_views(self, views):
-        self.builder(views)
+    def _init_views(self, views, **kwargs):
+        self.builder(views, **kwargs)
         self.define_executable()
 
     def get_view_requirements(self):
@@ -316,6 +317,7 @@ class EmptySchema(Schema):
 
 class MergedFormsView(MultipleContextsOperation, FormView):
     title = 'MergedFormsView'
+    name = 'mergedformsview'
     schema = EmptySchema(widget=SimpleFormWidget())
     widget = AccordionWidget()
     suffixe = 'All'
@@ -482,6 +484,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 class CallView(MultipleContextsOperation):
 
     title = 'CallView'
+    name = 'callview'
     self_template = 'pontus:templates/global_accordion.pt'
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
@@ -579,6 +582,7 @@ class ItemsSchema(Schema):
 class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
 
     title = 'CallSelectedContextsViews'
+    name = 'callselectedcontextsviews'
     #widgets
     items_widget = CheckboxChoiceWidget
     form_widget = SimpleFormWidget
@@ -738,7 +742,9 @@ class Wizard(MultipleViewsOperation):
 
     transitions = ()
     title = 'Wizard'
+    name = 'wizard'
     durable = False # session ou pas?
+    behavior = None
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(Wizard, self).__init__(context, request, parent, wizard, stepid, **kwargs)
@@ -746,6 +752,14 @@ class Wizard(MultipleViewsOperation):
         self.viewsinstances = {}
         self.startnode = None
         self.endnode = None
+        self.behaviorinstance = None
+        if self.behavior is not None:
+            try:
+                self.behavior.get_validator().validate(self.context, self.request)
+                self.behaviorinstance = self.behavior.get_instance(self.context, self.request)
+            except Exception:
+                pass
+
         for key, view in self.views.iteritems():
             viewinstance = view(self.context, self.request, self, self, key)
             self.viewsinstances[key] = viewinstance
@@ -811,14 +825,18 @@ class Wizard(MultipleViewsOperation):
 
         if stepidkey in self.request.session:
             self.currentsteps = [self.viewsinstances[self.request.session.pop(stepidkey)]]
-       
+
         result = None
         fs = False
         viewinstance, fs, result = self._get_result(self.currentsteps)
+        self.isexecutable = viewinstance.isexecutable
         if viewinstance is not None and fs and viewinstance._outgoing and not(viewinstance._outgoing[0].target == self.endnode):
-            viewinstance.after_update()
-            nextsteps = [transition.target for transition in viewinstance._outgoing if transition.validate()]
-            viewinstance, fs, result = self._get_result(nextsteps)
+            result = None
+            while(result is None and not(viewinstance._outgoing[0].target == self.endnode)):
+                viewinstance.after_update()
+                nextsteps = [transition.target for transition in viewinstance._outgoing if transition.validate()]
+                viewinstance, fs, result = self._get_result(nextsteps)
+                self.isexecutable = viewinstance.isexecutable
 
         if fs and (viewinstance._outgoing[0].target == self.endnode):
             self.finished_successfully = True

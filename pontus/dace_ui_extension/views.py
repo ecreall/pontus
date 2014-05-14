@@ -50,7 +50,6 @@ class RuntimeView(BasicView):
 
     title = 'Processes'
     self_template = 'pontus:dace_ui_extension/templates/runtime_view.pt'
-    viewid = 'processes'
     name='Processes'
     behaviors = [SeeProcesses]
     requirements = {'css_links':[],
@@ -73,7 +72,6 @@ class ProcessStatisticView(BasicView):
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/runtimeprocesses_statistic_view.pt'
-    viewid = 'statistic'
     name='StatisticRun'
     coordinates = 'left'
     behaviors = [StatisticProcesses]
@@ -104,7 +102,6 @@ class ProcessDefinitionContainerView(BasicView):
 
     title = 'Processes'
     self_template = 'pontus:dace_ui_extension/templates/defcontainer_view.pt'
-    viewid = 'processes'
     name='ProcessesDef'
     behaviors = [SeeProcessesDef]
     requirements = {'css_links':[],
@@ -147,7 +144,6 @@ class ProcessDefinitionStatisticView(BasicView):
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/processdef_statistic_view.pt'
-    viewid = 'statistic'
     name='StatisticDef'
     coordinates = 'left'
     behaviors = [StatisticProcessesDef]
@@ -178,7 +174,6 @@ class ProcessDefinitionView(BasicView):
 
     title = 'La definition du processus'
     self_template = 'pontus:dace_ui_extension/templates/processdef_view.pt'
-    viewid = 'processdef'
     name='ProcessDef'
     behaviors = [SeeProcessDef]
 
@@ -201,7 +196,6 @@ class ProcessesPDDefinitionView(BasicView):
 
     title = 'Les instance de la definition'
     self_template = 'pontus:dace_ui_extension/templates/processinstances_view.pt'
-    viewid = 'processinstances'
     name='ProcessInst'
     behaviors = [InstanceProcessesDef]
     requirements = {'css_links':[],
@@ -244,7 +238,6 @@ class ProcessView(BasicView):
 
     title = 'Les detail du processus'
     self_template = 'pontus:dace_ui_extension/templates/process_view.pt'
-    viewid = 'process'
     name='Process'
     behaviors = [SeeProcess]
 
@@ -257,7 +250,7 @@ class ProcessView(BasicView):
         resources['css_links'] = []
         dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
         for a in definition_actions:
-            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
+            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class_]
             view_instance = view(definition, self.request) 
             view_result = view_instance.get_view_requirements()
             body = ''
@@ -297,7 +290,6 @@ class StatisticProcessView(BasicView):
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/processstatistic_view.pt'
-    viewid = 'Statistic'
     name='Statistic'
     coordinates = 'left'
     behaviors = [StatisticProcess]
@@ -317,7 +309,7 @@ class StatisticProcessView(BasicView):
 
 
 @mgmt_view(
-    name = 'Les donnees manipulees',
+    name = 'lesdonneesmanipulees',
     context=Process,
     renderer='pontus:templates/view.pt'
     )
@@ -325,8 +317,7 @@ class ProcessDataView(BasicView):
 
     title = 'Les donnees manipulees'
     self_template = 'pontus:dace_ui_extension/templates/processdatas_view.pt'
-    viewid = 'processdata'
-    name='Les donnees manipulees'
+    name='lesdonneesmanipulees'
     behaviors = [SeeProcessDatas]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -384,7 +375,6 @@ class DoActivitiesProcessView(BasicView):
 
     title = 'Les actions a realiser'
     self_template = 'pontus:dace_ui_extension/templates/processactions_view.pt'
-    viewid = 'processactions'
     name='actionsrealiser'
     behaviors = [DoActivitiesProcess]
     requirements = {'css_links':[],
@@ -401,7 +391,7 @@ class DoActivitiesProcessView(BasicView):
         for t in all_actions:
             a = t[1]
             c = t[0]
-            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class]
+            view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class_]
             view_instance = view(c, self.request, behaviors=[a.action])
             view_result = {}
             if not action_updated and form_id is not None and form_id.startswith(view_instance.viewid):
@@ -411,13 +401,15 @@ class DoActivitiesProcessView(BasicView):
             else:
                 view_result = view_instance.get_view_requirements()
 
-            if updated_view is view_instance and view_instance.finished_successfully:
+            if updated_view is view_instance and  view_instance.isexecutable and view_instance.finished_successfully:
                 return True, True, None, None
               
             if isinstance(view_result, dict):
                 action_infos = {}
-                if updated_view is view_instance and not view_instance.finished_successfully:
+                if updated_view is view_instance and (not view_instance.isexecutable or (view_instance.isexecutable and not view_instance.finished_successfully)) :
                     action_infos['toreplay'] = True
+                    if not view_instance.isexecutable:
+                        action_infos['finished'] = True
 
                 if caa:
                     actions_as = sorted(a.action.actions, key=lambda aa: aa.action.behavior_id)
@@ -437,8 +429,7 @@ class DoActivitiesProcessView(BasicView):
 
                 body = ''
                 if 'coordinates' in view_result:
-                    body = view_instance.render_item(view_result['coordinates'][view.coordinates][0], view_instance.coordinates, None)
-
+                    body = view_instance.render_item(view_result['coordinates'][view_instance.coordinates][0], view_instance.coordinates, None)
                 assigned_to = sorted(a.action.assigned_to, key=lambda u: u.__name__)
                 users= []
                 for user in assigned_to:
@@ -459,6 +450,19 @@ class DoActivitiesProcessView(BasicView):
                 if 'css_links' in view_result:
                     resources['css_links'].extend(view_result['css_links'])
                     resources['css_links'] =list(set(resources['css_links']))
+
+                if 'finished' in action_infos:
+                    view_resources= {}
+                    view_resources['js_links'] = []
+                    view_resources['css_links'] = []
+                    if 'js_links' in view_result:
+                        view_resources['js_links'].extend(view_result['js_links'])
+
+                    if 'css_links' in view_result:
+                        view_resources['css_links'].extend(view_result['css_links'])
+
+                    return True, True, view_resources, [action_infos]
+
 
         return False, action_updated, resources, allbodies_actions
 
@@ -487,13 +491,27 @@ class DoActivitiesProcessView(BasicView):
 
         if toreplay:
             self.request.POST.clear()
+            old_resources = resources
+            old_allbodies_actions = allbodies_actions
             action_updated, messages, resources, allbodies_actions = self._actions()
+            if old_resources is not None:
+                if 'js_links' in old_resources:
+                    resources['js_links'].extend(old_resources['js_links'])
+                    resources['js_links'] = list(set(resources['js_links']))
+
+                if 'css_links' in old_resources:
+                    resources['css_links'].extend(old_resources['css_links'])
+                    resources['css_links'] =list(set(resources['css_links']))
+
+            if old_allbodies_actions is not None:
+                allbodies_actions.extend(old_allbodies_actions)
+
             return True , messages, resources, allbodies_actions
 
         if form_id is not None and not action_updated:
             error = ViewError()
             error.principalmessage = u"Action non realisee"
-            error.causes = ["Vous n'avez plus le droit de realiser cette action.", "L'action est verrouillée par un autre utilisateur."]
+            error.causes = ["Vous n'avez plus le droit de realiser cette action.", "L'action est verrouillee par un autre utilisateur."]
             message = self._get_message(error)
             messages.update({error.type: [message]})
 
@@ -561,7 +579,6 @@ class AssignedUsersView(BasicView):
     title = 'Les utilisateurs assignies'
     name='assigned_users'
     self_template = 'pontus.dace_ui_extension:templates/assigned_users.pt'
-    viewid = 'assigned_users_view'      
     
     def update(self):
         assigned_to = sorted(self.context.assigned_to, key=lambda u: u.__name__)
@@ -582,11 +599,11 @@ class AssignedUsersView(BasicView):
 class AssignActionToUsersView(FormView):
 
     title = 'Assigner l\'action'
-    schema = AssignToUsersViewSchema()
+    name ='assign_action_form'
     formid = 'assigne_action_form'
+    schema = AssignToUsersViewSchema()
     behaviors = [AssignActionToUsers]
     validate_behaviors = False
-    name='assign_action_form'
 
 
 @mgmt_view(
@@ -596,7 +613,6 @@ class AssignActionToUsersView(FormView):
     )
 class AssignActionToUsersMultipleView(MultipleView):
     title = 'Assigner l\'action'
-    viewid = 'assigne_users_view'
     name='assign_action'
     self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
     views = (AssignedUsersView, AssignActionToUsersView)

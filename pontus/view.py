@@ -52,12 +52,13 @@ def merge_dicts(source, target):
 
 __emptytemplate__ = 'templates/empty.pt'
 
-
+#TODO creer des decorateur pour les vues Pontus
 class View(Step):
     implements(IView)
 
     viewid = None
     title = 'View'
+    name = 'view'
     coordinates = 'main' # default value
     validators = []
     item_template = 'templates/subview.pt'
@@ -74,7 +75,7 @@ class View(Step):
         self.request = request
         self.parent = parent
         if self.viewid is None:
-            self.viewid = re.sub(r'\s', '_', self.title).replace('\'','').replace('-','') #y a plus simple...expression reguliere
+            self.viewid = self.name#re.sub(r'\s', '_', self.name).replace('\'','').replace('-','') #y a plus simple...expression reguliere
 
         if self.parent is not None:
             self.viewid = self.parent.viewid+'_'+self.viewid
@@ -213,51 +214,59 @@ class ElementaryView(View):
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(ElementaryView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self._allvalidators = list(self.validators)
-        if self.validate_behaviors:
-            self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors])
-            
-
         self.init_behaviorinstances= []
         if 'behaviors' in kwargs:
-            self.init_behaviorinstances = kwargs['behaviors']
+            bis = kwargs['behaviors']
+            for bi in bis:
+                if bi._class_ in self.behaviors:
+                    self.init_behaviorinstances.append(bi)
+
+        _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
+        if self.validate_behaviors:
+            self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors if not (behavior in _init_behaviors)])
     
         self.behaviorinstances = {}
         self._init_behaviors()
 
     def validate(self):
-        for validator in self._allvalidators:
-            try:
+        try:
+            for validator in self._allvalidators:
                 validator.validate(self.context, self.request)
-                if self.validate_behaviors and self.init_behaviorinstances:
-                    for init_v in self.init_behaviorinstances:
-                        if not init_v.validate(self.context, self.request):
-                            raise ValidationError()
+
+            if self.validate_behaviors and self.init_behaviorinstances:
+                for init_v in self.init_behaviorinstances:
+                    if not init_v.validate(self.context, self.request):
+                        raise ValidationError()
                     
-            except ValidationError as e:
-                ve = ViewError()
-                ve.principalmessage = BehaviorViewErrorPrincipalmessage
-                ve.causes = BehaviorViewErrorCauses
-                ve.solutions = BehaviorViewErrorSolutions
-                raise ve
+        except ValidationError as e:
+            ve = ViewError()
+            ve.principalmessage = BehaviorViewErrorPrincipalmessage
+            ve.causes = BehaviorViewErrorCauses
+            ve.solutions = BehaviorViewErrorSolutions
+            raise ve
 
         return True
 
     def _init_behaviors(self):
         _behaviorinstances= {}
-        for behavior in self.behaviors:
+        _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
+        _behaviors = [behavior for behavior in self.behaviors if not (behavior in _init_behaviors)]
+        for behavior in _behaviors:
             try:
-                behavior.get_validator().validate(self.context, self.request)
-                behaviorinstance = behavior.get_instance(self.context, self.request)
+                wizard = None
+                if self.wizard is not None:
+                    wizard = self.wizard.behaviorinstance
+
+                behaviorinstance = behavior.get_instance(self.context, self.request, wizard=wizard)
                 if behaviorinstance is not None:
-                    key = behaviorinstance.__class__.__name__
+                    key = behaviorinstance._class_.__name__
                     _behaviorinstances[key] = behaviorinstance
             except ValidationError as e:
                 continue
 
         for behaviorinstance in self.init_behaviorinstances:
-                if behaviorinstance.validate(self.context, self.request):
-                    key = behaviorinstance.__class__.__name__
-                    _behaviorinstances[key] = behaviorinstance
+            key = behaviorinstance._class_.__name__
+            _behaviorinstances[key] = behaviorinstance
 
         if _behaviorinstances:
             sorted_behaviors = _behaviorinstances.values()
