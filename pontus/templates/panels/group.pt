@@ -1,0 +1,11 @@
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span tal:condition="isstart" class="glyphicon glyphicon-play-circle"></span> ${name} <b class="caret"></b></a>
+          <ul  class="dropdown-menu" role="menu">
+            <li  tal:repeat="a group['links']" class="${(a in active_items) and 'active'}">
+              <a href="${a.url}" data-toggle="tooltip" data-placement="left" title="${a.action.informations}" >${a.title}</a>
+            </li>
+            <li tal:condition="group['subgroups']" role="presentation" class="divider"></li>
+            <li  class="dropdown-submenu" tal:condition="group['subgroups']" tal:repeat="(k,g) group['subgroups'].iteritems()" >
+              <div tal:replace="view.render_group(k, g, active_items, isstart)" />   
+            </li>
+          </ul>
+

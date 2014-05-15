@@ -2,6 +2,8 @@
 from pyramid_layout.panel import panel_config
 from pyramid.location import lineage
 from pyramid.security import has_permission
+from pyramid import renderers
+from pyramid_layout.layout import Structure
 
 from dace.objectofcollaboration.entity import Entity
 
@@ -67,33 +69,51 @@ class NavBarPanel(object):
         self.context = context
         self.request = request
 
+    def render_group(self, name, group, active_items, isstart):
+        body = renderers.render('pontus:templates/panels/group.pt', {'name': name, 'group':group,'active_items':active_items, 'view': self, 'isstart':isstart}, self.request)
+        return Structure(body)
+
     def _classifier(self, actions, groups):
         actionsgroups = {}
-        titels = {}
         links = []
+        titles = [] 
         for a in actions:
-            if not a.action.groups:
+            if not a.action.groups and not(a.title in titles):
+                titles.append(a.title) 
                 links.append(a)
                 continue
 
-            for g in groups:
-                if g in a.action.groups:
-                    if not(g in actionsgroups):
-                        titels[g] = [a.title]
-                        actionsgroups[g] = [a]
-                    else:
-                        if not(a.title in titels[g]):
-                            actionsgroups[g].append(a)
-                            titels[g].append(a.title)                
+            principalgroup_name = a.action.groups[0]
+            principalgroup = None
+            if principalgroup_name in actionsgroups:
+                principalgroup = actionsgroups[principalgroup_name]
+            else:
+                principalgroup = actionsgroups[principalgroup_name] = {'links':[], 'subgroups':{}}
 
-        for k, acs in dict(actionsgroups).iteritems():
-            if len(acs) == 1:
-                if not (acs[0] in links):
-                    links.append(acs[0])
+            if len(a.action.groups) == 1:
+                if not(a.title in titles):
+                    principalgroup['links'].append(a)
+                    titles.append(a.title) 
 
-                actionsgroups.pop(k)
-   
-        return actionsgroups, links  
+                continue
+
+            lastgroup = None
+            currentgroup = principalgroup
+            for g in a.action.groups[1:]:
+                if g in currentgroup['subgroups']:
+                    lastgroup = currentgroup['subgroups'][g]
+                else:
+                    lastgroup = currentgroup['subgroups'][g] = {'links':[], 'subgroups':{}}
+
+                currentgroup = lastgroup
+      
+            if not(a.title in titles):
+                lastgroup['links'].append(a)
+                titles.append(a.title) 
+
+
+        return actionsgroups, links 
+
 
     def _actions(self):
         actions = self.context.actions
@@ -111,6 +131,7 @@ class NavBarPanel(object):
         g, l = self._classifier(activeactions, groups)
         result['active']={'links': l, 'groups': g}
         result['active_items'] = active_items
+        result['view'] = self
         return result
 
 

@@ -42,7 +42,7 @@ from pontus.view_operation import MultipleView
 
 
 @mgmt_view(
-    name = 'Processes',
+    name='Processes',
     context=Runtime,
     renderer='pontus:templates/view.pt'
     )
@@ -50,7 +50,7 @@ class RuntimeView(BasicView):
 
     title = 'Processes'
     self_template = 'pontus:dace_ui_extension/templates/runtime_view.pt'
-    name='Processes'
+    name = 'Processes'
     behaviors = [SeeProcesses]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -63,7 +63,7 @@ class RuntimeView(BasicView):
 
 
 @mgmt_view(
-    name = 'StatisticRun',
+    name='StatisticRun',
     context=Runtime,
     renderer='pontus:templates/view.pt'
     )
@@ -72,7 +72,7 @@ class ProcessStatisticView(BasicView):
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/runtimeprocesses_statistic_view.pt'
-    name='StatisticRun'
+    name = 'StatisticRun'
     coordinates = 'left'
     behaviors = [StatisticProcesses]
     requirements = {'css_links':[],
@@ -94,7 +94,7 @@ class ProcessStatisticView(BasicView):
 
 
 @mgmt_view(
-    name = 'ProcessesDef',
+    name='ProcessesDef',
     context=ProcessDefinitionContainer,
     renderer='pontus:templates/view.pt'
     )
@@ -102,7 +102,7 @@ class ProcessDefinitionContainerView(BasicView):
 
     title = 'Processes'
     self_template = 'pontus:dace_ui_extension/templates/defcontainer_view.pt'
-    name='ProcessesDef'
+    name = 'ProcessesDef'
     behaviors = [SeeProcessesDef]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -135,7 +135,7 @@ class ProcessDefinitionContainerView(BasicView):
 
 
 @mgmt_view(
-    name = 'StatisticDef',
+    name='StatisticDef',
     context=ProcessDefinition,
     renderer='pontus:templates/view.pt'
     )
@@ -144,7 +144,7 @@ class ProcessDefinitionStatisticView(BasicView):
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
     self_template = 'pontus:dace_ui_extension/templates/processdef_statistic_view.pt'
-    name='StatisticDef'
+    name = 'StatisticDef'
     coordinates = 'left'
     behaviors = [StatisticProcessesDef]
     requirements = {'css_links':[],
@@ -166,7 +166,7 @@ class ProcessDefinitionStatisticView(BasicView):
 
 
 @mgmt_view(
-    name = 'ProcessDef',
+    name='ProcessDef',
     context=ProcessDefinition,
     renderer='pontus:templates/view.pt'
     )
@@ -174,7 +174,7 @@ class ProcessDefinitionView(BasicView):
 
     title = 'La definition du processus'
     self_template = 'pontus:dace_ui_extension/templates/processdef_view.pt'
-    name='ProcessDef'
+    name = 'ProcessDef'
     behaviors = [SeeProcessDef]
 
     def update(self):
@@ -188,7 +188,7 @@ class ProcessDefinitionView(BasicView):
 
 
 @mgmt_view(
-    name = 'ProcessInst',
+    name='ProcessInst',
     context=ProcessDefinition,
     renderer='pontus:templates/view.pt'
     )
@@ -196,7 +196,7 @@ class ProcessesPDDefinitionView(BasicView):
 
     title = 'Les instance de la definition'
     self_template = 'pontus:dace_ui_extension/templates/processinstances_view.pt'
-    name='ProcessInst'
+    name = 'ProcessInst'
     behaviors = [InstanceProcessesDef]
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
@@ -230,7 +230,7 @@ class ProcessesPDDefinitionView(BasicView):
 
 
 @mgmt_view(
-    name = 'Process',
+    name='Process',
     context=Process,
     renderer='pontus:templates/view.pt'
     )
@@ -238,7 +238,7 @@ class ProcessView(BasicView):
 
     title = 'Les detail du processus'
     self_template = 'pontus:dace_ui_extension/templates/process_view.pt'
-    name='Process'
+    name ='Process'
     behaviors = [SeeProcess]
 
     def _actions(self):
@@ -352,10 +352,8 @@ class ProcessDataView(BasicView):
     def update(self):
         self.execute(None)
         result = {}
-        
         all_involveds = self._datas(self.context.execution_context.all_classified_involveds())
-        involveds = [a for a in all_involveds if a['iscurrent']] #self._datas(self.context.execution_context.all_active_involveds())
-        
+        involveds = [a for a in all_involveds if a['iscurrent']]
         values = {'datas': involveds, 'alldatas':all_involveds , 'tabid':self.__class__.__name__+'AllDatas'}
         body = self.content(result=values, template=self.self_template)['body']
         item = self.adapt_item(body, self.viewid)
@@ -488,7 +486,6 @@ class DoActivitiesProcessView(BasicView):
             form_id = self.request.POST['__formid__']
 
         toreplay, action_updated, resources, allbodies_actions = self._modal_views(all_actions, form_id, True)
-
         if toreplay:
             self.request.POST.clear()
             old_resources = resources
@@ -556,7 +553,7 @@ class AssignToUsersViewSchema(Schema):
                 colander.Set(),
                 widget=listchoice,
                 default=defaultusers,
-                title = 'Les utilisateurs',
+                title='Les utilisateurs',
                 required=False
                 )
 
@@ -572,7 +569,7 @@ class AssignToUsersView(FormView):
     schema = AssignToUsersViewSchema()
     formid = 'assign_activity_form'
     behaviors = [AssignToUsers]
-    name='assign_activity'
+    name ='assign_activity'
 
 
 class AssignedUsersView(BasicView):
@@ -613,12 +610,13 @@ class AssignActionToUsersView(FormView):
     )
 class AssignActionToUsersMultipleView(MultipleView):
     title = 'Assigner l\'action'
-    name='assign_action'
+    name = 'assign_action'
     self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
     views = (AssignedUsersView, AssignActionToUsersView)
     validators = [AssignActionToUsers.get_validator()]
 
 
+#un decorateur c'est mieux!
 DEFAULTMAPPING_ACTIONS_VIEWS.update({SeeProcessesDef:ProcessDefinitionContainerView,
                                      SeeProcesses:RuntimeView,
                                      StatisticProcessesDef:ProcessDefinitionStatisticView,

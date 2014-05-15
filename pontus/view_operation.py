@@ -867,18 +867,22 @@ class Wizard(MultipleViewsOperation):
         nsteps = nsteps + maxsteps
         return nsteps
 
-    def getwizardinformationsview(self):
+    def _calculate_wizard_informations(self):
         stepidkey = STEPID+self.viewid
         currentsteps = [] 
         if stepidkey in self.request.session:
             currentsteps = [self.viewsinstances[self.request.session[stepidkey]]]
 
         currentstep = currentsteps[0]
-        par = self._count_path(currentstep, self.startnode)-1
+        covered = self._count_path(currentstep, self.startnode)-1
         rest = self._count_path(self.endnode, currentstep)-1
-        total = par + rest
-        width = par * 100 /total  
-        values = {'total':total, 'current': par, 'title': currentstep.title, 'width':width}
+        total = covered + rest
+        pourcentage = covered * 100 /total
+        return currentstep, total, covered, rest, pourcentage 
+ 
+    def getwizardinformationsview(self):
+        currentstep, total, covered, rest, pourcentage = self._calculate_wizard_informations()
+        values = {'total':total, 'current': covered, 'title': currentstep.title, 'pourcentage':pourcentage}
         body = self.content(result=values, template=self.informations_template)['body']
         result = {'body':body, 'js_links':[], 'css_links':[]}
         if self.informations_requirements is not None:

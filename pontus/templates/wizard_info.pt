@@ -10,7 +10,7 @@
                   aria-valuenow="${current}" 
                   aria-valuemin="0" 
                   aria-valuemax="${total}" 
-                  style="width: ${width}%"></div>
+                  style="width: ${pourcentage}%"></div>
           </div>
 	  <small>${title}</small>
     </blockquote>
