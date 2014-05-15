@@ -761,6 +761,7 @@ class Wizard(MultipleViewsOperation):
     behavior = None
     informations_template = 'pontus:templates/wizard_info.pt'
     informations_requirements = None
+    include_informations = False
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(Wizard, self).__init__(context, request, parent, wizard, stepid, **kwargs)
@@ -909,14 +910,25 @@ class Wizard(MultipleViewsOperation):
                 viewinstance, fs, result = self._get_result(nextsteps)
                 self.isexecutable = viewinstance.isexecutable
 
+        if isinstance(result, dict) and self.include_informations:
+            wizardinfo = self.getwizardinformationsview()
+            if 'js_links' in result:
+                result['js_links'].extend(list(wizardinfo['js_links']))
+            if 'css_links' in result:
+                result['css_links'].extend(list(wizardinfo['css_links']))
+
+            for coordinates in result['coordinates']:
+                item = result['coordinates'][coordinates][0]
+                body = item['body']
+                body = wizardinfo['body']+body
+                item['body'] = body
+
         if fs and (viewinstance._outgoing[0].target == self.endnode):
             self.finished_successfully = True
             viewinstance.after_update()
             self.request.session.__delitem__(stepidkey)
             if viewinstance.isexecutable:
                 return self.success()
-
-            return result
 
         return result
 

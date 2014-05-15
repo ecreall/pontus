@@ -1,10 +1,11 @@
-<div class="alert alert-dismissable">
-  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+<small>
+<div class="alert alert-dismissable" style="padding: 6px">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true" style="right: 0px">&times;</button>
 <div class="view clearfix">
-    <blockquote  class="">
-	  <p><span class="glyphicon glyphicon-cog"></span> Étape ${current} sur ${total}</p>
+    <blockquote  style="margin: 0 0 0px; border-left: 3px solid #428bca;">
+	<h5>  <p><span class="glyphicon glyphicon-cog"></span> Étape ${current+1} sur ${total+1}</p></h5>
           <div class="progress progress-striped active">
-             <div class="progress-bar ${((width == 100) and 'progress-bar-success') or ''} "  
+             <div class="progress-bar"  
                   role="progressbar" 
                   aria-valuenow="${current}" 
                   aria-valuemin="0" 
@@ -15,3 +16,4 @@
     </blockquote>
 </div>
 </div>
+</small>
