@@ -203,6 +203,8 @@ class TestRelationsCatalog(FunctionalTests):
         res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
         titles = [f for f in res.form.fields['title'] if f.__class__.__name__ == 'Text']
         self.assertEqual(len(titles), 2 )
+        forms = set(res.forms.values())
+        self.assertEqual(len(forms), 1 )
         title_values = [t.value for t in titles]
         self.assertIn('objecta', title_values)
         self.assertIn('objectb', title_values)
@@ -222,6 +224,8 @@ class TestRelationsCatalog(FunctionalTests):
         res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
         titles = [f for f in res.form.fields['title'] if f.__class__.__name__ == 'Text']
         self.assertEqual(len(titles), 1 )
+        forms = set(res.forms.values())
+        self.assertEqual(len(forms), 1 )
         title_values = [t.value for t in titles]
         self.assertIn('newtitleb', title_values)
         for field in res.form.fields['title']:
@@ -233,19 +237,8 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(objectA.title, 'notnewtitlea')
         self.assertEqual(objectB.title, 'objectb')
 
-        objectB.title = 'notobjectb'
+        objectB.title = 'notnewtitlea'
         res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
-        titles = [f for f in res.form.fields['title'] if f.__class__.__name__ == 'Text']
-        self.assertEqual(len(titles), 1 )
-        title_values = [t.value for t in titles]
-        self.assertIn('newtitleb', title_values)
-        for field in res.form.fields['title']:
-            if field.value == 'newtitleb':
-                field.value__set('objectb')
-
-        res = res.form.submit('Behavior_A_All')
-        self.assertEqual(res.status_int, 302)
-        self.assertEqual(objectA.title, 'notnewtitlea')
-        self.assertEqual(objectB.title, 'objectb')
-
-
+        self.assertEqual(res.status_int, 200)
+        forms = set(res.forms.values())
+        self.assertEqual(len(forms), 0 )
