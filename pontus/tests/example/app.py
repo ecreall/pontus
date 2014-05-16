@@ -1,21 +1,34 @@
+import colander
+import deform
+import deform.widget
 from zope.interface import Interface
 from pyramid.httpexceptions import HTTPFound
-#from zope.authentication.interfaces import IAuthentication
-#from zope.pluggableauth import PluggableAuthentication as PAU
-#from com.ecreall.omegsi.library.authentication import initialize_pau
+
+from substanced.sdi import mgmt_view
+from substanced.sdi import RIGHT
 
 from pontus.view import BasicView
-from pontus.view_operation import MultipleView
+from pontus.form import FormView
+from pontus.view_operation import MultipleView, MergedFormsView
+from pontus.schema import select, Schema
 from dace.processinstance.core import Behavior, ValidationError
+from dace.objectofcollaboration.runtime import Runtime
+from dace.objectofcollaboration.object import Object
 
 
 class BehaviorAValidator(object):
 
     @classmethod
     def validate(cls, context, request, **kw):
-        if not request.validationA:
-            raise ValidationError()
-
+        try:
+            if not request.validationA:
+                raise ValidationError()
+        except AttributeError:
+            if context.title.startswith('not'):
+                raise ValidationError()
+            else:
+                return True
+  
         return request.validationA
 
 
@@ -29,7 +42,14 @@ class BehaviorA(Behavior):
         return BehaviorAValidator
 
     def start(self, context, request, appstruct, **kw):
-        request.viewexecuted.append('behaviorA')
+        try:
+            request.viewexecuted.append('behaviorA')
+        except AttributeError:
+            if 'title' in appstruct:
+                context.title = appstruct['title']
+
+            return True
+        
         return True
 
 
@@ -57,8 +77,11 @@ class BehaviorBValidator(object):
 
     @classmethod
     def validate(cls, context, request, **kw):
-        if not request.validationB:
-            raise ValidationError()
+        try:
+            if not request.validationB:
+                raise ValidationError()
+        except AttributeError:
+            return True
 
         return request.validationB
 
@@ -73,7 +96,11 @@ class BehaviorB(Behavior):
         return BehaviorBValidator
 
     def start(self, context, request, appstruct, **kw):
-        request.viewexecuted.append('behaviorB')
+        try:
+            request.viewexecuted.append('behaviorB')
+        except AttributeError:
+            return True
+
         return True
 
 
@@ -102,3 +129,53 @@ class MultipleViewA(MultipleView):
     name = 'multipleviewa'
     views = (ViewA, ViewB)
 
+
+class SchemaA(Schema):
+    
+    title = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget()
+        )
+
+class FormViewA(FormView):
+
+    title = 'FormView A'
+    schema = select(SchemaA(), [u'title'])
+    behaviors = [BehaviorA]
+    formid = 'formA'
+    coordinates = 'left'
+
+    def default_data(self):
+        return self.context 
+
+@mgmt_view(
+    name='multipleformviewa',
+    tab_title='MultipleFormView A',
+    context=Runtime,
+    renderer='pontus:templates/view.pt',
+    tab_near=RIGHT,
+    )
+class MultipleFromViewA(MultipleView):
+    title = 'MultipleFormView A'
+    name = 'multipleformviewa'
+    views = (FormViewA, ViewB)
+
+
+objectA = Object(title='objecta')
+objectB = Object(title='objectb')
+
+def get_item(view=None):
+    return [objectA, objectB]
+
+@mgmt_view(
+    name='mergedformsviewa',
+    tab_title='Call A',
+    context=Runtime,
+    renderer='pontus:templates/view.pt',
+    tab_near=RIGHT,
+    )
+class MergedFormsViewA(MergedFormsView):
+    views = FormViewA
+    title = 'MergedFormsView A'
+    name = 'mergedformsviewa'
+    contexts = get_item

@@ -418,7 +418,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                                 #dans le cas ou le behavior n'est pls valide: @TODO a voir
                                 if bname in view_instance.behaviorinstances:
                                     behavior = view_instance.behaviorinstances[bname] 
-                                    behavior.execute(self.context, self.request, v['item'])
+                                    behavior.execute(view_instance.context, self.request, v['item'])
                                     view_instance.finished_successfully = True
 
                             item = self.success(validated)
