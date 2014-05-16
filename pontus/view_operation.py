@@ -281,7 +281,7 @@ class MultipleView(MultipleViewsOperation):
 
     def failure(self, e, subject=None):#...
         content_message = self._get_message(e, subject)
-        item =self.adapt_item([], self.viewid)
+        item =self.adapt_item('', self.viewid)
         item['messages'] = {e.type: [content_message]}
         item['isactive'] = True
         result = {'js_links': [], 'css_links': [], 'coordinates': {self.coordinates:[item]}}

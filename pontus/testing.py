@@ -45,6 +45,7 @@ class FunctionalTests(unittest.TestCase):
         request.root = self.app
         from webtest import TestApp
         self.testapp = TestApp(app)
+        self.request = request
 
     def tearDown(self):
         import shutil
