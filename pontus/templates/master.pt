@@ -57,7 +57,7 @@
          style="display:none;"
          alt="Loading indicator"/>
 
-    <div class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
       <div class="container">
         ${panel('breadcrumbs')}
         ${panel('usermenu')}
