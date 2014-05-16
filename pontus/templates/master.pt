@@ -8,7 +8,7 @@
       su request.static_url;
       sdititle request.sdiapi.sdi_title()">
   <head>
-    
+
     <more tal:omit-tag="" metal:define-slot="head-first"></more>
 
     <meta charset="utf-8"/>
@@ -52,9 +52,9 @@
   <body>
 
     <img class="loading-indicator"
-         id="sdi-loading-img" 
+         id="sdi-loading-img"
          src="${su('substanced.sdi:static/img/progress_bar.gif')}"
-         style="display:none;" 
+         style="display:none;"
          alt="Loading indicator"/>
 
     <div class="navbar navbar-default navbar-fixed-top">
@@ -110,7 +110,7 @@
           <div class="col-md-12 column ui-sortable">
              <div metal:define-slot="footer"></div>
           </div>
-         </div> 
+         </div>
 
       </metal:slot>
 

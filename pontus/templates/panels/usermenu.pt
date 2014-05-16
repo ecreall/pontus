@@ -2,7 +2,7 @@
   tal:define="mp request.sdiapi.mgmt_path;"
   tal:omit-tag="">
             <div tal:condition="request.user">
-              <button type="button" class="btn btn-primary dropdown-toggle" 
+              <button type="button" class="btn btn-primary dropdown-toggle"
                       data-toggle="dropdown">
                 <i class="glyphicon glyphicon-user" style="margin-right: 5px;"></i>${request.user.__name__}<span class="caret" style="margin-left: 8px;"></span>
               </button>
