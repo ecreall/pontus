@@ -11,7 +11,6 @@ from pontus.interfaces import IFormView
 from pontus.view import ElementaryView, merge_dicts
 
 
-
 class FormView(ElementaryView, SubstanceDFormView):
     implements(IFormView)
 
@@ -25,7 +24,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
 
     def setviewid(self, viewid):
-        ElementaryView.setviewid(self,viewid)
+        ElementaryView.setviewid(self, viewid)
         self.formid = viewid
 
     def get_view_requirements(self):

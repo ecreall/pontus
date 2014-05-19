@@ -59,7 +59,10 @@ class View(Step):
     requirements = None
 
     def render_item(self, item, coordinates, parent):
-        body = renderers.render(self.item_template, {'coordinates':coordinates,'subitem':item, 'parent': parent}, self.request)
+        body = renderers.render(self.item_template,
+                {'coordinates': coordinates,
+                 'subitem': item,
+                 'parent': parent}, self.request)
         return Structure(body)
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
@@ -71,10 +74,10 @@ class View(Step):
             self.viewid = self.name#re.sub(r'\s', '_', self.name).replace('\'','').replace('-','') #y a plus simple...expression reguliere
 
         if self.parent is not None:
-            self.viewid = self.parent.viewid+'_'+self.viewid
+            self.viewid = self.parent.viewid + '_' + self.viewid
 
         if self.context is not None:
-            self.viewid = self.viewid+'_'+str(get_oid(self.context))
+            self.viewid = self.viewid + '_' + str(get_oid(self.context))
 
         self._request_configuration()
 
@@ -86,7 +89,7 @@ class View(Step):
     @property
     def requirements_copy(self):
         if self.requirements is None:
-            return {'css_links':[], 'js_links':[]}
+            return {'css_links': [], 'js_links': []}
         else:
             copy = {}
             if 'css_links' in self.requirements:
@@ -98,14 +101,13 @@ class View(Step):
             return copy
 
     def get_view_requirements(self):
-
         return self.requirements_copy
 
     def validate(self):
         for validator in self.validators:
             try:
                 validator.validate(self.context, self.request)
-            except ValidationError as e:
+            except ValidationError:
                 raise ViewError()
 
         return True
@@ -171,7 +173,7 @@ class View(Step):
         if self.parent is not None:
             isactive = False
 
-        item = {'view':self, 'id':id, 'isactive':isactive}
+        item = {'view': self, 'id': id, 'isactive': isactive}
         if isinstance(render, list):
             item['items'] = render
         else:
@@ -183,16 +185,18 @@ class View(Step):
         self.viewid = viewid
 
     def _get_message(self, e, subject=None):
-        content_message = renderers.render(e.template, {'error':e, 'subject': subject}, self.request)
+        content_message = renderers.render(e.template,
+                {'error': e, 'subject': subject}, self.request)
         return content_message
 
     def failure(self, e, subject=None):
         #TODO
         content_message = self. _get_message(e, subject)
-        item =self.adapt_item('', self.viewid)
+        item = self.adapt_item('', self.viewid)
         item['messages'] = {e.type: [content_message]}
         item['isactive'] = True
-        result = {'js_links': [], 'css_links': [], 'coordinates': {self.coordinates:[item]}}
+        result = {'js_links': [], 'css_links': [],
+                  'coordinates': {self.coordinates: [item]}}
         return result
 
     def success(self, validated=None):
@@ -241,7 +245,7 @@ class ElementaryView(View):
         return True
 
     def _init_behaviors(self):
-        _behaviorinstances= {}
+        _behaviorinstances = {}
         _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
         _behaviors = [behavior for behavior in self.behaviors if not (behavior in _init_behaviors)]
         for behavior in _behaviors:
