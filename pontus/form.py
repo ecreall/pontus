@@ -3,13 +3,11 @@ from pyramid.httpexceptions import HTTPFound
 from zope.interface import implements
 import deform.exception
 import deform.widget
-import colander
 
 from substanced.form import FormView as FV, FormError
 
 from pontus.interfaces import IFormView
-from pontus.view import ElementaryView, ViewError, merge_dicts
-from pontus.resources import CallViewErrorPrincipalmessage, CallViewViewErrorCauses
+from pontus.view import ElementaryView, merge_dicts
 
 
 
@@ -24,7 +22,7 @@ class FormView(ElementaryView, FV):
         FV.__init__(self, context, request)
         ElementaryView.__init__(self, context, request, parent, wizard, stepid, **kwargs)
         self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
-        
+
     def setviewid(self, viewid):
         View.setviewid(self,viewid)
         self.formid = viewid
@@ -37,26 +35,21 @@ class FormView(ElementaryView, FV):
         _requirements = self.requirements_copy
         result = merge_dicts(_requirements, result)
         return result
-        
+
     def update(self,):
-        #if not self.buttons:
-        #    e = ViewError()
-        #    e.principalmessage = CallViewErrorPrincipalmessage
-        #    e.causes = CallViewViewErrorCauses
-        #    raise e
-        self.init_stepid(self.schema) # dans le before_update?!
+        self.init_stepid(self.schema)  # TODO: in before_update?
         form, reqts = self._build_form()
-        form.formid = self.viewid+'_'+form.formid
+        form.formid = self.viewid + '_' + form.formid
         for c in form.children:
-            c.oid = c.oid+form.formid
- 
+            c.oid = c.oid + form.formid
+
         item = None
         result = {}
         posted_formid = None
         error = False
         if '__formid__' in self.request.POST:
             posted_formid = self.request.POST['__formid__']
- 
+
         if posted_formid is not None and posted_formid == form.formid:
             for button in form.buttons:
                 if button.name in self.request.POST:
@@ -72,13 +65,15 @@ class FormView(ElementaryView, FV):
                     else:
                         try:
                             behavior = self.behaviorinstances[button.name]
-                            item = behavior.execute(self.context, self.request, validated)
+                            item = behavior.execute(self.context,
+                                    self.request, validated)
                             self.finished_successfully = True
                         except FormError as e:
                             snippet = '<div class="error">Failed: %s</div>' % e
                             self.request.sdiapi.flash(snippet, 'danger',
                                                       allow_duplicate=True)
-                            item = self.adapt_item(form.render(validated), form.formid)
+                            item = self.adapt_item(form.render(validated),
+                                                   form.formid)
                             error = True
 
                     break
@@ -89,11 +84,11 @@ class FormView(ElementaryView, FV):
             else:
                 item = HTTPFound(self.request.mgmt_path(self.context, '@@index'))
 
-        if isinstance(item,dict):
+        if isinstance(item, dict):
             if error:
                 item['isactive'] = True
 
-            result['coordinates'] = {self.coordinates:[item]}
+            result['coordinates'] = {self.coordinates: [item]}
             result['js_links'] = list(reqts['js'])
             result['css_links'] = list(reqts['css'])
         else:
@@ -116,7 +111,7 @@ class FormView(ElementaryView, FV):
         return self.adapt_item(body, form.formid)
 
     def default_data(self):
-        return None 
+        return None
 
     def _failure(self, e, form):
         return self.adapt_item(e.render(), form.formid)
@@ -137,4 +132,3 @@ class FormView(ElementaryView, FV):
                        node.widget.readonly = True
                 else:
                     self._chmod(node.children[0], m[1])
-

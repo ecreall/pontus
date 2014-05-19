@@ -1,16 +1,10 @@
-import json
 import re
 
 from zope.interface import implements
-from zope.interface import providedBy
 
-from pyramid.threadlocal import get_current_registry
-from pyramid.interfaces import IView as IV, IViewClassifier
 from pyramid import renderers
 from pyramid.renderers import get_renderer
-from pyramid.path import package_of
 from pyramid_layout.layout import Structure
-from pyramid.response import Response
 
 from substanced.util import get_oid
 
@@ -24,15 +18,14 @@ from pontus.resources import (
                 BehaviorViewErrorSolutions)
 
 
-
 class ViewError(Exception):
     principalmessage = u""
     causes = []
     solutions = []
     type = 'danger'
-    template='templates/message.pt'
+    template = 'templates/message.pt'
 
-    
+
 def merge_dicts(source, target):
     result = dict(target)
     for k in source.keys():
@@ -50,9 +43,9 @@ def merge_dicts(source, target):
     return result
 
 
-__emptytemplate__ = 'templates/empty.pt'
+EMPTY_TEMPLATE = 'templates/empty.pt'
 
-#TODO creer des decorateur pour les vues Pontus
+#TODO create decorator for pontus views
 class View(Step):
     implements(IView)
 
@@ -62,7 +55,7 @@ class View(Step):
     coordinates = 'main' # default value
     validators = []
     item_template = 'templates/subview.pt'
-    self_template = None
+    template = None
     requirements = None
 
     def render_item(self, item, coordinates, parent):
@@ -79,17 +72,17 @@ class View(Step):
 
         if self.parent is not None:
             self.viewid = self.parent.viewid+'_'+self.viewid
-        
+
         if self.context is not None:
             self.viewid = self.viewid+'_'+str(get_oid(self.context))
-     
+
         self._request_configuration()
 
     def _request_configuration(self):
         coordinates = self.params('coordinates') #++
         if coordinates is not None:
             self.coordinates = coordinates
-    
+
     @property
     def requirements_copy(self):
         if self.requirements is None:
@@ -125,7 +118,7 @@ class View(Step):
             return self.request.params[key]
 
         return None
-  
+
     def before_update(self):
         pass
 
@@ -144,7 +137,7 @@ class View(Step):
             self.after_update()
         except ViewError as e:
             return self.failure(e)
-            
+
         if isinstance(result, dict):
             if not ('js_links' in result):
                 result['js_links'] = []
@@ -156,7 +149,7 @@ class View(Step):
 
     def content(self, result, template=None, main_template=None):
         if template is None:
-            template = self_template
+            template = self.template
             #registry = get_current_registry()
             #context_iface = providedBy(self.context)
             #view_deriver = registry.adapters.lookup((IViewClassifier, self.request.request_iface, context_iface), IV, name=self.title, default=None)
@@ -164,7 +157,7 @@ class View(Step):
             #template = registry.introspector.get('templates', discriminator).title
 
         if main_template is None:
-            main_template = get_renderer(__emptytemplate__).implementation()
+            main_template = get_renderer(EMPTY_TEMPLATE).implementation()
 
         if isinstance(result, dict):
             result['main_template'] = main_template
@@ -185,7 +178,7 @@ class View(Step):
             item['body'] = render
 
         return item
-  
+
     def setviewid(self, viewid):
         self.viewid = viewid
 
@@ -224,7 +217,7 @@ class ElementaryView(View):
         _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
         if self.validate_behaviors:
             self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors if not (behavior in _init_behaviors)])
-    
+
         self.behaviorinstances = {}
         self._init_behaviors()
 
@@ -237,8 +230,8 @@ class ElementaryView(View):
                 for init_v in self.init_behaviorinstances:
                     if not init_v.validate(self.context, self.request):
                         raise ValidationError()
-                    
-        except ValidationError as e:
+
+        except ValidationError:
             ve = ViewError()
             ve.principalmessage = BehaviorViewErrorPrincipalmessage
             ve.causes = BehaviorViewErrorCauses
@@ -261,7 +254,7 @@ class ElementaryView(View):
                 if behaviorinstance is not None:
                     key = behaviorinstance._class_.__name__
                     _behaviorinstances[key] = behaviorinstance
-            except ValidationError as e:
+            except ValidationError:
                 continue
 
         for behaviorinstance in self.init_behaviorinstances:
@@ -297,7 +290,7 @@ class ElementaryView(View):
 class BasicView(ElementaryView):
 
     isexecutable = False
-    
+
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(BasicView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.finished_successfully = True

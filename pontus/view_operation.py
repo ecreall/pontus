@@ -2,7 +2,6 @@ import re
 import deform.widget
 import colander
 import itertools
-from inspect import isfunction
 from pyramid.httpexceptions import HTTPFound
 
 from substanced.form import FormError
@@ -13,16 +12,16 @@ from pontus.schema import Schema
 from pontus.view import View, merge_dicts, ViewError
 from pontus.form import FormView
 from pontus.widget import (
-        SimpleFormWidget, 
-        AccordionWidget, 
-        SimpleMappingWidget, 
+        SimpleFormWidget,
+        AccordionWidget,
+        SimpleMappingWidget,
         CheckboxChoiceWidget)
 from pontus.interfaces import IFormView
 from pontus.resources import (
-        CallViewErrorPrincipalmessage, 
-        CallViewViewErrorCauses, 
-        MutltipleViewErrorPrincipalmessage, 
-        MutltipleViewErrorCauses, 
+        CallViewErrorPrincipalmessage,
+        CallViewViewErrorCauses,
+        MutltipleViewErrorPrincipalmessage,
+        MutltipleViewErrorCauses,
         CallViewErrorCildrenNotValidatedmessage)
 from pontus.core import STEPID, Step
 
@@ -56,7 +55,7 @@ class ViewOperation(View):
 
         if type(self.views).__name__ == 'function':
             self.views = self.views(self)
-        
+
         if not isinstance(self.views,(list, tuple, dict)):
             self.views = [self.views]
 
@@ -67,9 +66,9 @@ class ViewOperation(View):
         super(ViewOperation, self)._request_configuration()
         tomerge = self.params('tomerge')
         if tomerge is not None:
-            self.merged = bool(tomerge) 
+            self.merged = bool(tomerge)
 
-    #l'operation renvoie une vue qui peut etre executable ou non. 
+    #l'operation renvoie une vue qui peut etre executable ou non.
     #Il faut donc une fonction qui fixe si la vue renvoyee est executable ou non.
     def define_executable(self):
         return self.isexecutable
@@ -122,7 +121,7 @@ class MultipleContextsOperation(ViewOperation):
 
 class MultipleContextsViewsOperation(ViewOperation):
     pass
-    
+
 
 def default_builder(parent, views, **kwargs):
     if views is None:
@@ -149,16 +148,16 @@ def default_builder(parent, views, **kwargs):
             if parent.merged:
                 viewinstance.coordinates = parent.coordinates
 
-            parent.children.append(viewinstance)        
+            parent.children.append(viewinstance)
 
 
 class MultipleView(MultipleViewsOperation):
-    
+
     title = 'Multiple View'
     name = 'multipleview'
     builder = default_builder
-    self_template = 'templates/submultipleview.pt'
-    
+    template = 'templates/submultipleview.pt'
+
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(MultipleView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.children = []
@@ -176,7 +175,7 @@ class MultipleView(MultipleViewsOperation):
             view_requirements = view.get_view_requirements()
             result = merge_dicts(view_requirements, result)
 
-        return result 
+        return result
 
     def define_executable(self):
         _isexecutable =False
@@ -184,7 +183,7 @@ class MultipleView(MultipleViewsOperation):
             if child.isexecutable:
                 _isexecutable = True
                 break
-       
+
         if not _isexecutable:
             self.isexecutable = False
             self.finished_successfully = True
@@ -201,7 +200,7 @@ class MultipleView(MultipleViewsOperation):
     def before_update(self):
         for view in self.children:
             view.before_update()
-     
+
     def update(self,):
         #validation
         if not self.children:
@@ -245,7 +244,7 @@ class MultipleView(MultipleViewsOperation):
                 if item['isactive']:
                     isactive = True
                     break
-            
+
             if not isactive:
                 self._activate(items)
                 if self.parent is None:
@@ -256,7 +255,7 @@ class MultipleView(MultipleViewsOperation):
                       'view': self,
                       'id':self.viewid}
             values = {'coordinates':coordinate,'subitem':_item, 'parent': self}
-            body = self.content(result=values, template=self.self_template)['body']
+            body = self.content(result=values, template=self.template)['body']
             item = self.adapt_item(body, self.viewid)
             item['isactive'] = isactive
             result['coordinates'][coordinate] = [item]
@@ -307,7 +306,7 @@ class ViewSchema(Schema):
                 colander.String(),
                 widget=deform.widget.HiddenWidget()
                 )
-   
+
 
 class EmptySchema(Schema):
     views = colander.SchemaNode(
@@ -380,7 +379,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
         error = False
         if '__formid__' in self.request.POST:
             posted_formid = self.request.POST['__formid__']
- 
+
         if posted_formid is not None and posted_formid == form.formid:
             for button in form.buttons:
                 if button.name in self.request.POST:
@@ -388,7 +387,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                         controls = self.request.POST.items()
                         validated = form.validate(controls)
                     except deform.exception.ValidationFailure as e:
-                        #@TODO gestion des _failure des vues 
+                        #@TODO gestion des _failure des vues
                         fail = getattr(self, '%s_failure' % button.name, None)
                         if fail is None:
                             fail = self._failure
@@ -396,7 +395,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                         error = True
                     else:
                         try:
-                            #execution des vues postees (avec verification de la validite)  
+                            #execution des vues postees (avec verification de la validite)
                             views = validated['views']
                             for v in views:
                                 views_context = None
@@ -417,7 +416,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                                 bname = button.name.replace(('_'+self.suffixe), '')
                                 #dans le cas ou le behavior n'est pls valide: @TODO a voir
                                 if bname in view_instance.behaviorinstances:
-                                    behavior = view_instance.behaviorinstances[bname] 
+                                    behavior = view_instance.behaviorinstances[bname]
                                     behavior.execute(view_instance.context, self.request, v['item'])
                                     view_instance.finished_successfully = True
 
@@ -442,15 +441,14 @@ class MergedFormsView(MultipleContextsOperation, FormView):
             if messages:
                 item['messages']={}
                 for e, messagecontent in messages.iteritems():
-                    if e.type in item['messages']: 
+                    if e.type in item['messages']:
                         item['messages'][e.type].append(messagecontent)
                     else:
                         item['messages'][e.type]=[messagecontent]
-       
+
             result['coordinates'] = {self.view.coordinates:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
-
 
         else:
             result = item
@@ -464,7 +462,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
     def success(self, validated):
         return HTTPFound(
-            self.request.mgmt_path(self.context, '@@contents'))#+self.request.view_name))
+            self.request.mgmt_path(self.context, '@@contents'))
 
     def default_data(self):
         result = {'views':[]}
@@ -475,18 +473,18 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                 item_default_data = {}
             item_default_data = {'item': item_default_data,
                                  'id': item.viewid,
-                                 'context_oid':str(get_oid(item.context)), 
+                                 'context_oid':str(get_oid(item.context)),
                                  'title':item.context.title}
             result['views'].append(item_default_data)
 
-        return result 
+        return result
 
 
 class CallView(MultipleContextsOperation):
 
     title = 'CallView'
     name = 'callview'
-    self_template = 'pontus:templates/global_accordion.pt'
+    template = 'pontus:templates/global_accordion.pt'
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(CallView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
@@ -498,7 +496,7 @@ class CallView(MultipleContextsOperation):
             if child.isexecutable:
                 _isexecutable = True
                 break
-       
+
         if not _isexecutable:
             self.isexecutable = False
             self.finished_successfully = True
@@ -538,7 +536,7 @@ class CallView(MultipleContextsOperation):
                 coordinate = view_result['coordinates'].items()[0][0]
                 item = view_result['coordinates'].items()[0][1][0]
                 if coordinate in result:
-                    result[coordinate].append(item) 
+                    result[coordinate].append(item)
                 else:
                     result[coordinate] = [item]
             else:
@@ -547,19 +545,19 @@ class CallView(MultipleContextsOperation):
                     subviewid = currentview.viewid+'_'+coordinate
                     item['id'] = subviewid
                     if coordinate in result:
-                        result[coordinate].append(item) 
+                        result[coordinate].append(item)
                     else:
                         result[coordinate] = [item]
 
         for coordinate, items in result.iteritems():
             values = {'items': items, 'id':self.viewid+coordinate }
-            body = self.content(result=values, template=self.self_template)['body']
+            body = self.content(result=values, template=self.template)['body']
             item = self.adapt_item(body, self.viewid)
             global_result['coordinates'][coordinate]=[item]
 
         #if not (len(self.children) == len(self.contexts)):
         #    global_result['messages']
-        return  global_result 
+        return  global_result
 
     def after_update(self):
         if self.finished_successfully:
@@ -587,7 +585,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
     #widgets
     items_widget = CheckboxChoiceWidget
     form_widget = SimpleFormWidget
-    # a ne pas changer 
+    # a ne pas changer
     schema = ItemsSchema
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
@@ -638,7 +636,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         error = False
         if '__formid__' in self.request.POST:
             posted_formid = self.request.POST['__formid__']
- 
+
         if posted_formid is not None and posted_formid == form.formid:
             for button in form.buttons:
                 if button.name in self.request.POST:
@@ -685,7 +683,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         if isinstance(item,dict):
             if error:
                 item['isactive'] = True
-       
+
             result['coordinates'] = {self.coordinates:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
@@ -741,7 +739,7 @@ class Transition(object):
         self.id = id
 
     def validate(self):
-        behavior_transition = None 
+        behavior_transition = None
         if self.wizard.behaviorinstance is not None:
             behavior_transitions = dict(self.wizard.behaviorinstance.transitionsinstances)
             if self.id in behavior_transitions:
@@ -797,7 +795,7 @@ class Wizard(MultipleViewsOperation):
             except Exception:
                 pass
 
-            transitioninstance = Transition(sourceinstance, targetinstance, transitionid, condition, default)            
+            transitioninstance = Transition(sourceinstance, targetinstance, transitionid, condition, default)
             self.transitionsinstances[transitionid] = transitioninstance
 
         self._add_startnode()
@@ -814,21 +812,21 @@ class Wizard(MultipleViewsOperation):
             view_requirements = view.get_view_requirements()
             result = merge_dicts(view_requirements, result)
 
-        return result 
+        return result
 
     def _add_startnode(self):
         initnodes = self._getinitnodes()
         self.startnode = Step(self,'start_'+self.viewid)
         for node in initnodes:
             transitionid = self.startnode.stepid+'->'+node.stepid
-            self.transitionsinstances[transitionid] = Transition(self.startnode, node, transitionid)  
+            self.transitionsinstances[transitionid] = Transition(self.startnode, node, transitionid)
 
     def _add_endnode(self):
         finalnodes = self._getfinalnodes()
         self.endnode = Step(self,'end_'+self.viewid)
         for node in finalnodes:
             transitionid = node.stepid+'->'+self.endnode.stepid
-            self.transitionsinstances[transitionid] = Transition(node, self.endnode, transitionid) 
+            self.transitionsinstances[transitionid] = Transition(node, self.endnode, transitionid)
 
     def _getinitnodes(self):
         result = []
@@ -844,7 +842,7 @@ class Wizard(MultipleViewsOperation):
             if not view._outgoing:
                 result.append(view)
 
-        return result 
+        return result
 
     def _count_path(self, source, target):
         nsteps = 1
@@ -854,7 +852,7 @@ class Wizard(MultipleViewsOperation):
 
         if target in [s.source for s in listincomming]:
             return nsteps
-        
+
         maxsteps = 1000
         for inct in listincomming:
             incs = self._count_path(inct.source, target)
@@ -869,7 +867,7 @@ class Wizard(MultipleViewsOperation):
 
     def _calculate_wizard_informations(self):
         stepidkey = STEPID+self.viewid
-        currentsteps = [] 
+        currentsteps = []
         if stepidkey in self.request.session:
             currentsteps = [self.viewsinstances[self.request.session[stepidkey]]]
 
@@ -878,16 +876,16 @@ class Wizard(MultipleViewsOperation):
         rest = self._count_path(self.endnode, currentstep)-1
         total = covered + rest
         pourcentage = covered * 100 /total
-        return currentstep, total, covered, rest, pourcentage 
- 
+        return currentstep, total, covered, rest, pourcentage
+
     def getwizardinformationsview(self):
         currentstep, total, covered, rest, pourcentage = self._calculate_wizard_informations()
         values = {'total':total, 'current': covered, 'title': currentstep.title, 'pourcentage':pourcentage}
         body = self.content(result=values, template=self.informations_template)['body']
         result = {'body':body, 'js_links':[], 'css_links':[]}
         if self.informations_requirements is not None:
-            result.update(self.informations_requirements) 
-   
+            result.update(self.informations_requirements)
+
         return result
 
     def update(self):
@@ -958,7 +956,7 @@ class Wizard(MultipleViewsOperation):
                 if v.finished_successfully:
                     viewinstance = v
                 else:
-                    viewinstance = multipleviewinstance 
+                    viewinstance = multipleviewinstance
 
             if isinstance(result,dict):
                 result['view'] = viewinstance
@@ -968,4 +966,3 @@ class Wizard(MultipleViewsOperation):
     def success(self, validated=None):
         return HTTPFound(
             self.request.mgmt_path(self.context, '@@index'))
-        
