@@ -24,7 +24,7 @@ class FormView(ElementaryView, FV):
         self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
 
     def setviewid(self, viewid):
-        View.setviewid(self,viewid)
+        ElementaryView.setviewid(self,viewid)
         self.formid = viewid
 
     def get_view_requirements(self):
