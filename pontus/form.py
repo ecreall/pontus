@@ -19,8 +19,8 @@ class FormView(ElementaryView, SubstanceDFormView):
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         self.schema = self.schema.clone()
-        SubstanceDFormView(self, context, request)
-        ElementaryView(self, context, request, parent, wizard, stepid, **kwargs)
+        SubstanceDFormView.__init__(self, context, request)
+        ElementaryView.__init__(self, context, request, parent, wizard, stepid, **kwargs)
         self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
 
     def setviewid(self, viewid):
