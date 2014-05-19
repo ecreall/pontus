@@ -4,14 +4,15 @@ from zope.interface import implements
 import deform.exception
 import deform.widget
 
-from substanced.form import FormView as FV, FormError
+from substanced.form import FormView as SubstanceDFormView
+from substanced.form import FormError
 
 from pontus.interfaces import IFormView
 from pontus.view import ElementaryView, merge_dicts
 
 
 
-class FormView(ElementaryView, FV):
+class FormView(ElementaryView, SubstanceDFormView):
     implements(IFormView)
 
     title = 'Form View'
@@ -19,8 +20,8 @@ class FormView(ElementaryView, FV):
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         self.schema = self.schema.clone()
-        FV.__init__(self, context, request)
-        ElementaryView.__init__(self, context, request, parent, wizard, stepid, **kwargs)
+        SubstanceDFormView(self, context, request)
+        ElementaryView(self, context, request, parent, wizard, stepid, **kwargs)
         self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
 
     def setviewid(self, viewid):
