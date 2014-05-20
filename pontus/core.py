@@ -65,13 +65,13 @@ class VisualisableElement(object):
         self.title = ''
         self.label = ''
         self.description = ''
-        if kwargs.has_key('description'):
+        if 'description' in kwargs:
             self.description = kwargs.get('description')
 
-        if kwargs.has_key('label'):
+        if 'label' in kwargs:
             self.label = kwargs.get('label')
 
-        if kwargs.has_key('title'):
+        if 'title' in kwargs:
             self.title = kwargs.get('title')
 
     def url(self, request, view=None, args=None):
