@@ -56,7 +56,7 @@ class BehaviorA(Behavior):
 class ViewA(BasicView):
 
     title = 'ViewA'
-    self_template = 'pontus:tests/example/templates/testtemplate.pt'
+    template = 'pontus:tests/example/templates/testtemplate.pt'
     name = 'viewA'
     coordinates = 'left'
     behaviors = [BehaviorA]
@@ -67,7 +67,7 @@ class ViewA(BasicView):
         values = {
                 'title': self.title,
                }
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         return result
@@ -107,7 +107,7 @@ class BehaviorB(Behavior):
 class ViewB(BasicView):
 
     title = 'ViewB'
-    self_template = 'pontus:tests/example/templates/testtemplate.pt'
+    template = 'pontus:tests/example/templates/testtemplate.pt'
     name = 'viewB'
     coordinates = 'left'
     behaviors = [BehaviorB]
@@ -118,7 +118,7 @@ class ViewB(BasicView):
         values = {
                 'title': self.title,
                }
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         return result

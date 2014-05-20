@@ -49,7 +49,7 @@ from pontus.view_operation import MultipleView
 class RuntimeView(BasicView):
 
     title = 'Processes'
-    self_template = 'pontus:dace_ui_extension/templates/runtime_view.pt'
+    template = 'pontus:dace_ui_extension/templates/runtime_view.pt'
     name = 'Processes'
     behaviors = [SeeProcesses]
     requirements = {'css_links':[],
@@ -71,7 +71,7 @@ class ProcessStatisticView(BasicView):
 
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
-    self_template = 'pontus:dace_ui_extension/templates/runtimeprocesses_statistic_view.pt'
+    template = 'pontus:dace_ui_extension/templates/runtimeprocesses_statistic_view.pt'
     name = 'StatisticRun'
     coordinates = 'left'
     behaviors = [StatisticProcesses]
@@ -86,7 +86,7 @@ class ProcessStatisticView(BasicView):
         values = dace_ui_api.statistic_processes(self, self.context.processes, self.__class__.__name__)
         dates = dace_ui_api.statistic_dates(self, self.context.processes)
         values['dates'] = dates
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         result  = merge_dicts(self.requirements_copy, result) 
@@ -101,7 +101,7 @@ class ProcessStatisticView(BasicView):
 class ProcessDefinitionContainerView(BasicView):
 
     title = 'Processes'
-    self_template = 'pontus:dace_ui_extension/templates/defcontainer_view.pt'
+    template = 'pontus:dace_ui_extension/templates/defcontainer_view.pt'
     name = 'ProcessesDef'
     behaviors = [SeeProcessesDef]
     requirements = {'css_links':[],
@@ -127,7 +127,7 @@ class ProcessDefinitionContainerView(BasicView):
         result = {}
         allprocessesdef = [{'title':k, 'processes':v} for k, v in self._processes().iteritems()]
         values = {'allprocessesdef': allprocessesdef}
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         result  = merge_dicts(self.requirements_copy, result) 
@@ -143,7 +143,7 @@ class ProcessDefinitionStatisticView(BasicView):
 
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
-    self_template = 'pontus:dace_ui_extension/templates/processdef_statistic_view.pt'
+    template = 'pontus:dace_ui_extension/templates/processdef_statistic_view.pt'
     name = 'StatisticDef'
     coordinates = 'left'
     behaviors = [StatisticProcessesDef]
@@ -158,7 +158,7 @@ class ProcessDefinitionStatisticView(BasicView):
         values = dace_ui_api.statistic_processes(self, self.context.started_processes, self.__class__.__name__)
         dates = dace_ui_api.statistic_dates(self, self.context.started_processes)
         values['dates'] = dates
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         result  = merge_dicts(self.requirements_copy, result) 
@@ -173,7 +173,7 @@ class ProcessDefinitionStatisticView(BasicView):
 class ProcessDefinitionView(BasicView):
 
     title = 'La definition du processus'
-    self_template = 'pontus:dace_ui_extension/templates/processdef_view.pt'
+    template = 'pontus:dace_ui_extension/templates/processdef_view.pt'
     name = 'ProcessDef'
     behaviors = [SeeProcessDef]
 
@@ -181,7 +181,7 @@ class ProcessDefinitionView(BasicView):
         self.execute(None)
         result = {}
         values = {'processdef': self.context}
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         return result
@@ -195,7 +195,7 @@ class ProcessDefinitionView(BasicView):
 class ProcessesPDDefinitionView(BasicView):
 
     title = 'Les instance de la definition'
-    self_template = 'pontus:dace_ui_extension/templates/processinstances_view.pt'
+    template = 'pontus:dace_ui_extension/templates/processinstances_view.pt'
     name = 'ProcessInst'
     behaviors = [InstanceProcessesDef]
     requirements = {'css_links':[],
@@ -222,7 +222,7 @@ class ProcessesPDDefinitionView(BasicView):
                   'page': page, 
                   'pages': pages,
                   'url': self.request.mgmt_path(self.context, '@@ProcessInst')}
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         result  = merge_dicts(self.requirements_copy, result) 
@@ -237,7 +237,7 @@ class ProcessesPDDefinitionView(BasicView):
 class ProcessView(BasicView):
 
     title = 'Les detail du processus'
-    self_template = 'pontus:dace_ui_extension/templates/process_view.pt'
+    template = 'pontus:dace_ui_extension/templates/process_view.pt'
     name ='Process'
     behaviors = [SeeProcess]
 
@@ -273,7 +273,7 @@ class ProcessView(BasicView):
         result = {}
         resources, actions = self._actions()
         values = {'actions': actions, 'definition':self.context.definition ,'defurl':self.request.mgmt_path(self.context.definition, '@@index')}
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
@@ -289,7 +289,7 @@ class StatisticProcessView(BasicView):
 
     title = 'Tableau de bord'
     item_template = 'pontus:templates/subview_sample.pt'
-    self_template = 'pontus:dace_ui_extension/templates/processstatistic_view.pt'
+    template = 'pontus:dace_ui_extension/templates/processstatistic_view.pt'
     name='Statistic'
     coordinates = 'left'
     behaviors = [StatisticProcess]
@@ -302,7 +302,7 @@ class StatisticProcessView(BasicView):
         self.execute(None)
         result = {}
         values = {'actions': self._actions()}
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         return result
@@ -316,7 +316,7 @@ class StatisticProcessView(BasicView):
 class ProcessDataView(BasicView):
 
     title = 'Les donnees manipulees'
-    self_template = 'pontus:dace_ui_extension/templates/processdatas_view.pt'
+    template = 'pontus:dace_ui_extension/templates/processdatas_view.pt'
     name='lesdonneesmanipulees'
     behaviors = [SeeProcessDatas]
     requirements = {'css_links':[],
@@ -355,7 +355,7 @@ class ProcessDataView(BasicView):
         all_involveds = self._datas(self.context.execution_context.all_classified_involveds())
         involveds = [a for a in all_involveds if a['iscurrent']]
         values = {'datas': involveds, 'alldatas':all_involveds , 'tabid':self.__class__.__name__+'AllDatas'}
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         result  = merge_dicts(self.requirements_copy, result)  
@@ -372,7 +372,7 @@ class ProcessDataView(BasicView):
 class DoActivitiesProcessView(BasicView):
 
     title = 'Les actions a realiser'
-    self_template = 'pontus:dace_ui_extension/templates/processactions_view.pt'
+    template = 'pontus:dace_ui_extension/templates/processactions_view.pt'
     name='actionsrealiser'
     behaviors = [DoActivitiesProcess]
     requirements = {'css_links':[],
@@ -522,7 +522,7 @@ class DoActivitiesProcessView(BasicView):
                   'process':self.context,
                   'defurl':self.request.mgmt_path(self.context.definition, '@@index'),
                   'tabid':self.__class__.__name__+'AllActions'}
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         item['messages'] = messages
         item['isactive'] = action_updated
@@ -575,7 +575,7 @@ class AssignToUsersView(FormView):
 class AssignedUsersView(BasicView):
     title = 'Les utilisateurs assignies'
     name='assigned_users'
-    self_template = 'pontus.dace_ui_extension:templates/assigned_users.pt'
+    template = 'pontus.dace_ui_extension:templates/assigned_users.pt'
     
     def update(self):
         assigned_to = sorted(self.context.assigned_to, key=lambda u: u.__name__)
@@ -587,7 +587,7 @@ class AssignedUsersView(BasicView):
         values = {
                 'users': users,
                }
-        body = self.content(result=values, template=self.self_template)['body']
+        body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         return result
@@ -611,7 +611,7 @@ class AssignActionToUsersView(FormView):
 class AssignActionToUsersMultipleView(MultipleView):
     title = 'Assigner l\'action'
     name = 'assign_action'
-    self_template = 'pontus.dace_ui_extension:templates/multipleview.pt'
+    template = 'pontus.dace_ui_extension:templates/multipleview.pt'
     views = (AssignedUsersView, AssignActionToUsersView)
     validators = [AssignActionToUsers.get_validator()]
 
