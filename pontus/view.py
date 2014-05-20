@@ -300,3 +300,6 @@ class BasicView(ElementaryView):
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(BasicView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
         self.finished_successfully = True
+
+    def update(self):
+        return {}
