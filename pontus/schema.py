@@ -6,7 +6,7 @@ import colander
 
 from substanced.schema import Schema as SH
 
-from pontus.file import ObjectData, ObjectOID
+from pontus.file import ObjectData, ObjectOID, OBJECT_DATA
 
 try:
       basestring
@@ -20,12 +20,24 @@ class Schema(SH):
     label = ''
     description = ''
 
-    def __init__(self, objectfactory=None, editable=False, **kwargs):
+    def __init__(self, objectfactory=None, editable=False, omit=(),**kwargs):
         SH.__init__(self,**kwargs)
+        self._omit_nodes(omit)
         self.typ = ObjectData(objectfactory, editable)
         if editable:
             self.add_idnode(ObjectOID)
 
+    def _omit_nodes(self, omit):
+        csrf = self.get('_csrf_token_', None)
+        if csrf is not None:
+            csrf.to_omit = True
+            csrf.privat = True
+
+        for o in omit:
+            node = self.get(o, None)
+            if node is not None:
+                node.to_omit = True 
+                 
     def deserialize(self, cstruct=colander.null):
         members = dict(inspect.getmembers(self))
         if TAGGED_DATA in members and 'invariants' in members[TAGGED_DATA]:
@@ -48,17 +60,17 @@ class Schema(SH):
                 widget=deform.widget.HiddenWidget(),
                 default=value
                 )
+        idnode.to_omit = True
+        idnode.privat = True
         self.children.append(idnode)
 
 
 def select(schema, mask):
     """Return a new schema with only fields included in mask.
     """
-    if schema.get('_csrf_token_', None) is not None:
-        mask.insert(0, '_csrf_token_')
-
-    if schema.get(ObjectOID, None) is not None:
-        mask.insert(0, ObjectOID)
+    for n in schema.children:
+        if getattr(n, 'privat', False):
+            mask.insert(0, n.name)
 
     new_schema = schema.clone()
     new_schema.children = []

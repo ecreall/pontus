@@ -11,7 +11,7 @@ from substanced.util import get_oid
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
 
-
+OBJECT_DATA = '_objectdata_' 
 ObjectOID = '__objectoid__'
 
 
@@ -118,7 +118,6 @@ class ObjectData(colander.Mapping):
             self.editable = True
 
     def serialize(self, node, appstruct):
-
         _object = None
         if appstruct is None:
             appstruct = colander.null
@@ -167,11 +166,28 @@ class ObjectData(colander.Mapping):
         if self.factory is None and _object is None:
             return result
 
+        omited_result = {}
+        if isinstance(result, dict):
+            _result = dict(result)
+            for (k, n) in _result.iteritems():
+                subnode = node.get(k)
+                if getattr(subnode, 'to_omit', False):
+                     omited_result[k] = n
+                     result.pop(k)
+
         if _object is None and self.factory is not None:
             _object = self.factory(**result)
+            if omited_result:
+                omited_result[OBJECT_DATA] = _object
+                return omited_result
+
             return _object
 
         _object.set_data(result)
+        if omited_result:
+            omited_result[OBJECT_DATA] = _object
+            return omited_result
+
         return _object
 
     def cstruct_children(self, node, cstruct):

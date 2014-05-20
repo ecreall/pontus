@@ -220,11 +220,16 @@ class SelectWidget(SelectW):
         if cstruct in (null, None):
             cstruct = self.null_value
 
-        if cstruct and not isinstance(cstruct[0], string_types):
+        if cstruct and self.multiple and not isinstance(cstruct[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:
                 pass
+        elif isinstance(cstruct, string_types):
+            try:
+                cstruct = str(get_oid(cstruct))
+            except Exception:
+                pass 
             
         readonly = kw.get('readonly', self.readonly)
         values = kw.get('values', self.values)
@@ -294,11 +299,16 @@ class CheckboxChoiceWidget(CheckboxChoiceW):
         if self.multiple and not isinstance(cstruct,(list,tuple)):
             cstruct = [cstruct]
 
-        if cstruct and not isinstance(cstruct[0], string_types):
+        if cstruct and self.multiple and not isinstance(cstruct[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:
                 pass
+        elif isinstance(cstruct, string_types):
+            try:
+                cstruct = str(get_oid(cstruct))
+            except Exception:
+                pass 
 
         readonly = kw.get('readonly', self.readonly)
         values = kw.get('values', self.values)
