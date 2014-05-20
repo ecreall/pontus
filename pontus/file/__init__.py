@@ -169,7 +169,7 @@ class ObjectData(colander.Mapping):
         omited_result = {}
         if isinstance(result, dict):
             _result = dict(result)
-            for (k, n) in _result.iteritems():
+            for (k, n) in _result.items():
                 subnode = node.get(k)
                 if getattr(subnode, 'to_omit', False):
                      omited_result[k] = n
