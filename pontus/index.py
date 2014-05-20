@@ -1,6 +1,3 @@
-from pyramid.threadlocal import get_current_registry
-from pyramid import renderers
-
 from substanced.sdi import mgmt_view
 
 from dace.interfaces import IObject
@@ -8,15 +5,6 @@ from dace.util import getAllBusinessAction
 from pontus.view import View, ViewError
 from pontus.view_operation import MultipleView
 from pontus.resources import IndexViewErrorPrincipalmessage, IndexViewErrorCauses
-
-#a changer...
-def comp(action1, action2):
-    if action1.title < action2.title:
-        return -1
-    elif action1.title > action2.title:
-        return 1
-  
-    return 0
 
 
 @mgmt_view(
@@ -27,7 +15,7 @@ def comp(action1, action2):
     )
 class Index(View):
 
-    title = 'Voire'
+    title = 'Voir'
     viewid = 'index'
 
     def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
@@ -36,7 +24,7 @@ class Index(View):
 
     def update(self):
         allactions = getAllBusinessAction(self.context, self.request, True)
-        allactions.sort(cmp=comp)
+        allactions.sort(key=lambda x: x.title)
         views = []
         for action in allactions:
             views.append(action.action_view)
