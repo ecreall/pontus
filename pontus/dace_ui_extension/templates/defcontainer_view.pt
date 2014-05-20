@@ -9,7 +9,10 @@
 	   </a>
            <a tal:attributes="href p['url']" class="nav navbar-nav navbar-right">${p['process'].title.capitalize()}</a>
 	 </div>
-	 <div tal:define="p_id p['process'].title.capitalize()" class="panel-collapse collapse" id="panel-element-${p['process'].__name__.capitalize()}" style="height: auto;">
+	 <div tal:define="p_id p['process'].title.capitalize();
+                              view p['nav_bar']['view'];
+                              active_items p['nav_bar']['active_items']"
+              class="panel-collapse collapse" id="panel-element-${p['process'].__name__.capitalize()}" style="height: auto;">
            <div  tal:define="startedps p['process'].started_processes" class="panel-body">
               <dl>
 		 <dt>Description</dt>
@@ -26,16 +29,16 @@
                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                        <span class="glyphicon glyphicon-play-circle"></span> ${k} <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" role="menu" style="position: relative">
-                      <li tal:repeat="a g">
-                       <a href="${a.url}" data-toggle="tooltip" data-placement="bottom" title="${a.action.informations}">${a.title}</a>
-                      </li>
-                    </ul>
+                     <ul  class="dropdown-menu" role="menu" style="position: relative">
+                        <div tal:replace="view.render_group(k, g, active_items, True)" />
+                     </ul>
                   </div>
                 </div>
               </div>
 
-              <div tal:define="active p['nav_bar']['active']; links active['links']; groups active['groups']" class="btn-group">
+              <div tal:define="active p['nav_bar']['active'];
+                              links active['links'];
+                              groups active['groups'];" class="btn-group">
                  <div  tal:omit-tag="" tal:condition="links" tal:repeat="l links" >
                     <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}" class="btn btn-primary">${l.title}</a>
                  </div>
@@ -44,11 +47,9 @@
                       <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                         ${k} <span class="caret"></span>
                       </button>
-                      <ul class="dropdown-menu" role="menu" style="position: relative">
-                        <li tal:repeat="a g">
-                          <a href="${a.url}" data-toggle="tooltip" data-placement="bottom" title="${a.action.informations}">${a.title}</a>
-                        </li>
-                      </ul>
+                     <ul  class="dropdown-menu" role="menu" style="position: relative">
+                        <div tal:replace="view.render_group(k, g, active_items, True)" />
+                     </ul>
                    </div>
                  </div>
               </div>

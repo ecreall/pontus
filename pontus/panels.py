@@ -69,8 +69,8 @@ class NavBarPanel(object):
         self.context = context
         self.request = request
 
-    def render_group(self, name, group, active_items, isstart):
-        body = renderers.render('pontus:templates/panels/group.pt', {'name': name, 'group':group,'active_items':active_items, 'view': self, 'isstart':isstart}, self.request)
+    def render_group(self, name, group, active_items, isrelative):
+        body = renderers.render('pontus:templates/panels/group.pt', {'name': name, 'group':group,'active_items':active_items, 'view': self, 'isrelative':isrelative}, self.request)
         return Structure(body)
 
     def _classifier(self, actions, groups):
