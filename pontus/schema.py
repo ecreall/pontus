@@ -19,7 +19,7 @@ class Schema(SH):
         SH.__init__(self,**kwargs)
         self.typ = ObjectData(objectfactory, editable)
         if editable:
-            self.add_idnode(ObjectOID)  
+            self.add_idnode(ObjectOID)
 
     def deserialize(self, cstruct=colander.null):
         members = dict(inspect.getmembers(self))
@@ -58,7 +58,7 @@ def select(schema, mask):
     new_schema = schema.clone()
     new_schema.children = []
     for m in mask:
-        if isinstance(m, basestring):
+        if isinstance(m, str):
             node = schema.get(m)
             if node is not None:
                 new_schema.add(node.clone())
@@ -73,9 +73,9 @@ def select(schema, mask):
 
 
 def flatten(schemes):
-    if len(schemes)==0:
+    if len(schemes) == 0:
         return None
-    
+
     new_schema = schemes[0].clone()
     for schema in schemes[1:]:
         clone = schema.clone()
@@ -87,7 +87,7 @@ def flatten(schemes):
 def schemes_sum(schemes):
     if len(schemes)==0:
         return None
-    
+
     new_schema = Schema()
     for schema in schemes:
         clone = schema.clone()
@@ -106,7 +106,7 @@ def omit(schema, mask, isinternal=False):
         new_schema = schema
 
     for m in mask:
-        if isinstance(m, basestring):
+        if isinstance(m, str):
             node = new_schema.get(m)
             if node is not None:
                 new_schema.children.remove(node)

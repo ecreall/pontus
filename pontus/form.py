@@ -123,12 +123,12 @@ class FormView(ElementaryView, SubstanceDFormView):
 
         return None
 
-    def _chmod(self, form, mask=[]):
+    def _chmod(self, form, mask):
         for m in mask:
             node = self._get(form, m[0])
             if node is not None:
-                if isinstance(m[1], basestring):
-                   if m[1] == u'r':
+                if isinstance(m[1], str):
+                   if m[1] == 'r':
                        node.widget.readonly = True
                 else:
                     self._chmod(node.children[0], m[1])

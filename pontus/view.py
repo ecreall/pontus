@@ -266,8 +266,7 @@ class ElementaryView(View):
             _behaviorinstances[key] = behaviorinstance
 
         if _behaviorinstances:
-            sorted_behaviors = _behaviorinstances.values()
-            sorted_behaviors.sort()
+            sorted_behaviors = sorted(_behaviorinstances.values())
             for behaviorinstance in sorted_behaviors:
                 key = re.sub(r'\s', '_', behaviorinstance.title)
                 self.behaviorinstances[key] = behaviorinstance
