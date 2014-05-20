@@ -8,6 +8,11 @@ from substanced.schema import Schema as SH
 
 from pontus.file import ObjectData, ObjectOID
 
+try:
+      basestring
+except NameError:
+      basestring = str
+
 
 class Schema(SH):
 
@@ -58,7 +63,7 @@ def select(schema, mask):
     new_schema = schema.clone()
     new_schema.children = []
     for m in mask:
-        if isinstance(m, str):
+        if isinstance(m, basestring):
             node = schema.get(m)
             if node is not None:
                 new_schema.add(node.clone())
@@ -106,7 +111,7 @@ def omit(schema, mask, isinternal=False):
         new_schema = schema
 
     for m in mask:
-        if isinstance(m, str):
+        if isinstance(m, basestring):
             node = new_schema.get(m)
             if node is not None:
                 new_schema.children.remove(node)

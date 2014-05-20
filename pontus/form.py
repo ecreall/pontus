@@ -10,6 +10,11 @@ from substanced.form import FormError
 from pontus.interfaces import IFormView
 from pontus.view import ElementaryView, merge_dicts
 
+try:
+      basestring
+except NameError:
+      basestring = str
+
 
 @implementer(IFormView)
 class FormView(ElementaryView, SubstanceDFormView):
@@ -127,7 +132,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         for m in mask:
             node = self._get(form, m[0])
             if node is not None:
-                if isinstance(m[1], str):
+                if isinstance(m[1], basestring):
                    if m[1] == 'r':
                        node.widget.readonly = True
                 else:
