@@ -48,6 +48,7 @@ EMPTY_TEMPLATE = 'templates/empty.pt'
 #TODO create decorator for pontus views
 @implementer(IView)
 class View(Step):
+    """Abstract view"""
 
     viewid = None
     title = 'View'
@@ -204,6 +205,7 @@ class View(Step):
 
 
 class ElementaryView(View):
+    """Abstract view"""
 
     behaviors = []
     validate_behaviors = True
@@ -291,6 +293,7 @@ class ElementaryView(View):
 
 
 class BasicView(ElementaryView):
+    """Basic view"""
 
     isexecutable = False
 
