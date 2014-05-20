@@ -164,7 +164,7 @@ class Dace_ui_api(object):
             else:
                 dates[date] = 1
 
-        dates = sorted(dates.iteritems(), key=lambda i: i[0])
+        dates = sorted(dates.items(), key=lambda i: i[0])
         return dates
 
 

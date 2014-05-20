@@ -8,7 +8,7 @@
         <li class="menu-item " tal:condition="links" tal:repeat="l links" class="${(l in active_items) and 'active'}">
             <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}"><span class="glyphicon glyphicon-play-circle"></span> ${l.title}</a>
         </li>
-        <li tal:condition="groups" tal:repeat="(k, g) groups.iteritems()" class="menu-item dropdown">
+        <li tal:condition="groups" tal:repeat="(k, g) groups.items()" class="menu-item dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-play-circle"></span> ${k} <b class="caret"></b></a>
           <ul  class="dropdown-menu" role="menu" >
             <div tal:replace="view.render_group(k, g, active_items, False)" /> 
@@ -19,7 +19,7 @@
         <li class="menu-item " tal:condition="links" tal:repeat="l links" class="${(l in active_items) and 'active'}">
           <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}">${l.title}</a>
         </li>
-        <li  tal:condition="groups" tal:repeat="(k, g) groups.iteritems()" class="menu-item dropdown" >
+        <li  tal:condition="groups" tal:repeat="(k, g) groups.items()" class="menu-item dropdown" >
          <a href="#" class="dropdown-toggle" data-toggle="dropdown"> ${k} <b class="caret"></b></a>
          <ul  class="dropdown-menu" role="menu" >
           <div tal:replace="view.render_group(k, g, active_items, False)" />

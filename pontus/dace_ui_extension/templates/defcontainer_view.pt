@@ -24,7 +24,7 @@
                      <span class="glyphicon glyphicon-play-circle"></span> ${l.title}
                    </a>
                 </div>
-                <div  tal:omit-tag="" tal:condition="groups" tal:repeat="(k, g) groups.iteritems()">
+                <div  tal:omit-tag="" tal:condition="groups" tal:repeat="(k, g) groups.items()">
                   <div class="btn-group">
                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                        <span class="glyphicon glyphicon-play-circle"></span> ${k} <span class="caret"></span>
@@ -42,7 +42,7 @@
                  <div  tal:omit-tag="" tal:condition="links" tal:repeat="l links" >
                     <a href="${l.url}" data-toggle="tooltip" data-placement="bottom" title="${l.action.informations}" class="btn btn-primary">${l.title}</a>
                  </div>
-                 <div  tal:omit-tag="" tal:condition="groups" tal:repeat="(k, g) groups.iteritems()">
+                 <div  tal:omit-tag="" tal:condition="groups" tal:repeat="(k, g) groups.items()">
                    <div class="btn-group">
                       <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                         ${k} <span class="caret"></span>

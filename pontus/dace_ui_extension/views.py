@@ -1,31 +1,27 @@
 # -*- coding: utf8 -*-
-import re
 import colander
-from pyramid.response import Response
 from pyramid.threadlocal import get_current_registry
 
 from substanced.sdi import mgmt_view
-from substanced.sdi import LEFT
-from substanced.util import get_oid
 
 from dace.objectofcollaboration.runtime import Runtime
 from dace.objectofcollaboration.services.processdef_container import ProcessDefinitionContainer
 from dace.processdefinition.processdef import ProcessDefinition
 from dace.processinstance.core import DEFAULTMAPPING_ACTIONS_VIEWS
 from dace.processinstance.process import Process
-from dace.util import getSite, get_obj
+from dace.util import getSite
 from dace.interfaces import (
     IActivity,
     IBusinessAction)
 
 from .processes import (
-           SeeProcessesDef, 
-           SeeProcesses, 
-           StatisticProcessesDef, 
-           SeeProcessDef, 
-           InstanceProcessesDef, 
-           StatisticProcesses, 
-           SeeProcess, 
+           SeeProcessesDef,
+           SeeProcesses,
+           StatisticProcessesDef,
+           SeeProcessDef,
+           InstanceProcessesDef,
+           StatisticProcesses,
+           SeeProcess,
            StatisticProcess,
            SeeProcessDatas,
            DoActivitiesProcess,
@@ -34,7 +30,7 @@ from .processes import (
 from pontus.view import BasicView, ViewError, merge_dicts
 from pontus.form import FormView
 from pontus.schema import Schema
-from pontus.widget import  SequenceWidget, Select2Widget
+from pontus.widget import Select2Widget
 from pontus.dace_ui_extension.interfaces import IDaceUIAPI
 from pontus.dace_ui_extension import calculatePage
 from pontus.view_operation import MultipleView
@@ -89,7 +85,7 @@ class ProcessStatisticView(BasicView):
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result  = merge_dicts(self.requirements_copy, result) 
+        result  = merge_dicts(self.requirements_copy, result)
         return result
 
 
@@ -117,7 +113,7 @@ class ProcessDefinitionContainerView(BasicView):
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'nav_bar':actions}
             if p.discriminator in allprocesses:
                 allprocesses[p.discriminator].append(processe)
-            else:  
+            else:
                 allprocesses[p.discriminator] = [processe]
 
         return allprocesses
@@ -125,12 +121,12 @@ class ProcessDefinitionContainerView(BasicView):
     def update(self):
         self.execute(None)
         result = {}
-        allprocessesdef = [{'title':k, 'processes':v} for k, v in self._processes().iteritems()]
+        allprocessesdef = [{'title':k, 'processes':v} for k, v in self._processes().items()]
         values = {'allprocessesdef': allprocessesdef}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result  = merge_dicts(self.requirements_copy, result) 
+        result  = merge_dicts(self.requirements_copy, result)
         return result
 
 
@@ -161,7 +157,7 @@ class ProcessDefinitionStatisticView(BasicView):
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result  = merge_dicts(self.requirements_copy, result) 
+        result  = merge_dicts(self.requirements_copy, result)
         return result
 
 
@@ -207,7 +203,7 @@ class ProcessesPDDefinitionView(BasicView):
         allprocesses = []
         for p in processes:
             processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p}
-            allprocesses.append(processe) 
+            allprocesses.append(processe)
 
         return page, pages, allprocesses
 
@@ -215,17 +211,17 @@ class ProcessesPDDefinitionView(BasicView):
         self.execute(None)
         result = {}
         tabid = self.__class__.__name__+'AllProcesses'
-        page, pages, allprocesses = self._processes(tabid) 
+        page, pages, allprocesses = self._processes(tabid)
         values = {'processes': allprocesses,
                   'p_id': self.context.title,
                   'tabid':tabid,
-                  'page': page, 
+                  'page': page,
                   'pages': pages,
                   'url': self.request.mgmt_path(self.context, '@@ProcessInst')}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result  = merge_dicts(self.requirements_copy, result) 
+        result  = merge_dicts(self.requirements_copy, result)
         return result
 
 
@@ -251,14 +247,14 @@ class ProcessView(BasicView):
         dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
         for a in definition_actions:
             view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class_]
-            view_instance = view(definition, self.request) 
+            view_instance = view(definition, self.request)
             view_result = view_instance.get_view_requirements()
             body = ''
             if 'coordinates' in view_result:
                 body = view_result['coordinates'][view_instance .coordinates][0]['body']
 
             action_infos = dace_ui_api.action_infomrations(action=a.action, context=definition, request=self.request)
-            action_infos.update({'body':body, 'actionurl': a.url}) 
+            action_infos.update({'body':body, 'actionurl': a.url})
             alldefinitions_actions.append(action_infos)
             if 'js_links' in view_result:
                 resources['js_links'].extend(view_result['js_links'])
@@ -324,20 +320,19 @@ class ProcessDataView(BasicView):
 
     def _datas(self, involveds):
         alldatas = []
-        for pname, inv in involveds.iteritems():
+        for pname, inv in involveds.items():
             name = pname
             for i, d in enumerate(inv[1]):
-                iscollection =  (inv[0] == 'collection')
                 iscurrent = inv[4]
                 index = inv[3]
                 name = inv[2]
                 if index == -1:
                     index = i+1
-       
+
                 if iscurrent is None:
                     if i == (len(inv[1]) - 1):
                         iscurrent = True
-                    
+
                 alldatas.append({'url':self.request.mgmt_path(d, '@@index'),
                                  'data':d,
                                  'iscreator': inv[5] == 'created',
@@ -358,7 +353,7 @@ class ProcessDataView(BasicView):
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
-        result  = merge_dicts(self.requirements_copy, result)  
+        result  = merge_dicts(self.requirements_copy, result)
         return result
 
 
@@ -401,7 +396,7 @@ class DoActivitiesProcessView(BasicView):
 
             if updated_view is view_instance and  view_instance.isexecutable and view_instance.finished_successfully:
                 return True, True, None, None
-              
+
             if isinstance(view_result, dict):
                 action_infos = {}
                 if updated_view is view_instance and (not view_instance.isexecutable or (view_instance.isexecutable and not view_instance.finished_successfully)) :
@@ -415,10 +410,10 @@ class DoActivitiesProcessView(BasicView):
                     toreplay, action_updated_as, resources_as, allbodies_actions_as = self._modal_views(a_actions, form_id)
                     if toreplay:
                         return True, True, None, None
- 
+
                     if action_updated_as:
-                        action_updated = True 
-                   
+                        action_updated = True
+
                     resources['js_links'].extend(resources_as['js_links'])
                     resources['js_links'] = list(set(resources['js_links']))
                     resources['css_links'].extend(resources_as['css_links'])
@@ -439,7 +434,7 @@ class DoActivitiesProcessView(BasicView):
                              'actionurl': a.url,
                              'data': c,
                              'dataurl': self.request.mgmt_path(c, '@@index'),
-                             'assignedto': users}) 
+                             'assignedto': users})
                 allbodies_actions.append(action_infos)
                 if 'js_links' in view_result:
                     resources['js_links'].extend(view_result['js_links'])
@@ -528,7 +523,7 @@ class DoActivitiesProcessView(BasicView):
         item['isactive'] = action_updated
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
-        result  = merge_dicts(self.requirements_copy, result)  
+        result  = merge_dicts(self.requirements_copy, result)
         return result
 
 
@@ -576,7 +571,7 @@ class AssignedUsersView(BasicView):
     title = 'Les utilisateurs assignies'
     name='assigned_users'
     template = 'pontus.dace_ui_extension:templates/assigned_users.pt'
-    
+
     def update(self):
         assigned_to = sorted(self.context.assigned_to, key=lambda u: u.__name__)
         users= []

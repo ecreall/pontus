@@ -440,7 +440,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
             if messages:
                 item['messages']={}
-                for e, messagecontent in messages.iteritems():
+                for e, messagecontent in messages.items():
                     if e.type in item['messages']:
                         item['messages'][e.type].append(messagecontent)
                     else:
@@ -466,7 +466,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
     def default_data(self):
         result = {'views':[]}
-        views = list(itertools.chain.from_iterable([values for key, values in self.children.iteritems()]))
+        views = list(itertools.chain.from_iterable([values for key, values in self.children.items()]))
         for item in views:
             item_default_data = item.default_data()
             if item_default_data is None:
@@ -540,7 +540,7 @@ class CallView(MultipleContextsOperation):
                 else:
                     result[coordinate] = [item]
             else:
-                for coordinate, values in view_result['coordinates'].iteritems():
+                for coordinate, values in view_result['coordinates'].items():
                     item = values[0]
                     subviewid = currentview.viewid+'_'+coordinate
                     item['id'] = subviewid
@@ -549,7 +549,7 @@ class CallView(MultipleContextsOperation):
                     else:
                         result[coordinate] = [item]
 
-        for coordinate, items in result.iteritems():
+        for coordinate, items in result.items():
             values = {'items': items, 'id':self.viewid+coordinate }
             body = self.content(result=values, template=self.template)['body']
             item = self.adapt_item(body, self.viewid)
@@ -604,7 +604,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             name = re.sub(r'\s', '_', v.title)
             _views[name] = v
 
-        for key, view in _views.iteritems():
+        for key, view in _views.items():
             multiplecontextsview_class = CallView
             if IFormView.implementedBy(view):
                 multiplecontextsview_class = MergedFormsView
@@ -775,7 +775,7 @@ class Wizard(MultipleViewsOperation):
             except Exception:
                 pass
 
-        for key, view in self.views.iteritems():
+        for key, view in self.views.items():
             viewinstance = view(self.context, self.request, self, self, key)
             self.viewsinstances[key] = viewinstance
 
