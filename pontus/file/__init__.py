@@ -1,9 +1,9 @@
 from ZODB.blob import Blob
-import colander
-import deform.widget
-from deform.i18n import _
-import transaction
 from ZODB.interfaces import BlobError
+import colander
+from deform.schema import default_widget_makers
+from deform.widget import MappingWidget
+import transaction
 
 from substanced.file import File as FL
 from substanced.util import get_oid
@@ -38,7 +38,7 @@ class File(DaceObject,FL):
     @property
     def filename(self):
         return self.title
-        
+
     def get_data(self, node):
         result = {}
         result['filename'] = self.title
@@ -52,7 +52,7 @@ class File(DaceObject,FL):
     def get_size(self):
         try:
             return FL.get_size(self)
-        except BlobError as e:
+        except BlobError:
             transaction.commit()
             return FL.get_size(self)
 
@@ -115,8 +115,8 @@ class ObjectData(colander.Mapping):
         self.factory = factory
         self.editable = editable
         if self.factory is not None and self.factory in self.__specialObjects:
-            self.editable = True 
-  
+            self.editable = True
+
     def serialize(self, node, appstruct):
 
         _object = None
@@ -134,7 +134,7 @@ class ObjectData(colander.Mapping):
                 return result
         else:
             if appstruct is colander.null:
-                return  appstruct  
+                return  appstruct
 
             result = appstruct
 
@@ -155,7 +155,7 @@ class ObjectData(colander.Mapping):
                 return result
         else:
             if cstruct is colander.null:
-                return  cstruct 
+                return  cstruct
 
         if result is None:
             result = cstruct
@@ -163,7 +163,7 @@ class ObjectData(colander.Mapping):
         _object = None
         if isinstance(result, dict) and obj_oid is not None and not (obj_oid=='None') and not (obj_oid==''):
             _object = get_obj(int(obj_oid))
-            
+
         if self.factory is None and _object is None:
             return result
 
@@ -183,7 +183,4 @@ class ObjectData(colander.Mapping):
         return result
 
 
-from deform.schema import default_widget_makers
-from pontus.widget import MappingWidget
-
-default_widget_makers[ObjectData]= MappingWidget
+default_widget_makers[ObjectData] = MappingWidget
