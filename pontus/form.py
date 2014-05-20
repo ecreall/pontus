@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pyramid.httpexceptions import HTTPFound
-from zope.interface import implements
+from zope.interface import implementer
 import deform.exception
 import deform.widget
 
@@ -11,8 +11,8 @@ from pontus.interfaces import IFormView
 from pontus.view import ElementaryView, merge_dicts
 
 
+@implementer(IFormView)
 class FormView(ElementaryView, SubstanceDFormView):
-    implements(IFormView)
 
     title = 'Form View'
     chmod = []

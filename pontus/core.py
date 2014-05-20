@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import colander
 import deform
-from zope.interface import implements
+from zope.interface import implementer
 from pyramid import renderers
 from pyramid_layout.layout import Structure
 
@@ -55,8 +55,8 @@ class VisualisableElementSchema(Schema):
         )
 
 
+@implementer(IVisualisableElement)
 class VisualisableElement(object):
-    implements(IVisualisableElement)
 
     template = 'templates/visualisable_templates/object.pt'
 

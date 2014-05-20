@@ -1,6 +1,6 @@
 import re
 
-from zope.interface import implements
+from zope.interface import implementer
 
 from pyramid import renderers
 from pyramid.renderers import get_renderer
@@ -46,8 +46,8 @@ def merge_dicts(source, target):
 EMPTY_TEMPLATE = 'templates/empty.pt'
 
 #TODO create decorator for pontus views
+@implementer(IView)
 class View(Step):
-    implements(IView)
 
     viewid = None
     title = 'View'

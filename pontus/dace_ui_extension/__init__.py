@@ -1,7 +1,8 @@
 import datetime
+from math import ceil
 
 from pyramid.threadlocal import get_current_request
-from zope.interface import implements
+from zope.interface import implementer
 
 from substanced.sdi import mgmt_view
 from substanced.util import get_oid
@@ -13,6 +14,7 @@ from dace.objectofcollaboration.entity import Entity
 from pontus.view import BasicView, merge_dicts
 from .interfaces import IDaceUIAPI
 
+
 def calculatePage(elements, view, tabid):
     page = view.params('page'+tabid)
     number = view.params('number'+tabid)
@@ -21,8 +23,7 @@ def calculatePage(elements, view, tabid):
     else:
         number = int(number)
 
-    import numpy as np
-    pages = int(np.ceil(float(len(elements))/number))
+    pages = int(ceil(float(len(elements))/number))
     if pages > 0:
         if page is None:
             page = 1
@@ -39,8 +40,8 @@ def calculatePage(elements, view, tabid):
 
 
 @utility(name='dace_ui_api')
+@implementer(IDaceUIAPI)
 class Dace_ui_api(object):
-    implements(IDaceUIAPI)
 
     def action_infomrations(self, action, context, request=None, **args):
         action_id = action.behavior_id
@@ -52,7 +53,7 @@ class Dace_ui_api(object):
             pass
 
         action_id= action_id+str(action_oid)+'_'+str(context_oid)
-        after_url = self.afterexecution_viewurl(request=request, action_uid=str(action_oid), context_uid=str(context_oid)) 
+        after_url = self.afterexecution_viewurl(request=request, action_uid=str(action_oid), context_uid=str(context_oid))
         actionurl_update = self.updateaction_viewurl(request=request, action_uid=str(action_oid), context_uid=str(context_oid))
         if action_oid == 'start':
             after_url = self.afterexecution_viewurl(request=request,
@@ -60,13 +61,13 @@ class Dace_ui_api(object):
                                                            context_uid=str(context_oid),
                                                            pd_id=action.node.process.id,
                                                            action_id=action.node.__name__,
-                                                           behavior_id=action.behavior_id) 
+                                                           behavior_id=action.behavior_id)
             actionurl_update = self.updateaction_viewurl(request=request,
                                                            isstart=True,
                                                            context_uid=str(context_oid),
                                                            pd_id=action.node.process.id,
                                                            action_id=action.node.__name__,
-                                                           behavior_id=action.behavior_id) 
+                                                           behavior_id=action.behavior_id)
         informations = {}
         informations.update({'action':action,
                              'action_id':action_id,
@@ -112,7 +113,7 @@ class Dace_ui_api(object):
         processes = sorted(processes, key=lambda p: p.created_at)
         page, pages, processes = calculatePage(processes, view, tabid)
         nb_encours, nb_bloque, nb_termine, allprocesses = self._processes(view, processes)
-        values = {'processes': allprocesses, 
+        values = {'processes': allprocesses,
                   'encours':nb_encours,
                   'bloque':nb_bloque,
                   'termine':nb_termine,
@@ -123,12 +124,12 @@ class Dace_ui_api(object):
         body = view.content(result=values, template='pontus:dace_ui_extension/templates/runtime_view.pt')['body']
         item = view.adapt_item(body, view.viewid)
         result['coordinates'] = {view.coordinates:[item]}
-        result  = merge_dicts(dict(view.requirements), result) 
+        result  = merge_dicts(dict(view.requirements), result)
         return result
 
     def statistic_processes(self, view, processes, tabid):
         nb_encours, nb_bloque, nb_termine, allprocesses =  self._processes(view, processes)
-        
+
         blocedprocesses = [p['process'] for p in  allprocesses if p['bloced'] and not p['process']._finished ]
         terminetedprocesses = [ p['process'] for p in  allprocesses if p['process']._finished]
         activeprocesses = [ p['process'] for p in  allprocesses if  not p['process']._finished and not p['bloced']]
@@ -191,7 +192,6 @@ class Dace_ui_api_json(BasicView):
         action = None
         context = None
         result = {}
-        error_messages = ''
         try:
             if action_uid is not None:
                 action = get_obj(int(action_uid ))
@@ -222,12 +222,12 @@ class Dace_ui_api_json(BasicView):
            #             js_links.append(self.request.static_url(js))
            #
            #         result['js_links'] = js_links
-           #     
+           #
            #     if 'css_links' in view_result and view_result['css_links']:
            #         css_links = []
            #         for css in view_result['css_links']:
            #             css_links.append(self.request.static_url(css))
-           # 
+           #
            #         result['css_links'] = css_links
 
 
@@ -243,7 +243,7 @@ class Dace_ui_api_json(BasicView):
                 action = get_obj(int(action_uid ))
             else:
                 action = self._get_start_action()
-                    
+
         except Exception:
             return {}#message erreur
 
