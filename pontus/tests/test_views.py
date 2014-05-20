@@ -1,7 +1,8 @@
 from pontus.testing import FunctionalTests
 
-from pontus.tests.example.app import ViewA, BehaviorA, MultipleViewA, ViewB, BehaviorB, MultipleFromViewA, FormViewA, MergedFormsViewA, objectA, objectB
-from dace.objectofcollaboration.object import Object
+from pontus.tests.example.app import (
+    ViewA, MultipleViewA, ViewB,
+    MultipleFromViewA, FormViewA, objectA, objectB)
 
 class TestRelationsCatalog(FunctionalTests):
 
@@ -61,7 +62,6 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(len(self.request.viewexecuted), 0)
         self.assertIn('danger', item['messages'])
 
-
     def test_MultipleView(self):
         self.request.validationA = True
         self.request.validationB = True
@@ -88,14 +88,15 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(isinstance(result, dict), True)
         self.assertIn('coordinates', result)
         self.assertIn(ViewA.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][ViewA.coordinates]),1)
+        self.assertEqual(len(result['coordinates'][ViewA.coordinates]), 1)
 
-        items_body = [item['body'] for item in  result['coordinates'][ViewA.coordinates]]
+        items_body = [item['body']
+                for item in result['coordinates'][ViewA.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("Hello_"+ViewA.title+"\n")>-1), False )
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), True )
+        self.assertEqual((items_body[0].find("Hello_"+ViewA.title+"\n") > -1), False)
+        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n") > -1), True)
         self.assertEqual(len(self.request.viewexecuted), 1)
-        self.assertIn('behaviorB',self.request.viewexecuted)
+        self.assertIn('behaviorB', self.request.viewexecuted)
 
         self.request.validationA = False
         self.request.validationB = False
@@ -105,15 +106,15 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(isinstance(result, dict), True)
         self.assertIn('coordinates', result)
         self.assertIn(view.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][view.coordinates]),1)
+        self.assertEqual(len(result['coordinates'][view.coordinates]), 1)
         item = result['coordinates'][view.coordinates][0]
         self.assertIn('messages', item)
         self.assertEqual(len(item['messages']), 1)
 
         items_body = [item['body'] for item in  result['coordinates'][view.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("Hello_"+ViewA.title+"\n")>-1), False )
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), False )
+        self.assertEqual((items_body[0].find("Hello_"+ViewA.title+"\n") > -1), False)
+        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n") > -1), False)
         self.assertEqual(len(self.request.viewexecuted), 0)
 
     def test_MultipleFormView(self):
@@ -122,16 +123,16 @@ class TestRelationsCatalog(FunctionalTests):
         self.request.viewexecuted = []
         view = MultipleFromViewA(None, self.request)
         result = view()
-        self.assertEqual(view.isexecutable, True)
-        self.assertEqual(isinstance(result, dict), True)
+        self.assertTrue(view.isexecutable)
+        self.assertTrue(isinstance(result, dict))
         self.assertIn('coordinates', result)
         self.assertIn(ViewA.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][ViewA.coordinates]),1)
+        self.assertEqual(len(result['coordinates'][ViewA.coordinates]), 1)
 
         items_body = [item['body'] for item in  result['coordinates'][FormViewA.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("title")>-1), True )
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), True )
+        self.assertTrue(items_body[0].find("title") > -1)
+        self.assertTrue(items_body[0].find("Hello_"+ViewB.title+"\n") > -1)
         self.assertEqual(len(self.request.viewexecuted), 1)
         self.assertIn('behaviorB',self.request.viewexecuted)
 
@@ -166,7 +167,7 @@ class TestRelationsCatalog(FunctionalTests):
 
         items_body = [item['body'] for item in  result['coordinates'][view.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("title")>-1), False )
+        self.assertEqual((items_body[0].find("title")>-1), False)
         self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), False )
         self.assertEqual(len(self.request.viewexecuted), 0)
 
@@ -174,21 +175,21 @@ class TestRelationsCatalog(FunctionalTests):
         self.test_login()
         self.assertEqual(runtime.title, 'Runtime')
         res = self.testapp.get('/manage/runtime/@@multipleformviewa')
-        self.assertEqual((str(res.html).find("title")>-1), True )
-        self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n")>-1), True )
+        self.assertEqual((str(res.html).find("title") > -1), True)
+        self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n") > -1), True)
         res.form['title'] = 'newtitleA'
         res = res.form.submit('Behavior_A')
         self.assertEqual(res.status_int, 302)
         self.assertEqual(runtime.title, 'newtitleA')
 
         res = self.testapp.get('/manage/runtime/@@multipleformviewa')
-        self.assertEqual((str(res.html).find("title")>-1), True )
-        self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n")>-1), True )
+        self.assertEqual((str(res.html).find("title")>-1), True)
+        self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n") > -1), True)
         res.form['title'] = ''
         res = res.form.submit('Behavior_A')
         self.assertEqual(res.status_int, 200)
-        self.assertEqual((str(res.html).find("title")>-1), True )
-        self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n")>-1), True )
+        self.assertEqual((str(res.html).find("title") > -1), True)
+        self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n") > -1), True)
         res.form['title'] = 'Runtime'
         res = res.form.submit('Behavior_A')
         self.assertEqual(runtime.title, 'Runtime')
@@ -201,7 +202,8 @@ class TestRelationsCatalog(FunctionalTests):
         self.app['objectb'] = objectB
         self.test_login()
         res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
-        titles = [f for f in res.form.fields['title'] if f.__class__.__name__ == 'Text']
+        titles = [f for f in res.form.fields['title']
+                  if f.__class__.__name__ == 'Text']
         self.assertEqual(len(titles), 2 )
         forms = set(res.forms.values())
         self.assertEqual(len(forms), 1 )
@@ -222,10 +224,11 @@ class TestRelationsCatalog(FunctionalTests):
 
         objectA.title = 'notnewtitlea'
         res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
-        titles = [f for f in res.form.fields['title'] if f.__class__.__name__ == 'Text']
-        self.assertEqual(len(titles), 1 )
+        titles = [f for f in res.form.fields['title']
+                  if f.__class__.__name__ == 'Text']
+        self.assertEqual(len(titles), 1)
         forms = set(res.forms.values())
-        self.assertEqual(len(forms), 1 )
+        self.assertEqual(len(forms), 1)
         title_values = [t.value for t in titles]
         self.assertIn('newtitleb', title_values)
         for field in res.form.fields['title']:
@@ -241,4 +244,4 @@ class TestRelationsCatalog(FunctionalTests):
         res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
         self.assertEqual(res.status_int, 200)
         forms = set(res.forms.values())
-        self.assertEqual(len(forms), 0 )
+        self.assertEqual(len(forms), 0)
