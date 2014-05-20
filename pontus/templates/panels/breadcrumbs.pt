@@ -1,11 +1,20 @@
+<metal:block
+    xmlns:tal="http://xml.zope.org/namespaces/tal"
+    xmlns:metal="http://xml.zope.org/namespaces/metal"
+    xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+
         <div class="col-md-10 breadcrumbs-bounding">
           <ul tal:condition="breadcrumbs"
               class="breadcrumb">
             <tal:breadcrumbs repeat="breadcrumb breadcrumbs">
               <li tal:attributes="class breadcrumb['active']"
+                  tal:define="url breadcrumb['url']"
                   title="${breadcrumb['content_type']} '${breadcrumb['name']}'">
                 <i class="${breadcrumb['icon']}"> </i>
-                <a href="${breadcrumb['url']}">${breadcrumb['name']}</a>
+                <tal:block tal:switch="url != ''">
+                  <a tal:case="True" href="${breadcrumb['url']}">${breadcrumb['name']}</a>
+                  <span tal:case="False" tal:replace="breadcrumb['name']" />
+                </tal:block>
               </li>
             </tal:breadcrumbs>
           </ul>
@@ -14,8 +23,9 @@
              tal:define="sdititle request.sdiapi.sdi_title();
                          home_path request.sdiapi.mgmt_path(request.virtual_root)"
              class="navbar"
-             href="${home_path}"><img 
+             href="${home_path}"><img
                     alt="${sdititle}"
                     src="${request.static_url('substanced.sdi:static/img/capsule-icon-32.png')}"
                     />${sdititle}</a>
         </div>
+</metal:block>

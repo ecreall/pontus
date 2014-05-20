@@ -18,22 +18,25 @@ def usermenu_panel(context, request):
               renderer='templates/panels/breadcrumbs.pt')
 class Breadcrumbs_panel(object):
 
-
     def __init__(self, context, request):
         self.context = context
         self.request = request
 
     def breadcrumbs(self):
         request = self.request
+        context = self.context
         breadcrumbs = []
-        for resource in lineage(request.context):
+        for resource in lineage(context):
             if not has_permission('sdi.view', resource, request):
                 return {'breadcrumbs':[]}
-            
-            url = request.sdiapi.mgmt_path(resource, '@@manage_main')
-            if isinstance(resource, Entity):
-                url = request.sdiapi.mgmt_path(resource, '@@index')
-    
+
+            if resource == context:
+                url = ''
+            elif isinstance(resource, Entity):
+                url = request.resource_url(resource, '@@index')
+            else:
+                url = request.resource_url(resource)
+
             name = getattr(resource, 'title', None)
             if name is None:
                 name = resource.__name__ or 'Home'
@@ -76,10 +79,10 @@ class NavBarPanel(object):
     def _classifier(self, actions, groups):
         actionsgroups = {}
         links = []
-        titles = [] 
+        titles = []
         for a in actions:
             if not a.action.groups and not(a.title in titles):
-                titles.append(a.title) 
+                titles.append(a.title)
                 links.append(a)
                 continue
 
@@ -93,7 +96,7 @@ class NavBarPanel(object):
             if len(a.action.groups) == 1:
                 if not(a.title in titles):
                     principalgroup['links'].append(a)
-                    titles.append(a.title) 
+                    titles.append(a.title)
 
                 continue
 
@@ -106,13 +109,13 @@ class NavBarPanel(object):
                     lastgroup = currentgroup['subgroups'][g] = {'links':[], 'subgroups':{}}
 
                 currentgroup = lastgroup
-      
+
             if not(a.title in titles):
                 lastgroup['links'].append(a)
-                titles.append(a.title) 
+                titles.append(a.title)
 
 
-        return actionsgroups, links 
+        return actionsgroups, links
 
 
     def _actions(self):
