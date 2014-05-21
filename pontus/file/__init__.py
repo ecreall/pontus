@@ -21,7 +21,7 @@ USE_MAGIC = object()
 class File(DaceObject,FL):
 
     def __init__(self, fp, mimetype, filename, preview_url, uid, **kwargs):
-        DaceObject.__init__(self)
+        DaceObject.__init__(self, **kwargs)
         if fp:
             fp.seek(0)
         else:
