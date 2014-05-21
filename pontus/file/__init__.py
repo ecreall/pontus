@@ -172,23 +172,55 @@ class ObjectData(colander.Mapping):
             for (k, n) in _result.items():
                 subnode = node.get(k)
                 if getattr(subnode, 'to_omit', False):
-                     omited_result[k] = n
+                     if not getattr(subnode, 'private', False):
+                         omited_result[k] = n
+
                      result.pop(k)
+
+        if isinstance(result, dict):
+            _result = dict(result)
+            _to_result = {}
+            for (k, n) in _result.items(): 
+                islist = True
+                isobject = False
+                if not isinstance(n, (list,tuple)):
+                    n = [n]
+                    islist = False
+
+                for item in list(n):
+                    if isinstance(item, dict) and OBJECT_DATA in item:
+                        isobject = True
+                        subobject = item.pop(OBJECT_DATA)
+                        if not(k in _to_result):
+                            _to_result[k] = [subobject]
+                        else:
+                            _to_result[k].append(subobject)
+
+                        if not item:
+                            n.pop(n.index(item))
+                        else:
+                            item[OBJECT_DATA] = subobject
+
+            if isobject:           
+                if islist and n:
+                    omited_result[k] = n
+                elif n:
+                    omited_result[k] = n[0]
+
+                if islist and k in _to_result:
+                    result[k] = _to_result[k]
+                elif k in _to_result:   
+                    result[k] = _to_result[k][0]
 
         if _object is None and self.factory is not None:
             _object = self.factory(**result)
-            if omited_result:
-                omited_result[OBJECT_DATA] = _object
-                return omited_result
-
-            return _object
-
-        _object.set_data(result)
-        if omited_result:
             omited_result[OBJECT_DATA] = _object
             return omited_result
 
-        return _object
+        _object.set_data(result)
+        omited_result[OBJECT_DATA] = _object
+        return omited_result
+
 
     def cstruct_children(self, node, cstruct):
         result = []

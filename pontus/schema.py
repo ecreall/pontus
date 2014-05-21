@@ -14,6 +14,18 @@ except NameError:
       basestring = str
 
 
+def omit_nodes(schemanode, omit):
+    for o in omit:
+        if isinstance(o, basestring):
+            node = schemanode.get(o, None)
+            if node is not None:
+                node.to_omit = True 
+        else:
+            node = schemanode.get(o[0])
+            if node is not None:
+                omit_nodes(node.children[0], o[1])
+
+
 class Schema(SH):
 
     title = ''
@@ -22,8 +34,10 @@ class Schema(SH):
 
     def __init__(self, objectfactory=None, editable=False, omit=(),**kwargs):
         SH.__init__(self,**kwargs)
-        self._omit_nodes(omit)
         self.typ = ObjectData(objectfactory, editable)
+        if editable or objectfactory is not None:
+            self._omit_nodes(omit)
+
         if editable:
             self.add_idnode(ObjectOID)
 
@@ -31,13 +45,10 @@ class Schema(SH):
         csrf = self.get('_csrf_token_', None)
         if csrf is not None:
             csrf.to_omit = True
-            csrf.privat = True
+            csrf.private = True
 
-        for o in omit:
-            node = self.get(o, None)
-            if node is not None:
-                node.to_omit = True 
-                 
+        omit_nodes(self, omit)
+
     def deserialize(self, cstruct=colander.null):
         members = dict(inspect.getmembers(self))
         if TAGGED_DATA in members and 'invariants' in members[TAGGED_DATA]:
@@ -61,7 +72,7 @@ class Schema(SH):
                 default=value
                 )
         idnode.to_omit = True
-        idnode.privat = True
+        idnode.private = True
         self.children.append(idnode)
 
 
@@ -69,7 +80,7 @@ def select(schema, mask):
     """Return a new schema with only fields included in mask.
     """
     for n in schema.children:
-        if getattr(n, 'privat', False):
+        if getattr(n, 'private', False):
             mask.insert(0, n.name)
 
     new_schema = schema.clone()
