@@ -19,7 +19,10 @@ def omit_nodes(schemanode, omit):
         if isinstance(o, basestring):
             node = schemanode.get(o, None)
             if node is not None:
-                node.to_omit = True 
+                newnode = node.clone()
+                index = schemanode.children.index(node)
+                newnode.to_omit = True
+                schemanode.insert(index, newnode)
         else:
             node = schemanode.get(o[0])
             if node is not None:

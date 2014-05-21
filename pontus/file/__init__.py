@@ -201,16 +201,16 @@ class ObjectData(colander.Mapping):
                         else:
                             item[OBJECT_DATA] = subobject
 
-            if isobject:           
-                if islist and n:
-                    omited_result[k] = n
-                elif n:
-                    omited_result[k] = n[0]
+                if isobject:           
+                    if islist and n:
+                        omited_result[k] = n
+                    elif n:
+                        omited_result[k] = n[0]
 
-                if islist and k in _to_result:
-                    result[k] = _to_result[k]
-                elif k in _to_result:   
-                    result[k] = _to_result[k][0]
+                    if islist and k in _to_result:
+                        result[k] = _to_result[k]
+                    elif k in _to_result:   
+                        result[k] = _to_result[k][0]
 
         if _object is None and self.factory is not None:
             _object = self.factory(**result)
