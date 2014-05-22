@@ -76,9 +76,9 @@ class VisualisableElement(object):
 
     def url(self, request, view=None, args=None):
         if view is None:
-            return request.mgmt_path(self, '@@index')
+            return request.resource_url(self, '@@index')
         else:
-            return request.mgmt_path(self, '@@'+view)
+            return request.resource_url(self, '@@'+view)
 
     def get_view(self, request, template=None):
         if template is None:

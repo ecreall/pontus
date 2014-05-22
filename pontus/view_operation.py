@@ -462,7 +462,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
     def success(self, validated):
         return HTTPFound(
-            self.request.mgmt_path(self.context, '@@contents'))
+            self.request.resource_url(self.context, '@@contents'))
 
     def default_data(self):
         result = {'views':[]}

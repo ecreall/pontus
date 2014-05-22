@@ -80,9 +80,9 @@ class File(DaceObject,FL):
     def url(self, request, view=None, args=None):
         if view is None:
             #generalement c est la vue de l index associer qu'il faut retourner
-            return request.mgmt_path(self, '@@view')
+            return request.resource_url(self, '@@view')
         else:
-            return request.mgmt_path(self, '@@'+view)
+            return request.resource_url(self, '@@'+view)
 
 
 class Image(File):

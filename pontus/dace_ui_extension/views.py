@@ -1,8 +1,7 @@
 # -*- coding: utf8 -*-
 import colander
 from pyramid.threadlocal import get_current_registry
-
-from substanced.sdi import mgmt_view
+from pyramid.view import view_config
 
 from dace.objectofcollaboration.runtime import Runtime
 from dace.objectofcollaboration.services.processdef_container import ProcessDefinitionContainer
@@ -37,7 +36,7 @@ from pontus.view_operation import MultipleView
 
 
 
-@mgmt_view(
+@view_config(
     name='Processes',
     context=Runtime,
     renderer='pontus:templates/view.pt'
@@ -58,7 +57,7 @@ class RuntimeView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name='StatisticRun',
     context=Runtime,
     renderer='pontus:templates/view.pt'
@@ -89,7 +88,7 @@ class ProcessStatisticView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name='ProcessesDef',
     context=ProcessDefinitionContainer,
     renderer='pontus:templates/view.pt'
@@ -110,7 +109,7 @@ class ProcessDefinitionContainerView(BasicView):
         for p in processes:
             nav_bar = NavBarPanel(p, self.request)
             actions = nav_bar()
-            processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p, 'nav_bar':actions}
+            processe = {'url':self.request.resource_url(p, '@@index'), 'process':p, 'nav_bar':actions}
             if p.discriminator in allprocesses:
                 allprocesses[p.discriminator].append(processe)
             else:
@@ -130,7 +129,7 @@ class ProcessDefinitionContainerView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name='StatisticDef',
     context=ProcessDefinition,
     renderer='pontus:templates/view.pt'
@@ -161,7 +160,7 @@ class ProcessDefinitionStatisticView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name='ProcessDef',
     context=ProcessDefinition,
     renderer='pontus:templates/view.pt'
@@ -183,7 +182,7 @@ class ProcessDefinitionView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name='ProcessInst',
     context=ProcessDefinition,
     renderer='pontus:templates/view.pt'
@@ -202,7 +201,7 @@ class ProcessesPDDefinitionView(BasicView):
         page, pages, processes = calculatePage(processes, self, tabid)
         allprocesses = []
         for p in processes:
-            processe = {'url':self.request.mgmt_path(p, '@@index'), 'process':p}
+            processe = {'url':self.request.resource_url(p, '@@index'), 'process':p}
             allprocesses.append(processe)
 
         return page, pages, allprocesses
@@ -217,7 +216,7 @@ class ProcessesPDDefinitionView(BasicView):
                   'tabid':tabid,
                   'page': page,
                   'pages': pages,
-                  'url': self.request.mgmt_path(self.context, '@@ProcessInst')}
+                  'url': self.request.resource_url(self.context, '@@ProcessInst')}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -225,7 +224,7 @@ class ProcessesPDDefinitionView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name='Process',
     context=Process,
     renderer='pontus:templates/view.pt'
@@ -268,7 +267,7 @@ class ProcessView(BasicView):
         self.execute(None)
         result = {}
         resources, actions = self._actions()
-        values = {'actions': actions, 'definition':self.context.definition ,'defurl':self.request.mgmt_path(self.context.definition, '@@index')}
+        values = {'actions': actions, 'definition':self.context.definition ,'defurl':self.request.resource_url(self.context.definition, '@@index')}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -276,7 +275,7 @@ class ProcessView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name = 'Statistic',
     context=Process,
     renderer='pontus:templates/view.pt'
@@ -304,7 +303,7 @@ class StatisticProcessView(BasicView):
         return result
 
 
-@mgmt_view(
+@view_config(
     name = 'lesdonneesmanipulees',
     context=Process,
     renderer='pontus:templates/view.pt'
@@ -333,7 +332,7 @@ class ProcessDataView(BasicView):
                     if i == (len(inv[1]) - 1):
                         iscurrent = True
 
-                alldatas.append({'url':self.request.mgmt_path(d, '@@index'),
+                alldatas.append({'url':self.request.resource_url(d, '@@index'),
                                  'data':d,
                                  'iscreator': inv[5] == 'created',
                                  'iscollection': inv[0] == 'collection',
@@ -359,7 +358,7 @@ class ProcessDataView(BasicView):
 
 
 
-@mgmt_view(
+@view_config(
     name = 'actionsrealiser',
     context=Process,
     renderer='pontus:templates/view.pt'
@@ -426,14 +425,14 @@ class DoActivitiesProcessView(BasicView):
                 assigned_to = sorted(a.action.assigned_to, key=lambda u: u.__name__)
                 users= []
                 for user in assigned_to:
-                    users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
+                    users.append({'title':user.__name__, 'userurl': self.request.resource_url(user, '@@contents')})
 
                 action_infos.update(dace_ui_api.action_infomrations(action=a.action, context=c, request=self.request))
                 action_infos.update({'body':body,
                              'ismultiinstance':hasattr(a.action,'principalaction'),
                              'actionurl': a.url,
                              'data': c,
-                             'dataurl': self.request.mgmt_path(c, '@@index'),
+                             'dataurl': self.request.resource_url(c, '@@index'),
                              'assignedto': users})
                 allbodies_actions.append(action_infos)
                 if 'js_links' in view_result:
@@ -515,7 +514,7 @@ class DoActivitiesProcessView(BasicView):
         action_updated, messages, resources, actions = self._actions()
         values = {'actions': actions,
                   'process':self.context,
-                  'defurl':self.request.mgmt_path(self.context.definition, '@@index'),
+                  'defurl':self.request.resource_url(self.context.definition, '@@index'),
                   'tabid':self.__class__.__name__+'AllActions'}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
@@ -553,7 +552,7 @@ class AssignToUsersViewSchema(Schema):
                 )
 
 
-@mgmt_view(
+@view_config(
     name='assign_activity',
     context=IActivity,
     renderer='pontus:templates/view.pt',
@@ -576,7 +575,7 @@ class AssignedUsersView(BasicView):
         assigned_to = sorted(self.context.assigned_to, key=lambda u: u.__name__)
         users= []
         for user in assigned_to:
-            users.append({'title':user.__name__, 'userurl': self.request.mgmt_path(user, '@@contents')})
+            users.append({'title':user.__name__, 'userurl': self.request.resource_url(user, '@@contents')})
 
         result = {}
         values = {
@@ -598,7 +597,7 @@ class AssignActionToUsersView(FormView):
     validate_behaviors = False
 
 
-@mgmt_view(
+@view_config(
     name='assign_action',
     context=IBusinessAction,
     renderer='pontus:templates/view.pt',

@@ -174,7 +174,7 @@ class TestRelationsCatalog(FunctionalTests):
         runtime = self.app['runtime']
         self.test_login()
         self.assertEqual(runtime.title, 'Runtime')
-        res = self.testapp.get('/manage/runtime/@@multipleformviewa')
+        res = self.testapp.get('/runtime/@@multipleformviewa')
         self.assertEqual((str(res.html).find("title") > -1), True)
         self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n") > -1), True)
         res.form['title'] = 'newtitleA'
@@ -182,7 +182,7 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(res.status_int, 302)
         self.assertEqual(runtime.title, 'newtitleA')
 
-        res = self.testapp.get('/manage/runtime/@@multipleformviewa')
+        res = self.testapp.get('/runtime/@@multipleformviewa')
         self.assertEqual((str(res.html).find("title")>-1), True)
         self.assertEqual((str(res.html).find("Hello_"+ViewB.title+"\n") > -1), True)
         res.form['title'] = ''
@@ -201,7 +201,7 @@ class TestRelationsCatalog(FunctionalTests):
         self.app['objecta'] = objectA
         self.app['objectb'] = objectB
         self.test_login()
-        res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
+        res = self.testapp.get('/runtime/@@mergedformsviewa')
         titles = [f for f in res.form.fields['title']
                   if f.__class__.__name__ == 'Text']
         self.assertEqual(len(titles), 2 )
@@ -223,7 +223,7 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(objectB.title, 'newtitleb')
 
         objectA.title = 'notnewtitlea'
-        res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
+        res = self.testapp.get('/runtime/@@mergedformsviewa')
         titles = [f for f in res.form.fields['title']
                   if f.__class__.__name__ == 'Text']
         self.assertEqual(len(titles), 1)
@@ -241,7 +241,7 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(objectB.title, 'objectb')
 
         objectB.title = 'notnewtitlea'
-        res = self.testapp.get('/manage/runtime/@@mergedformsviewa')
+        res = self.testapp.get('/runtime/@@mergedformsviewa')
         self.assertEqual(res.status_int, 200)
         forms = set(res.forms.values())
         self.assertEqual(len(forms), 0)

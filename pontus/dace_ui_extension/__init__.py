@@ -1,10 +1,10 @@
 import datetime
 from math import ceil
-
-from pyramid.threadlocal import get_current_request
 from zope.interface import implementer
 
-from substanced.sdi import mgmt_view
+from pyramid.threadlocal import get_current_request
+from pyramid.view import view_config
+
 from substanced.util import get_oid
 
 from dace.util import get_obj, find_service, utility
@@ -81,14 +81,14 @@ class Dace_ui_api(object):
             request = get_current_request()
 
         args['op'] = 'after_execution_action'
-        return request.mgmt_path(request.context, '@@dace-ui-api-view', query=args)
+        return request.resource_url(request.context, '@@dace-ui-api-view', query=args)
 
     def updateaction_viewurl(self, request=None, **args):
         if request is None:
             request = get_current_request()
 
         args['op'] = 'update_action'
-        return request.mgmt_path(request.context, '@@dace-ui-api-view', query=args)
+        return request.resource_url(request.context, '@@dace-ui-api-view', query=args)
 
     def _processes(self, view, processes):
         allprocesses = []
@@ -97,7 +97,7 @@ class Dace_ui_api(object):
         nb_termine = 0
         for p in processes:
             bloced = not p.getWorkItems()
-            processe = {'url':view.request.mgmt_path(p, '@@index'), 'process':p, 'bloced':bloced, 'created_at': p.created_at}
+            processe = {'url':view.request.resource_url(p, '@@index'), 'process':p, 'bloced':bloced, 'created_at': p.created_at}
             allprocesses.append(processe)
             if p._finished:
                 nb_termine += 1
@@ -120,7 +120,7 @@ class Dace_ui_api(object):
                   'tabid':tabid,
                   'page': page,
                   'pages': pages,
-                  'url': view.request.mgmt_path(view.context, '@@'+view.name)}
+                  'url': view.request.resource_url(view.context, '@@'+view.name)}
         body = view.content(result=values, template='pontus:dace_ui_extension/templates/runtime_view.pt')['body']
         item = view.adapt_item(body, view.viewid)
         result['coordinates'] = {view.coordinates:[item]}
@@ -168,7 +168,7 @@ class Dace_ui_api(object):
         return dates
 
 
-@mgmt_view(name='dace-ui-api-view', context=Entity, xhr=True, renderer='json')
+@view_config(name='dace-ui-api-view', context=Entity, xhr=True, renderer='json')
 class Dace_ui_api_json(BasicView):
 
     def _get_start_action(self):

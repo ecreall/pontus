@@ -62,7 +62,7 @@ class StatisticProcesses(InfiniteCardinality):
             query={'isstart':'True'} 
 
         query['coordinates'] = 'main'
-        return get_current_request().mgmt_path(obj, '@@'+self.view_name,  query=query)
+        return get_current_request().resource_url(obj, '@@'+self.view_name,  query=query)
 
 
 class SeeProcesses(InfiniteCardinality):
@@ -174,7 +174,7 @@ class StatisticProcessesDef(InfiniteCardinality):
             query={'isstart':'True'} 
   
         query['coordinates'] = 'main'
-        return get_current_request().mgmt_path(obj, '@@'+self.view_name,  query=query)
+        return get_current_request().resource_url(obj, '@@'+self.view_name,  query=query)
 
 class InstanceProcessesDef(InfiniteCardinality):
 
@@ -257,7 +257,7 @@ class StatisticProcess(InfiniteCardinality):
             query={'isstart':'True'} 
 
         query['coordinates'] = 'main'
-        return get_current_request().mgmt_path(obj, '@@'+self.view_name,  query=query)
+        return get_current_request().resource_url(obj, '@@'+self.view_name,  query=query)
 
 
 class SeeProcessDatas(InfiniteCardinality):

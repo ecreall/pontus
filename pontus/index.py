@@ -1,4 +1,4 @@
-from substanced.sdi import mgmt_view
+from pyramid.view import view_config
 
 from dace.interfaces import IObject
 from dace.util import getAllBusinessAction
@@ -7,9 +7,8 @@ from pontus.view_operation import MultipleView
 from pontus.resources import IndexViewErrorPrincipalmessage, IndexViewErrorCauses
 
 
-@mgmt_view(
+@view_config(
     name='index',
-    tab_title='Voir',
     context=IObject,
     renderer='templates/view.pt',
     )

@@ -3,8 +3,8 @@ import deform
 import deform.widget
 from zope.interface import Interface
 from pyramid.httpexceptions import HTTPFound
+from pyramid.view import view_config
 
-from substanced.sdi import mgmt_view
 from substanced.sdi import RIGHT
 
 from pontus.view import BasicView
@@ -148,12 +148,10 @@ class FormViewA(FormView):
     def default_data(self):
         return self.context 
 
-@mgmt_view(
+@view_config(
     name='multipleformviewa',
-    tab_title='MultipleFormView A',
     context=Runtime,
     renderer='pontus:templates/view.pt',
-    tab_near=RIGHT,
     )
 class MultipleFromViewA(MultipleView):
     title = 'MultipleFormView A'
@@ -167,12 +165,10 @@ objectB = Object(title='objectb')
 def get_item(view=None):
     return [objectA, objectB]
 
-@mgmt_view(
+@view_config(
     name='mergedformsviewa',
-    tab_title='Call A',
     context=Runtime,
     renderer='pontus:templates/view.pt',
-    tab_near=RIGHT,
     )
 class MergedFormsViewA(MergedFormsView):
     views = FormViewA
