@@ -87,7 +87,7 @@ class FormView(ElementaryView, SubstanceDFormView):
             if not self.finished_successfully:
                 item = self.show(form)
             else:
-                item = HTTPFound(self.request.resource_url(self.context, '@@index'))
+                item = HTTPFound(self.request.resource_url(self.context))
 
         if isinstance(item, dict):
             if error:
