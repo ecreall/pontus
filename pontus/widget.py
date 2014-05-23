@@ -3,15 +3,16 @@ from colander import (
     Invalid,
     null,
     )
+from deform.i18n import _
 from deform.widget import (
-    SequenceWidget as SW,
+    SequenceWidget as OriginSequenceWidget,
     MappingWidget,
     RichTextWidget,
     FileUploadWidget,
     OptGroup,
-    FormWidget as FW,
-    SelectWidget as SelectW,
-    CheckboxChoiceWidget as CheckboxChoiceW
+    FormWidget as OriginFormWidget,
+    SelectWidget as OriginSelectWidget,
+    CheckboxChoiceWidget as OriginCheckboxChoiceWidget
     )
 
 from deform.compat import (
@@ -25,7 +26,8 @@ from substanced.util import get_oid
 from pontus.file import ObjectOID
 from dace.util import get_obj
 
-class SequenceWidget(SW):
+
+class SequenceWidget(OriginSequenceWidget):
 
 
     def prototype(self, field):
@@ -149,7 +151,7 @@ class SequenceWidget(SW):
 
 
 class TableWidget(SequenceWidget):
-  
+
     template = 'pontus:templates/table.pt'
     item_template = 'pontus:templates/table_item.pt'
     readonly_template = 'pontus:templates/readonly/table.pt'
@@ -157,21 +159,22 @@ class TableWidget(SequenceWidget):
 
 
 class LineWidget(MappingWidget):
-  
+
     template = 'pontus:templates/line_mapping.pt'
     item_template = 'pontus:templates/line_mapping_item.pt'
     readonly_template = 'pontus:templates/readonly/line_mapping.pt'
     readonly_item_template = 'pontus:templates/readonly/line_mapping_item.pt'
 
+
 class AccordionWidget(SequenceWidget):
-  
+
     template = 'pontus:templates/accordion.pt'
     item_template = 'pontus:templates/accordion_item.pt'
 
 
 class RichTextWidget(RichTextWidget):
-  
-    template = 'pontus:templates/richtext.pt' 
+
+    template = 'pontus:templates/richtext.pt'
 
 
 class MemoryTmpStore(dict):
@@ -208,19 +211,19 @@ def _normalize_choices(values):
                 try:
                     value = str(get_oid(value))
                 except Exception:
-                    pass
+                    value = str(value)
 
             result.append((value, description))
     return result
 
 
-class SelectWidget(SelectW):
+class SelectWidget(OriginSelectWidget):
 
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
             cstruct = self.null_value
 
-        if cstruct and self.multiple and not isinstance(cstruct[0], string_types):
+        if cstruct and getattr(self, 'multiple', False) and not isinstance(cstruct[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:
@@ -229,8 +232,8 @@ class SelectWidget(SelectW):
             try:
                 cstruct = str(get_oid(cstruct))
             except Exception:
-                pass 
-            
+                pass
+
         readonly = kw.get('readonly', self.readonly)
         values = kw.get('values', self.values)
         template = readonly and self.readonly_template or self.template
@@ -241,26 +244,28 @@ class SelectWidget(SelectW):
     def deserialize(self, field, pstruct):
         if pstruct in (null, self.null_value):
             return null
-        
-        result = []
-        for item in pstruct:
-            ob = None
-            try:
-                ob = get_obj(int(item))
-                if ob is None:
-                    result.append(item)
-                else:
-                    result.append(ob)
-            except ValueError:
-                result.append(item)
 
-        return result
+        if isinstance(pstruct, string_types):
+            return pstruct
+        else:
+            result = []
+            for item in pstruct:
+                ob = None
+                try:
+                    ob = get_obj(int(item))
+                    if ob is None:
+                        result.append(item)
+                    else:
+                        result.append(ob)
+                except ValueError:
+                    result.append(item)
+            return result
 
 
 class Select2Widget(SelectWidget):
     template = 'deform:templates/select2.pt'
     requirements = (('deform', None), ('select2', None))
-    
+
 
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
@@ -270,16 +275,16 @@ class RadioChoiceWidget(SelectWidget):
         if cstruct in (null, None):
             cstruct = self.null_value
 
-        if self.multiple and not isinstance(cstruct, (tuple, list)):
+        if getattr(self, 'multiple', False) and not isinstance(cstruct, (tuple, list)):
                 cstruct = [cstruct]
-        
+
         return super(RadioChoiceWidget, self).serialize(field, cstruct, **kw)
 
     def deserialize(self, field, pstruct):
         if pstruct in (null, self.null_value):
             return null
 
-        if not self.multiple and isinstance(pstruct, (list, tuple)):
+        if not getattr(self, 'multiple', False) and isinstance(pstruct, (list, tuple)):
             pstruct = pstruct[0]
 
         try:
@@ -288,7 +293,7 @@ class RadioChoiceWidget(SelectWidget):
             return pstruct
 
 
-class CheckboxChoiceWidget(CheckboxChoiceW):
+class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
 
     #template = 'pontus:templates/checkbox_choice.pt'
 
@@ -296,10 +301,11 @@ class CheckboxChoiceWidget(CheckboxChoiceW):
         if cstruct in (null, None):
             cstruct = ()
 
-        if self.multiple and not isinstance(cstruct,(list,tuple)):
+        is_multiple = getattr(self, 'multiple', False)
+        if is_multiple and not isinstance(cstruct,(list,tuple)):
             cstruct = [cstruct]
 
-        if cstruct and self.multiple and not isinstance(cstruct[0], string_types):
+        if cstruct and is_multiple and not isinstance(cstruct[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:
@@ -308,7 +314,7 @@ class CheckboxChoiceWidget(CheckboxChoiceW):
             try:
                 cstruct = str(get_oid(cstruct))
             except Exception:
-                pass 
+                pass
 
         readonly = kw.get('readonly', self.readonly)
         values = kw.get('values', self.values)
@@ -324,25 +330,29 @@ class CheckboxChoiceWidget(CheckboxChoiceW):
         if not isinstance(pstruct, (list, tuple)):
             pstruct = (pstruct,)
 
-        result = []
-        for item in pstruct:
-            ob = None
-            try:
-                ob = get_obj(int(item))
-                if ob is None:
+        if isinstance(pstruct, string_types):
+            return pstruct
+        else:
+            result = []
+            for item in pstruct:
+                ob = None
+                try:
+                    ob = get_obj(int(item))
+                    if ob is None:
+                        result.append(item)
+                    else:
+                        result.append(ob)
+                except ValueError:
                     result.append(item)
-                else:
-                    result.append(ob)
-            except ValueError:
-                result.append(item)
 
-        return tuple(result)
+            return tuple(result)
 
 
 class SimpleMappingWidget(MappingWidget):
 
     template = 'pontus:templates/simple_mapping.pt'
 
-class SimpleFormWidget(FW):
+
+class SimpleFormWidget(OriginFormWidget):
 
     item_template = 'pontus:templates/simple_mapping_item.pt'
