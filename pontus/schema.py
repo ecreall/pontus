@@ -4,9 +4,9 @@ import deform
 import deform.widget
 import colander
 
-from substanced.schema import Schema as SH
+from substanced.schema import Schema as OriginSchema
 
-from pontus.file import ObjectData, ObjectOID, OBJECT_DATA
+from pontus.file import ObjectData, ObjectOID
 
 try:
       basestring
@@ -29,14 +29,14 @@ def omit_nodes(schemanode, omit):
                 omit_nodes(node.children[0], o[1])
 
 
-class Schema(SH):
+class Schema(OriginSchema):
 
     title = ''
     label = ''
     description = ''
 
     def __init__(self, objectfactory=None, editable=False, omit=(),**kwargs):
-        SH.__init__(self,**kwargs)
+        OriginSchema.__init__(self,**kwargs)
         self.typ = ObjectData(objectfactory, editable)
         if editable or objectfactory is not None:
             self._omit_nodes(omit)
