@@ -94,14 +94,18 @@ class Object(colander.SchemaType):
         if appstruct is None:
             appstruct = colander.null
 
-        if  appstruct is not colander.null:
-            return str(get_oid(appstruct))
+        if appstruct is not colander.null:
+            oid = get_oid(appstruct)
+            if oid is None:
+                return colander.null
+            else:
+                return str(oid)
 
         return appstruct
 
     def deserialize(self, node, cstruct):
         if cstruct is colander.null:
-            return  cstruct
+            return cstruct
 
         return cstruct
 
@@ -127,7 +131,7 @@ class ObjectData(colander.Mapping):
             appstruct = _object.get_data(node)
 
         result = None
-        if not (self.factory in self.__specialObjects):
+        if not self.factory in self.__specialObjects:
             result = colander.Mapping.serialize(self, node, appstruct)
             if not self.editable or result is colander.null:
                 return result
@@ -143,83 +147,67 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
-        obj_oid = None
-        if self.editable and cstruct and OBJECT_OID in cstruct:
-            obj_oid = cstruct.get(OBJECT_OID)
-
         result = None
         if not (self.factory in self.__specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
             if not self.editable or result is colander.null or cstruct is colander.null:
                 return result
-        else:
-            if cstruct is colander.null:
-                return  cstruct
+        elif cstruct is colander.null:
+            return cstruct
 
         if result is None:
             result = cstruct
 
-        _object = None
-        if isinstance(result, dict) and obj_oid is not None and not (obj_oid=='None') and not (obj_oid==''):
-            _object = get_obj(int(obj_oid))
+        obj = None
+        if isinstance(result, dict) and self.editable:
+            obj_oid = result.get(OBJECT_OID, None)
+            if obj_oid == 'None':
+                obj_oid = None
 
-        if self.factory is None and _object is None:
+            if obj_oid is not None:
+                obj = get_obj(int(obj_oid))
+
+        if self.factory is None and obj is None:
             return result
 
-        omited_result = {}
+        appstruct = {}
+        create_object = False
         if isinstance(result, dict):
-            _result = dict(result)
-            for (k, n) in _result.items():
-                subnode = node.get(k)
+            for key, value in result.items():
+                subnode = node.get(key)
+                if key in ('_csrf_token_', OBJECT_OID):
+                    continue
+
+                if value != subnode.missing:
+                    create_object = True
+
                 if getattr(subnode, 'to_omit', False):
                      if not getattr(subnode, 'private', False):
-                         omited_result[k] = n
+                         appstruct[key] = value
 
-                     result.pop(k)
+                     continue
 
-        if isinstance(result, dict):
-            _result = dict(result)
-            _to_result = {}
-            for (k, n) in _result.items():
-                islist = True
-                isobject = False
-                if not isinstance(n, (list,tuple)):
-                    n = [n]
-                    islist = False
+                if not isinstance(value, (list, tuple)):
+                    value = [value]
 
-                for item in list(n):
+                for item in value:
                     if isinstance(item, dict) and OBJECT_DATA in item:
-                        isobject = True
-                        subobject = item.pop(OBJECT_DATA)
-                        if not(k in _to_result):
-                            _to_result[k] = [subobject]
-                        else:
-                            _to_result[k].append(subobject)
+                        subobject = item[OBJECT_DATA]
+                        appstruct.setdefault(key, []).append(subobject)
 
-                        if not item:
-                            n.pop(n.index(item))
-                        else:
-                            item[OBJECT_DATA] = subobject
+        if obj is None:
+            # add form
+            if self.factory is not None:
+                if create_object:
+                    appstruct[OBJECT_DATA] = self.factory(**result)
+                else:
+                    appstruct[OBJECT_DATA] = None
+        else:
+            # edit form
+            obj.set_data(result)
+            appstruct[OBJECT_DATA] = obj
 
-                if isobject:
-                    if islist and n:
-                        omited_result[k] = n
-                    elif n:
-                        omited_result[k] = n[0]
-
-                    if islist and k in _to_result:
-                        result[k] = _to_result[k]
-                    elif k in _to_result:
-                        result[k] = _to_result[k][0]
-
-        if _object is None and self.factory is not None:
-            _object = self.factory(**result)
-            omited_result[OBJECT_DATA] = _object
-            return omited_result
-
-        _object.set_data(result)
-        omited_result[OBJECT_DATA] = _object
-        return omited_result
+        return appstruct
 
 
     def cstruct_children(self, node, cstruct):
