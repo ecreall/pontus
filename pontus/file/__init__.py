@@ -11,8 +11,8 @@ from substanced.util import get_oid
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
 
-OBJECT_DATA = '_objectdata_' 
-ObjectOID = '__objectoid__'
+OBJECT_DATA = '_object_data'
+OBJECT_OID = '__objectoid__'
 
 
 USE_MAGIC = object()
@@ -138,14 +138,14 @@ class ObjectData(colander.Mapping):
             result = appstruct
 
         if _object is not None:
-            result[ObjectOID] = get_oid(_object)
+            result[OBJECT_OID] = get_oid(_object)
 
         return result
 
     def deserialize(self, node, cstruct):
         obj_oid = None
-        if self.editable and cstruct and ObjectOID in cstruct:
-            obj_oid = cstruct.get(ObjectOID)
+        if self.editable and cstruct and OBJECT_OID in cstruct:
+            obj_oid = cstruct.get(OBJECT_OID)
 
         result = None
         if not (self.factory in self.__specialObjects):
@@ -180,7 +180,7 @@ class ObjectData(colander.Mapping):
         if isinstance(result, dict):
             _result = dict(result)
             _to_result = {}
-            for (k, n) in _result.items(): 
+            for (k, n) in _result.items():
                 islist = True
                 isobject = False
                 if not isinstance(n, (list,tuple)):
@@ -201,7 +201,7 @@ class ObjectData(colander.Mapping):
                         else:
                             item[OBJECT_DATA] = subobject
 
-                if isobject:           
+                if isobject:
                     if islist and n:
                         omited_result[k] = n
                     elif n:
@@ -209,7 +209,7 @@ class ObjectData(colander.Mapping):
 
                     if islist and k in _to_result:
                         result[k] = _to_result[k]
-                    elif k in _to_result:   
+                    elif k in _to_result:
                         result[k] = _to_result[k][0]
 
         if _object is None and self.factory is not None:

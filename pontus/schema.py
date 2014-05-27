@@ -6,7 +6,7 @@ import colander
 
 from substanced.schema import Schema as OriginSchema
 
-from pontus.file import ObjectData, ObjectOID
+from pontus.file import ObjectData, OBJECT_OID
 
 try:
       basestring
@@ -23,6 +23,7 @@ def omit_nodes(schemanode, omit):
                 index = schemanode.children.index(node)
                 newnode.to_omit = True
                 schemanode.insert(index, newnode)
+                schemanode.children.remove(node)
         else:
             node = schemanode.get(o[0])
             if node is not None:
@@ -42,7 +43,7 @@ class Schema(OriginSchema):
             self._omit_nodes(omit)
 
         if editable:
-            self.add_idnode(ObjectOID)
+            self.add_idnode(OBJECT_OID)
 
     def _omit_nodes(self, omit):
         csrf = self.get('_csrf_token_', None)

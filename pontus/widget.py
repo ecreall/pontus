@@ -23,7 +23,7 @@ from deform.compat import (
 from translationstring import TranslationString
 from substanced.util import get_oid
 
-from pontus.file import ObjectOID
+from pontus.file import OBJECT_OID
 from dace.util import get_obj
 
 
@@ -195,7 +195,7 @@ class FileWidget(FileUploadWidget):
         if data is null:
             return null
 
-        data[ObjectOID] = pstruct.get(ObjectOID)
+        data[OBJECT_OID] = pstruct.get(OBJECT_OID)
         return data
 
 
