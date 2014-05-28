@@ -5,7 +5,7 @@ from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
 import transaction
 
-from substanced.file import File as FL
+from substanced.file import File as OriginFile
 from substanced.util import get_oid
 
 from dace.util import get_obj
@@ -18,7 +18,7 @@ NO_VALUES = '_no_values'
 USE_MAGIC = object()
 
 
-class File(DaceObject,FL):
+class File(DaceObject, OriginFile):
 
     def __init__(self, fp, mimetype, filename, preview_url, uid, **kwargs):
         DaceObject.__init__(self, **kwargs)
@@ -27,7 +27,7 @@ class File(DaceObject,FL):
         else:
             fp = None
         mimetype = mimetype or USE_MAGIC
-        FL.__init__(self, fp, mimetype, filename)
+        OriginFile.__init__(self, fp, mimetype, filename)
         self.preview_url = preview_url
         self.uid = uid
 
@@ -51,10 +51,10 @@ class File(DaceObject,FL):
 
     def get_size(self):
         try:
-            return FL.get_size(self)
+            return OriginFile.get_size(self)
         except BlobError:
             transaction.commit()
-            return FL.get_size(self)
+            return OriginFile.get_size(self)
 
     def __setattr__(self, name, value):
         if name == 'mimetype':
