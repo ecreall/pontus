@@ -17,6 +17,8 @@ NO_VALUES = '_no_values'
 
 USE_MAGIC = object()
 
+MARKER = object()
+
 
 class File(DaceObject, OriginFile):
 
@@ -171,7 +173,7 @@ class ObjectData(colander.Mapping):
             return result
 
         appstruct = {}
-        no_values = True
+        has_values = False
         if isinstance(result, dict):
             data_to_set = {}
             for key, value in result.items():
@@ -179,8 +181,9 @@ class ObjectData(colander.Mapping):
                 if key in ('_csrf_token_', OBJECT_OID):
                     continue
 
-                if value != subnode.missing:
-                    no_values = False
+                missing = getattr(subnode, 'missing', MARKER)
+                if value != missing:
+                    has_values = True
 
                 if getattr(subnode, 'to_omit', False):
                     if not getattr(subnode, 'private', False):
@@ -203,12 +206,12 @@ class ObjectData(colander.Mapping):
         if obj is None:
             # add form
             if self.factory is not None:
-                appstruct[NO_VALUES] = no_values
+                appstruct[NO_VALUES] = not has_values
                 appstruct[OBJECT_DATA] = self.factory(**data_to_set)
         else:
             # edit form
             obj.set_data(data_to_set)
-            appstruct[NO_VALUES] = no_values
+            appstruct[NO_VALUES] = not has_values
             appstruct[OBJECT_DATA] = obj
 
         return appstruct
