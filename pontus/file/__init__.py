@@ -86,6 +86,11 @@ class File(DaceObject, OriginFile):
         else:
             return request.resource_url(self, '@@'+view)
 
+    def get_response(self, **kw):
+        response = super(File, self).get_response(**kw)
+        response.content_disposition = 'attachment; filename="%s"' % self.filename
+        return response
+
 
 class Image(File):
     pass
