@@ -13,7 +13,7 @@ from dace.objectofcollaboration.object import Object as DaceObject
 
 OBJECT_DATA = '_object_data'
 OBJECT_OID = '__objectoid__'
-
+NO_VALUES = '_no_values'
 
 USE_MAGIC = object()
 
@@ -171,40 +171,44 @@ class ObjectData(colander.Mapping):
             return result
 
         appstruct = {}
-        create_object = False
+        no_values = True
         if isinstance(result, dict):
+            data_to_set = {}
             for key, value in result.items():
                 subnode = node.get(key)
                 if key in ('_csrf_token_', OBJECT_OID):
                     continue
 
                 if value != subnode.missing:
-                    create_object = True
+                    no_values = False
 
                 if getattr(subnode, 'to_omit', False):
-                     if not getattr(subnode, 'private', False):
-                         appstruct[key] = value
+                    if not getattr(subnode, 'private', False):
+                        appstruct[key] = value
 
-                     continue
+                    continue  # don't set data if omitted
+
+                data_to_set[key] = value
 
                 if not isinstance(value, (list, tuple)):
-                    value = [value]
-
-                for item in value:
-                    if isinstance(item, dict) and OBJECT_DATA in item:
-                        subobject = item[OBJECT_DATA]
-                        appstruct.setdefault(key, []).append(subobject)
+                    if isinstance(value, dict) and OBJECT_DATA in value:
+                        subobject = value[OBJECT_DATA]
+                        appstruct[key] = subobject
+                else:
+                    for item in value:
+                        if isinstance(item, dict) and OBJECT_DATA in item:
+                            subobject = item[OBJECT_DATA]
+                            appstruct.setdefault(key, []).append(subobject)
 
         if obj is None:
             # add form
             if self.factory is not None:
-                if create_object:
-                    appstruct[OBJECT_DATA] = self.factory(**result)
-                else:
-                    appstruct[OBJECT_DATA] = None
+                appstruct[NO_VALUES] = no_values
+                appstruct[OBJECT_DATA] = self.factory(**data_to_set)
         else:
             # edit form
-            obj.set_data(result)
+            obj.set_data(data_to_set)
+            appstruct[NO_VALUES] = no_values
             appstruct[OBJECT_DATA] = obj
 
         return appstruct
