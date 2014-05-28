@@ -6,16 +6,13 @@
   ${field.start_mapping()}
 
   <div class="deformReplaces" tal:condition="cstruct.get('uid')">
-
     <input type="hidden" name="uid" value="${cstruct['uid']}"
            id="${oid}-uid"/>
     <input tal:condition="'__objectoid__' in cstruct" type="hidden" name="__objectoid__" value="${cstruct['__objectoid__']}" id="${oid}-__objectoid__"/>
-    <span tal:content="cstruct.get('filename')"
-          id="${oid}-filename"/>
+    <span tal:content="cstruct.get('filename')" id="${oid}-filename"/>
+  </div><br />
 
-  </div>
-
-  <input type="file" name="upload" 
+  <input type="file" name="upload"
          tal:attributes="class css_class;
                          style style;"
          id="${oid}"/>
