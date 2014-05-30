@@ -1,12 +1,11 @@
 import re
-
-from zope.interface import implementer
+from collections import OrderedDict
 
 from pyramid import renderers
 from pyramid.renderers import get_renderer
 from pyramid_layout.layout import Structure
-
 from substanced.util import get_oid
+from zope.interface import implementer
 
 from dace.processinstance.core import  ValidationError
 
@@ -224,7 +223,7 @@ class ElementaryView(View):
         if self.validate_behaviors:
             self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors if not (behavior in _init_behaviors)])
 
-        self.behaviorinstances = {}
+        self.behaviorinstances = OrderedDict()
         self._init_behaviors()
 
     def validate(self):
@@ -247,28 +246,28 @@ class ElementaryView(View):
         return True
 
     def _init_behaviors(self):
-        _behaviorinstances = {}
+        behavior_instances = OrderedDict()
         _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
-        _behaviors = [behavior for behavior in self.behaviors if not (behavior in _init_behaviors)]
-        for behavior in _behaviors:
-            try:
-                wizard = None
-                if self.wizard is not None:
-                    wizard = self.wizard.behaviorinstance
+        for behavior in self.behaviors:
+            if not (behavior in _init_behaviors):
+                try:
+                    wizard = None
+                    if self.wizard is not None:
+                        wizard = self.wizard.behaviorinstance
 
-                behaviorinstance = behavior.get_instance(self.context, self.request, wizard=wizard)
-                if behaviorinstance is not None:
-                    key = behaviorinstance._class_.__name__
-                    _behaviorinstances[key] = behaviorinstance
-            except ValidationError:
-                continue
+                    behaviorinstance = behavior.get_instance(self.context, self.request, wizard=wizard)
+                    if behaviorinstance is not None:
+                        key = behaviorinstance._class_.__name__
+                        behavior_instances[key] = behaviorinstance
+                except ValidationError:
+                    continue
 
         for behaviorinstance in self.init_behaviorinstances:
             key = behaviorinstance._class_.__name__
-            _behaviorinstances[key] = behaviorinstance
+            behavior_instances[key] = behaviorinstance
 
-        if _behaviorinstances:
-            sorted_behaviors = sorted(_behaviorinstances.values())
+        if behavior_instances:
+            sorted_behaviors = behavior_instances.values()
             for behaviorinstance in sorted_behaviors:
                 key = re.sub(r'\s', '_', behaviorinstance.title)
                 self.behaviorinstances[key] = behaviorinstance
