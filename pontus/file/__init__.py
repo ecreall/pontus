@@ -119,13 +119,13 @@ class Object(colander.SchemaType):
 
 class ObjectData(colander.Mapping):
 
-    __specialObjects = (File, Image)
+    _specialObjects = (File, Image)
 
     def __init__(self, factory=None, editable=False, unknown='ignore'):
         colander.Mapping.__init__(self, unknown)
         self.factory = factory
         self.editable = editable
-        if self.factory is not None and self.factory in self.__specialObjects:
+        if self.factory is not None and self.factory in self._specialObjects:
             self.editable = True
 
     def serialize(self, node, appstruct):
@@ -138,7 +138,7 @@ class ObjectData(colander.Mapping):
             appstruct = _object.get_data(node)
 
         result = None
-        if not self.factory in self.__specialObjects:
+        if self.factory is not None and not self.factory in self._specialObjects:
             result = colander.Mapping.serialize(self, node, appstruct)
             if not self.editable or result is colander.null:
                 return result
@@ -155,7 +155,7 @@ class ObjectData(colander.Mapping):
 
     def deserialize(self, node, cstruct):
         result = None
-        if not (self.factory in self.__specialObjects):
+        if self.factory is not None and not self.factory in self._specialObjects:
             result = colander.Mapping.deserialize(self, node, cstruct)
             if not self.editable or result is colander.null or cstruct is colander.null:
                 return result
@@ -224,7 +224,7 @@ class ObjectData(colander.Mapping):
 
     def cstruct_children(self, node, cstruct):
         result = []
-        if self.factory is None or not (self.factory in self.__specialObjects):
+        if self.factory is None or not self.factory in self._specialObjects:
             result = colander.Mapping.cstruct_children(self, node, cstruct)
             if result is colander.null or cstruct is colander.null:
                 return result
