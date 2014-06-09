@@ -9,9 +9,9 @@ from substanced.schema import Schema as OriginSchema
 from pontus.file import ObjectData, OBJECT_OID
 
 try:
-      basestring
+    basestring
 except NameError:
-      basestring = str
+    basestring = str
 
 
 def omit_nodes(schemanode, omit):
@@ -65,9 +65,6 @@ class Schema(OriginSchema):
     def add_idnode(self, id, value=None):
         if self.get(id) is not None:
             self.__delitem__(id)
-
-        if value is None:
-            value
 
         idnode = colander.SchemaNode(
                 colander.String(),
