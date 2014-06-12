@@ -11,10 +11,7 @@
                 tal:define="url breadcrumb['url']"
                 title="${breadcrumb['content_type']} '${breadcrumb['name']}'">
               <i class="${breadcrumb['icon']}"> </i>
-              <tal:block tal:switch="url != ''">
-                <a tal:case="True" href="${breadcrumb['url']}">${breadcrumb['name']}</a>
-                <span tal:case="False" tal:replace="breadcrumb['name']" />
-              </tal:block>
+              <a href="${breadcrumb['url']}">${breadcrumb['name']}</a>
             </li>
           </tal:breadcrumbs>
         </ul>
