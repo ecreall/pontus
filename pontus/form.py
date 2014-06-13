@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from pyramid.httpexceptions import HTTPFound
 from zope.interface import implementer
 import deform.exception
 import deform.widget
@@ -90,8 +89,6 @@ class FormView(ElementaryView, SubstanceDFormView):
         if item is None:
             if not self.finished_successfully:
                 item = self.show(form)
-            else:
-                item = HTTPFound(self.request.resource_url(self.context))
 
         if isinstance(item, dict):
             if error:
