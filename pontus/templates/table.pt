@@ -25,7 +25,7 @@
       opacity: 0.5;
       z-index: 2000;
     }
-  </style>   
+  </style>
 
   <!-- sequence -->
   <input type="hidden" name="__start__"
@@ -44,7 +44,9 @@
               <tr class="row">
                <div tal:omit-tag="" tal:define="children field.children[0].children"
                      tal:repeat="child children">
-                     
+
+                  <th></th>
+
                   <th  tal:condition="child.widget.hidden"
                        for="${child.oid}"
                        class="control-label ${child.required and 'required' or ''}"
@@ -65,7 +67,7 @@
          </thead>
           <tbody>
 
-            <div tal:define="subfields [ x[1] for x in subfields ]" 
+            <div tal:define="subfields [ x[1] for x in subfields ]"
                tal:repeat="subfield subfields"
                tal:replace="structure subfield.render_template(item_tmpl,parent=field)" />
             <tr class="deformInsertBefore"
@@ -73,7 +75,7 @@
                  min_len min_len;
                  max_len max_len;
                  now_len now_len;
-                 orderable orderable;"></tr>            
+                 orderable orderable;"></tr>
 
           </tbody>
          </table>
