@@ -1,6 +1,7 @@
 <html xmlns:tal="http://xml.zope.org/namespaces/tal"
       xmlns:metal="http://xml.zope.org/namespaces/metal"
       xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="substanced"
       tal:define="mp request.sdiapi.mgmt_path;"
       tal:omit-tag="">
 
@@ -11,11 +12,11 @@
       </button>
 
       <ul class="dropdown-menu pull-right" role="menu">
-        <li>
+        <li class="account-link">
           <a href="${mp(request.user, '')}" i18n:translate="">
             <i i18n:name="icon" class="glyphicon glyphicon-pencil"></i> Account</a>
         </li>
-        <li>
+        <li class="logout-link">
           <a href="${request.resource_url(request.root, '@@logout')}" i18n:translate="">
             <i i18n:name="icon" class="glyphicon glyphicon-off"></i> Log Out</a>
         </li>
