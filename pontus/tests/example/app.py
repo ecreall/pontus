@@ -52,6 +52,9 @@ class BehaviorA(Behavior):
         
         return True
 
+    def redirect(self, context, request, **kw):
+        return HTTPFound(request.resource_url(context, "@@index"))
+
 
 class ViewA(BasicView):
 
@@ -71,6 +74,9 @@ class ViewA(BasicView):
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
         return result
+
+    def redirect(self, context, request, **kw):
+        return HTTPFound(request.resource_url(context, "@@index"))
 
 
 class BehaviorBValidator(object):

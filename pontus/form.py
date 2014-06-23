@@ -8,6 +8,7 @@ from substanced.form import FormError
 
 from pontus.interfaces import IFormView
 from pontus.view import ElementaryView, merge_dicts
+from pontus.default_behavior import Cancel
 
 try:
       basestring
@@ -58,12 +59,13 @@ class FormView(ElementaryView, SubstanceDFormView):
             for button in form.buttons:
                 if button.name in self.request.POST:
                     try:
-                        if button.name != "Cancel":
+                        if (button.name in self.behaviorinstances) and isinstance(self.behaviorinstances[button.name], Cancel):
+                            # bypass form validation for Cancel behavior
+                            validated = {}
+                        else :
                             controls = self.request.POST.items()
                             validated = form.validate(controls)
-                        else:
-                            # bypass form validation for Cancel button
-                            validated = {}
+
                     except deform.exception.ValidationFailure as e:
                         fail = getattr(self, '%s_failure' % button.name, None)
                         if fail is None:

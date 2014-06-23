@@ -45,8 +45,6 @@
                <div tal:omit-tag="" tal:define="children field.children[0].children"
                      tal:repeat="child children">
 
-                  <th></th>
-
                   <th  tal:condition="child.widget.hidden"
                        for="${child.oid}"
                        class="control-label ${child.required and 'required' or ''}"

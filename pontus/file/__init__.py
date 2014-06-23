@@ -138,7 +138,7 @@ class ObjectData(colander.Mapping):
             appstruct = _object.get_data(node)
 
         result = None
-        if self.factory is not None and not self.factory in self._specialObjects:
+        if self.factory is None or (self.factory is not None and not self.factory in self._specialObjects):
             result = colander.Mapping.serialize(self, node, appstruct)
             if not self.editable or result is colander.null:
                 return result
@@ -154,25 +154,27 @@ class ObjectData(colander.Mapping):
         return result
 
     def deserialize(self, node, cstruct):
+        obj_oid = None
+        if self.editable and cstruct and OBJECT_OID in cstruct:
+            obj_oid = cstruct.get(OBJECT_OID, None)
+            if obj_oid == 'None':
+                obj_oid = None
+
         result = None
-        if self.factory is not None and not self.factory in self._specialObjects:
+        if not (self.factory in self._specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
             if not self.editable or result is colander.null or cstruct is colander.null:
                 return result
-        elif cstruct is colander.null:
-            return cstruct
+        else:
+            if cstruct is colander.null:
+                return  cstruct
 
         if result is None:
             result = cstruct
 
         obj = None
-        if isinstance(result, dict) and self.editable:
-            obj_oid = result.get(OBJECT_OID, None)
-            if obj_oid == 'None':
-                obj_oid = None
-
-            if obj_oid is not None:
-                obj = get_obj(int(obj_oid))
+        if obj_oid is not None:
+            obj = get_obj(int(obj_oid))
 
         if self.factory is None and obj is None:
             return result
@@ -180,45 +182,65 @@ class ObjectData(colander.Mapping):
         appstruct = {}
         has_values = False
         if isinstance(result, dict):
-            data_to_set = {}
-            for key, value in result.items():
+            result_copy = dict(result)
+            for key, value in result_copy.items():
                 subnode = node.get(key)
-                if key in ('_csrf_token_', OBJECT_OID):
-                    continue
-
                 missing = getattr(subnode, 'missing', MARKER)
                 if value != missing:
                     has_values = True
 
                 if getattr(subnode, 'to_omit', False):
-                    if not getattr(subnode, 'private', False):
+                     if not getattr(subnode, 'private', False):
+                         appstruct[key] = value # private is omited and returned to the user
+
+                     result.pop(key) # don't set data if omitted
+
+        if isinstance(result, dict):
+            result_copy = dict(result)
+            to_result = {}
+            for key, value in result_copy.items():
+                is_multiple_cardinality = True
+                is_object_type = False
+                if not isinstance(value, (list,tuple)):
+                    value = [value]
+                    is_multiple_cardinality = False
+
+                for item in list(value):
+                    if isinstance(item, dict) and OBJECT_DATA in item:
+                        is_object_type = True
+                        subobject = item.pop(OBJECT_DATA)
+                        if not(key in to_result):
+                            to_result[key] = [subobject]
+                        else:
+                            to_result[key].append(subobject)
+
+                        if not item:
+                            value.pop(value.index(item))
+                        else:
+                            item[OBJECT_DATA] = subobject
+
+                if is_object_type:
+                    if is_multiple_cardinality and value:
                         appstruct[key] = value
+                    elif value:
+                        appstruct[key] = value[0]
 
-                    continue  # don't set data if omitted
+                    if is_multiple_cardinality and key in to_result:
+                        result[key] = to_result[key]
+                    elif key in to_result:
+                        result[key] = to_result[key][0]
 
-                data_to_set[key] = value
-
-                if not isinstance(value, (list, tuple)):
-                    if isinstance(value, dict) and OBJECT_DATA in value:
-                        subobject = value[OBJECT_DATA]
-                        appstruct[key] = subobject
-                else:
-                    for item in value:
-                        if isinstance(item, dict) and OBJECT_DATA in item:
-                            subobject = item[OBJECT_DATA]
-                            appstruct.setdefault(key, []).append(subobject)
-
-        if obj is None:
+        if obj is None and self.factory is not None:
             # add form
-            if self.factory is not None:
-                appstruct[NO_VALUES] = not has_values
-                appstruct[OBJECT_DATA] = self.factory(**data_to_set)
-        else:
-            # edit form
-            obj.set_data(data_to_set)
+            obj = self.factory(**result)
             appstruct[NO_VALUES] = not has_values
             appstruct[OBJECT_DATA] = obj
+            return appstruct
 
+        # edit form
+        obj.set_data(result)
+        appstruct[NO_VALUES] = not has_values
+        appstruct[OBJECT_DATA] = obj
         return appstruct
 
 
