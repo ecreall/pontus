@@ -16,7 +16,7 @@ def usermenu_panel(context, request):
 
 @panel_config(name='breadcrumbs',
               renderer='templates/panels/breadcrumbs.pt')
-class Breadcrumbs_panel(object):
+class BreadcrumbsPanel(object):
 
     def __init__(self, context, request):
         self.context = context
@@ -30,9 +30,7 @@ class Breadcrumbs_panel(object):
             if not has_permission('sdi.view', resource, request):
                 return {'breadcrumbs':[]}
 
-            if resource == context:
-                url = ''
-            elif isinstance(resource, Entity):
+            if isinstance(resource, Entity):
                 url = request.resource_url(resource, '@@index')
             else:
                 url = request.resource_url(resource)
