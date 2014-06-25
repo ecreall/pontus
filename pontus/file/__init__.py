@@ -4,6 +4,7 @@ import colander
 from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
 import transaction
+from pyramid.threadlocal import get_current_request
 
 from substanced.file import File as OriginFile
 from substanced.util import get_oid
@@ -50,6 +51,12 @@ class File(DaceObject, OriginFile):
         result['size'] = self.get_size()
         result['fp'] = self.blob.open('r')
         return result
+
+    def set_data(self, appstruct, omit=('_csrf_token_', '__objectoid__')):
+        request = get_current_request()
+        # If request.params['upload'] is a str, don't upload file data (file hasn't changed)
+        if not isinstance(request.params['upload'], str):
+            super(File, self).set_data(appstruct, omit)
 
     def get_size(self):
         try:
