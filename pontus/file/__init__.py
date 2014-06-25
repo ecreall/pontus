@@ -1,3 +1,4 @@
+import sys
 from ZODB.blob import Blob
 from ZODB.interfaces import BlobError
 import colander
@@ -11,6 +12,16 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
+
+PY3 = sys.version_info[0] == 3
+
+if PY3: # pragma: no cover
+   string_types = str,
+   text_type = str
+else: # pragma: no cover
+   string_types = basestring,
+   text_type = unicode
+
 
 OBJECT_DATA = '_object_data'
 OBJECT_OID = '__objectoid__'
@@ -55,7 +66,7 @@ class File(DaceObject, OriginFile):
     def set_data(self, appstruct, omit=('_csrf_token_', '__objectoid__')):
         request = get_current_request()
         # If request.params['upload'] is a str, don't upload file data (file hasn't changed)
-        if not isinstance(request.params['upload'], str):
+        if not isinstance(request.params['upload'], string_types):
             super(File, self).set_data(appstruct, omit)
 
     def get_size(self):
@@ -89,7 +100,7 @@ class File(DaceObject, OriginFile):
     def url(self, request, view=None, args=None):
         if view is None:
             #generalement c est la vue de l index associer qu'il faut retourner
-            return request.resource_url(self, '@@view')
+            return request.resource_url(self)
         else:
             return request.resource_url(self, '@@'+view)
 
