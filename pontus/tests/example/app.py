@@ -10,10 +10,12 @@ from substanced.sdi import RIGHT
 from pontus.view import BasicView
 from pontus.form import FormView
 from pontus.view_operation import MultipleView, MergedFormsView
-from pontus.schema import select, Schema
+from pontus.schema import select, Schema, omit
+from pontus.widget import TableWidget, LineWidget, CheckboxChoiceWidget
 from dace.processinstance.core import Behavior, ValidationError
 from dace.objectofcollaboration.runtime import Runtime
 from dace.objectofcollaboration.object import Object
+from dace.objectofcollaboration.services.processdef_container import ProcessDefinitionContainer
 
 
 class BehaviorAValidator(object):
@@ -143,6 +145,7 @@ class SchemaA(Schema):
         widget=deform.widget.TextInputWidget()
         )
 
+
 class FormViewA(FormView):
 
     title = 'FormView A'
@@ -181,3 +184,82 @@ class MergedFormsViewA(MergedFormsView):
     title = 'MergedFormsView A'
     name = 'mergedformsviewa'
     contexts = get_item
+
+
+class BehaviorC(Behavior):
+
+    title = 'Behavior C'
+    behavior_id = 'behaviorc'
+
+    def start(self, context, request, appstruct, **kw):
+        return True
+
+    def redirect(self, context, request, **kw):
+        return HTTPFound(request.resource_url(context, "@@index"))
+
+
+class SchemaB(Schema):
+    
+    title = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget()
+        )
+
+    description = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget()
+        ) 
+
+
+@view_config(
+    name='formviewb',
+    context=Runtime,
+    renderer='pontus:templates/view.pt',
+    )
+class FormViewB(FormView):
+
+    title = 'FormView B'
+    schema = select(SchemaB(editable=True,omit=('title',)), [u'title', u'description'])
+    behaviors = [BehaviorC]
+    formid = 'formB'
+    coordinates = 'left'
+
+    def default_data(self):
+        return self.context
+
+
+class SchemaC(Schema):
+    
+    title = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget()
+        )
+
+    description = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget()
+        )
+
+    definitions = colander.SchemaNode(
+        colander.Sequence(),
+        omit(SchemaB(widget=LineWidget(), editable=True, name='definition'),['_csrf_token_']),
+        widget=TableWidget(),
+        title='Liste des definitions'
+        )
+
+
+@view_config(
+    name='formviewc',
+    context=ProcessDefinitionContainer,
+    renderer='pontus:templates/view.pt',
+    )
+class FormViewC(FormView):
+
+    title = 'FormView C'
+    schema = select(SchemaC(factory=ProcessDefinitionContainer, editable=True,omit=((u'definitions',[u'title']),)), [u'title', u'description', (u'definitions',[u'title', u'description'])])
+    behaviors = [BehaviorC]
+    formid = 'formC'
+    coordinates = 'left'
+
+    def default_data(self):
+        return self.context

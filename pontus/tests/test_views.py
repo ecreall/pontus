@@ -4,7 +4,8 @@ from pontus.tests.example.app import (
     ViewA, MultipleViewA, ViewB,
     MultipleFromViewA, FormViewA, objectA, objectB)
 
-class TestRelationsCatalog(FunctionalTests):
+
+class TestPontusView(FunctionalTests):
 
     def test_login(self):
 
@@ -245,3 +246,66 @@ class TestRelationsCatalog(FunctionalTests):
         self.assertEqual(res.status_int, 200)
         forms = set(res.forms.values())
         self.assertEqual(len(forms), 0)
+
+    def test_omitedfield(self):
+        self.test_login()
+        runtime = self.app['runtime']
+        res = self.testapp.get('/runtime/@@formviewb')
+        titles = [f for f in res.form.fields['title']
+                  if f.__class__.__name__ == 'Text']
+        descriptions = [f for f in res.form.fields['description']
+                  if f.__class__.__name__ == 'Text']
+        self.assertEqual(len(titles), 1 )
+        self.assertEqual(len(descriptions), 1 )
+        forms = set(res.forms.values())
+        self.assertEqual(len(forms), 1 )
+        title_values = [t.value for t in titles]
+        old_titles = runtime.title
+        self.assertIn(runtime.title, title_values)
+        description_values = [t.value for t in descriptions]
+        self.assertIn('', description_values)
+        res.form.fields['title'][0].value__set('newtitleruntime')
+        res.form.fields['description'][0].value__set('newdescriptionruntime')
+        res = res.form.submit('Behavior_C')
+        self.assertEqual(res.status_int, 302)
+        self.assertEqual(runtime.title, old_titles) # title is omited
+        self.assertEqual(runtime.description, 'newdescriptionruntime')
+
+    def test_omitedfield_SubList(self):
+        self.test_login()
+        pdc = self.app['process_definition_container']
+        res = self.testapp.get('/process_definition_container/@@formviewc')
+        titles = [f for f in res.form.fields['title']
+                  if f.__class__.__name__ == 'Text']
+        descriptions = [f for f in res.form.fields['description']
+                  if f.__class__.__name__ == 'Text']
+        total = len(pdc.definitions)+1
+        self.assertEqual(len(titles), total )
+        self.assertEqual(len(descriptions), total )
+        title_values = [t.value for t in titles]
+        self.assertIn(pdc.title, title_values)
+        description_values = [t.value for t in descriptions]
+        self.assertIn(pdc.description, description_values)
+        for defi in pdc.definitions:
+            self.assertIn(defi.title, title_values)
+            self.assertIn(defi.description, description_values)
+
+        res.form.fields['title'][0].value__set('newtitledescription')
+        res.form.fields['description'][0].value__set('newdescriptiondescription')
+        i = 0
+        for field in res.form.fields['description'][1:]:
+            field.value__set('newdescription'+str(i))
+            i = i+1
+
+        i = 0
+        for field in res.form.fields['title'][1:]:
+            field.value__set('newtitle'+str(i)) # set titles
+            i = i+1
+
+        res = res.form.submit('Behavior_C')
+        self.assertEqual(res.status_int, 302)
+        self.assertEqual(pdc.title, 'newtitledescription')
+        self.assertEqual(pdc.description, 'newdescriptiondescription')
+        for defi in pdc.definitions:
+            self.assertFalse(defi.title.startswith('newtitle'))  # title is omited
+            self.assertTrue(defi.description.startswith('newdescription'))

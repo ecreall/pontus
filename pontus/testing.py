@@ -2,6 +2,7 @@ import unittest
 from pyramid.config import Configurator
 from pyramid.testing import DummyRequest
 from pyramid import testing
+from dace.objectofcollaboration.object import Object
 
 
 from substanced.db import root_factory
