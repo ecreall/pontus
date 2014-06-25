@@ -157,7 +157,7 @@ class ObjectData(colander.Mapping):
         obj_oid = None
         if self.editable and cstruct and OBJECT_OID in cstruct:
             obj_oid = cstruct.get(OBJECT_OID, None)
-            if obj_oid == 'None':
+            if not obj_oid or obj_oid == 'None':
                 obj_oid = None
 
         result = None
