@@ -186,7 +186,7 @@ class ObjectData(colander.Mapping):
             for key, value in result_copy.items():
                 subnode = node.get(key)
                 missing = getattr(subnode, 'missing', MARKER)
-                if value != missing:
+                if (value != missing and not getattr(subnode, 'to_omit', False)):
                     has_values = True
 
                 if getattr(subnode, 'to_omit', False):
