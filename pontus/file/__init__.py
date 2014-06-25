@@ -145,7 +145,7 @@ class ObjectData(colander.Mapping):
             appstruct = _object.get_data(node)
 
         result = None
-        if self.factory is None or (self.factory is not None and not self.factory in self._specialObjects):
+        if not (self.factory in self._specialObjects):
             result = colander.Mapping.serialize(self, node, appstruct)
             if not self.editable or result is colander.null:
                 return result
@@ -253,7 +253,7 @@ class ObjectData(colander.Mapping):
 
     def cstruct_children(self, node, cstruct):
         result = []
-        if self.factory is None or not self.factory in self._specialObjects:
+        if not (self.factory in self._specialObjects):
             result = colander.Mapping.cstruct_children(self, node, cstruct)
             if result is colander.null or cstruct is colander.null:
                 return result
