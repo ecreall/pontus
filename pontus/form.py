@@ -2,6 +2,7 @@
 from zope.interface import implementer
 import deform.exception
 import deform.widget
+from deform.form import Button
 
 from substanced.form import FormView as SubstanceDFormView
 from substanced.form import FormError
@@ -26,7 +27,8 @@ class FormView(ElementaryView, SubstanceDFormView):
         self.schema = self.schema.clone()
         SubstanceDFormView.__init__(self, context, request)
         ElementaryView.__init__(self, context, request, parent, wizard, stepid, **kwargs)
-        self.buttons = [behavior.title for behavior in self.behaviorinstances.values()]
+        self.buttons = [Button(name=behavior.title,
+                               title=behavior.title) for behavior in self.behaviorinstances.values()]
 
     def setviewid(self, viewid):
         ElementaryView.setviewid(self, viewid)
