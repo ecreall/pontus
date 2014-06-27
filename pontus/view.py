@@ -233,13 +233,12 @@ class ElementaryView(View):
 
             if self.validate_behaviors and self.init_behaviorinstances:
                 for init_v in self.init_behaviorinstances:
-                    if not init_v.validate(self.context, self.request):
-                        raise ValidationError()
+                    init_v.validate(self.context, self.request)
 
-        except ValidationError:
+        except ValidationError as e:
             ve = ViewError()
             ve.principalmessage = BehaviorViewErrorPrincipalmessage
-            ve.causes = BehaviorViewErrorCauses
+            ve.causes = [e.principalmessage]#BehaviorViewErrorCauses
             ve.solutions = BehaviorViewErrorSolutions
             raise ve
 
@@ -248,6 +247,7 @@ class ElementaryView(View):
     def _init_behaviors(self):
         behavior_instances = OrderedDict()
         _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
+        self.errors = []
         for behavior in self.behaviors:
             if not (behavior in _init_behaviors):
                 try:
@@ -259,8 +259,8 @@ class ElementaryView(View):
                     if behaviorinstance is not None:
                         key = behaviorinstance._class_.__name__
                         behavior_instances[key] = behaviorinstance
-                except ValidationError:
-                    continue
+                except ValidationError as e:
+                    self.errors.append(e)
 
         for behaviorinstance in self.init_behaviorinstances:
             key = behaviorinstance._class_.__name__

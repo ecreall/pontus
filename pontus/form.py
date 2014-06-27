@@ -84,6 +84,7 @@ class FormView(ElementaryView, SubstanceDFormView):
                             snippet = '<div class="error">Failed: %s</div>' % e
                             self.request.sdiapi.flash(snippet, 'danger',
                                                       allow_duplicate=True)
+                            import pdb; pdb.set_trace()
                             item = self.adapt_item(form.render(validated),
                                                    form.formid)
                             error = True

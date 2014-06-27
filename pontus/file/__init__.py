@@ -209,7 +209,7 @@ class ObjectData(colander.Mapping):
 
                 if getattr(subnode, 'to_omit', False):
                      if not getattr(subnode, 'private', False):
-                         appstruct[key] = value # private is omited and returned to the user
+                         appstruct[key] = value # private is omited and not returned to the user
 
                      result.pop(key) # don't set data if omitted
 
