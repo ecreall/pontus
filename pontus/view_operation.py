@@ -50,6 +50,7 @@ class ViewOperation(View):
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         super(ViewOperation, self).__init__(context, request, parent, wizard, stepid, **kwargs)
+        self.errors = []
         if hasattr(self.views, '__func__'):
             self.views = self.views.__func__
 
@@ -106,6 +107,7 @@ class MultipleContextsOperation(ViewOperation):
                 subview.validate()
             except ViewError as e:
                 self.children_notvalitaed.append(item_context)
+                self.errors.append(e)
                 continue
 
             self.children.append(subview)
@@ -143,6 +145,7 @@ def default_builder(parent, views, **kwargs):
             try:
                 viewinstance.validate()
             except ViewError as e:
+                parent.errors.append(e)
                 continue
 
             if parent.merged:
@@ -206,7 +209,11 @@ class MultipleView(MultipleViewsOperation):
         if not self.children:
             e = ViewError()
             e.principalmessage = MutltipleViewErrorPrincipalmessage
-            e.causes = MutltipleViewErrorCauses
+            causes = set()
+            for er in self.errors:
+                causes.update(er.causes)
+
+            e.causes = list(causes)#MutltipleViewErrorCauses
             raise e
 
         #faire l'update
@@ -359,7 +366,11 @@ class MergedFormsView(MultipleContextsOperation, FormView):
         if not self.children:
             e = ViewError()
             e.principalmessage = CallViewErrorPrincipalmessage
-            e.causes = CallViewViewErrorCauses
+            causes = set()
+            for er in self.errors:
+                causes.update(er.causes)
+
+            e.causes = list(causes)#= CallViewViewErrorCauses
             raise e
 
         messages = {}
@@ -511,7 +522,11 @@ class CallView(MultipleContextsOperation):
         if not self.children:
             e = ViewError()
             e.principalmessage = CallViewErrorPrincipalmessage
-            e.causes = CallViewViewErrorCauses
+            causes = set()
+            for er in self.errors:
+                causes.update(er.causes)
+
+            e.causes = list(causes)#CallViewViewErrorCauses
             raise e
 
         result = {}

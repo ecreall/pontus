@@ -7,7 +7,7 @@ from pyramid_layout.layout import Structure
 from substanced.util import get_oid
 from zope.interface import implementer
 
-from dace.processinstance.core import  ValidationError
+from dace.processinstance.core import  Error, ValidationError
 
 from pontus.interfaces import IView
 from pontus.core import Step
@@ -17,12 +17,12 @@ from pontus.resources import (
                 BehaviorViewErrorSolutions)
 
 
-class ViewError(Exception):
+class ViewError(Error):
     principalmessage = u""
     causes = []
     solutions = []
     type = 'danger'
-    template = 'templates/message.pt'
+    template='templates/message.pt'
 
 
 def merge_dicts(source, target):
