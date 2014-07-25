@@ -219,7 +219,7 @@ class ObjectData(colander.Mapping):
             for key, value in result_copy.items():
                 is_multiple_cardinality = True
                 is_object_type = False
-                if not isinstance(value, (list,tuple)):
+                if not isinstance(value, (list,tuple,set)):
                     value = [value]
                     is_multiple_cardinality = False
 
