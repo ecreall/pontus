@@ -35,7 +35,6 @@ from pontus.dace_ui_extension import calculatePage
 from pontus.view_operation import MultipleView
 
 
-
 @view_config(
     name='Processes',
     context=Runtime,

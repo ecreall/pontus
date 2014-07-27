@@ -246,7 +246,15 @@ class SelectWidget(OriginSelectWidget):
             return null
 
         if isinstance(pstruct, string_types):
-            return pstruct
+            ob = None
+            try:
+                ob = get_obj(int(pstruct))
+                if ob is None:
+                    return pstruct
+                else:
+                    return ob
+            except ValueError:
+                return pstruct
         else:
             result = []
             for item in pstruct:
