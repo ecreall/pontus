@@ -27,8 +27,8 @@ class BreadcrumbsPanel(object):
         context = self.context
         breadcrumbs = []
         for resource in lineage(context):
-            if not has_permission('sdi.view', resource, request):
-                return {'breadcrumbs':[]}
+            #if not has_permission('sdi.view', resource, request):
+            #    return {'breadcrumbs':[]}
 
             if isinstance(resource, Entity):
                 url = request.resource_url(resource, '@@index')
@@ -71,7 +71,13 @@ class NavBarPanel(object):
         self.request = request
 
     def render_group(self, name, group, active_items, isrelative):
-        body = renderers.render('pontus:templates/panels/group.pt', {'name': name, 'group':group,'active_items':active_items, 'view': self, 'isrelative':isrelative}, self.request)
+        body = renderers.render('pontus:templates/panels/group.pt', 
+                                {'name': name,
+                                 'group':group,
+                                 'active_items':active_items,
+                                 'view': self,
+                                 'isrelative':isrelative},
+                                self.request)
         return Structure(body)
 
     def _classifier(self, actions, groups):
@@ -117,7 +123,7 @@ class NavBarPanel(object):
 
 
     def _actions(self):
-        actions = self.context.actions
+        actions = [a for a in self.context.actions if not a.action.isautomatic]
         view_name = self.request.view_name
         active_items = [a for a in actions if self.request.url.endswith(a.url)]
         groups = set()

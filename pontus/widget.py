@@ -223,7 +223,7 @@ class SelectWidget(OriginSelectWidget):
         if cstruct in (null, None):
             cstruct = self.null_value
 
-        if cstruct and getattr(self, 'multiple', False) and not isinstance(cstruct[0], string_types):
+        if cstruct and getattr(self, 'multiple', False) and not isinstance(list(cstruct)[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:
@@ -313,7 +313,7 @@ class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
         if is_multiple and not isinstance(cstruct,(list,tuple)):
             cstruct = [cstruct]
 
-        if cstruct and is_multiple and not isinstance(cstruct[0], string_types):
+        if cstruct and is_multiple and not isinstance(list(cstruct)[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:

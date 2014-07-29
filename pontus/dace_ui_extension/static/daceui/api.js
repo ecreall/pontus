@@ -12,12 +12,17 @@ function update_action(url){
               var url = $(this).closest('.dace-action').data('updateurl');
               $.getJSON(url,{tomerge:'True', coordinates:'main'}, function(data) { 
                  var action_body = data['body'];
-                 $($(target).find('.modal-body')).html(action_body);
-                 $(target).modal('show');
-                 try {
-                      deform.processCallbacks();
+                 if (action_body){
+                     $($(target).find('.modal-body')).html(action_body);
+                     $(target).modal('show');
+                     try {
+                          deform.processCallbacks();
+                      }
+                     catch(err) {};
+                  }else{
+                     location.reload();
+                     return false
                   }
-                 catch(err) {};
               });
               return false;
 };

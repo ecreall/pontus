@@ -8,7 +8,6 @@ from pontus.tests.example.app import (
 class TestPontusView(FunctionalTests):
 
     def test_login(self):
-
         res = self.testapp.get('/manage')
         res.form['login'] = 'admin'
         res.form['password'] = 'admin'
