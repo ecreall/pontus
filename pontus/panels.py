@@ -6,6 +6,7 @@ from pyramid import renderers
 from pyramid_layout.layout import Structure
 
 from dace.objectofcollaboration.entity import Entity
+from dace.objectofcollaboration.principal.util import has_any_roles
 
 
 @panel_config(name='usermenu',
@@ -27,8 +28,9 @@ class BreadcrumbsPanel(object):
         context = self.context
         breadcrumbs = []
         for resource in lineage(context):
-            #if not has_permission('sdi.view', resource, request):
-            #    return {'breadcrumbs':[]}
+            
+            if has_any_roles(roles=('Anonymous',), ignore_superiors=True):
+                return {'breadcrumbs':[]}
 
             if isinstance(resource, Entity):
                 url = request.resource_url(resource, '@@index')
@@ -123,7 +125,7 @@ class NavBarPanel(object):
 
 
     def _actions(self):
-        actions = [a for a in self.context.actions if not a.action.isautomatic]
+        actions = [a for a in self.context.actions if not a.action.isautomatic and not a.action.access_controled]
         view_name = self.request.view_name
         active_items = [a for a in actions if self.request.url.endswith(a.url)]
         groups = set()

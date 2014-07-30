@@ -238,7 +238,9 @@ class ElementaryView(View):
         except ValidationError as e:
             ve = ViewError()
             ve.principalmessage = BehaviorViewErrorPrincipalmessage
-            ve.causes = [e.principalmessage]#BehaviorViewErrorCauses
+            if e.principalmessage:
+                ve.causes = [e.principalmessage]#BehaviorViewErrorCauses
+
             ve.solutions = BehaviorViewErrorSolutions
             raise ve
 

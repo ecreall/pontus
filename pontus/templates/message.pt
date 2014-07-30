@@ -1,12 +1,15 @@
-<div class="container">
-	<div class="row clearfix">
-		<div class="col-md-12 column">
-			<h3>
-				${error.principalmessage}
-			</h3>
-			<ul>
-				<li tal:repeat="message error.causes"> ${message} </li>
-			</ul>
-		</div>
-	</div>
-</div>
+<dl class="dl-horizontal">
+  <dt>Message</dt><dd>${error.principalmessage}</dd>
+  <dt tal:condition="error.causes">Possible causes</dt>
+  <dd tal:condition="error.causes">
+    <ul>
+        <li tal:repeat="message error.causes"> ${message}</li>
+    </ul>
+  </dd>
+  <dt>Possible solutions</dt>
+  <dd>  
+    <a href="${request.resource_url(request.root, '@@login')}" class="btn btn-${error.type} btn-sm">
+      Log in with another NovaIdeo account 
+    </a>
+  </dd>
+</dl>
