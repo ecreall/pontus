@@ -18,6 +18,7 @@ class TestPontusView(FunctionalTests):
         res = res.follow()
         res.mustcontain('Log Out')
 
+
     def test_BasicView(self):
         self.request.validationA = True
         self.request.viewexecuted = []
@@ -61,6 +62,11 @@ class TestPontusView(FunctionalTests):
         self.assertEqual(item['isactive'], True)
         self.assertEqual(len(self.request.viewexecuted), 0)
         self.assertIn('danger', item['messages'])
+
+    #def test_boucle_simple(self): # Moyenne de 0,18 ms par calcule de vue
+    #    for x in range(100000):
+    #        self.test_BasicView()
+
 
     def test_MultipleView(self):
         self.request.validationA = True
@@ -117,7 +123,7 @@ class TestPontusView(FunctionalTests):
         self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n") > -1), False)
         self.assertEqual(len(self.request.viewexecuted), 0)
 
-    def test_MultipleFormView(self):
+    def test_MultipleFormView(self, log=0):
         self.request.validationA = True
         self.request.validationB = True
         self.request.viewexecuted = []
@@ -172,7 +178,8 @@ class TestPontusView(FunctionalTests):
         self.assertEqual(len(self.request.viewexecuted), 0)
 
         runtime = self.app['runtime']
-        self.test_login()
+        if log==0:
+            self.test_login()
         self.assertEqual(runtime.title, 'Runtime')
         res = self.testapp.get('/runtime/@@multipleformviewa')
         self.assertEqual((str(res.html).find("title") > -1), True)
@@ -193,6 +200,10 @@ class TestPontusView(FunctionalTests):
         res.form['title'] = 'Runtime'
         res = res.form.submit('Behavior_A')
         self.assertEqual(runtime.title, 'Runtime')
+
+    #def test_boocle_multiform(self): # Moyenne de 45 ms par calcule de vue
+    #    for x in range(1000):
+    #        self.test_MultipleFormView(log=x) 
 
     def test_MergedFormsView(self):
         self.request.validationA = True

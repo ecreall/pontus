@@ -256,6 +256,7 @@ class ObjectData(colander.Mapping):
             return appstruct
 
         # edit form
+        #import pdb; pdb.set_trace()
         obj.set_data(result)
         appstruct[NO_VALUES] = not has_values
         appstruct[OBJECT_DATA] = obj

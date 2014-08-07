@@ -10,6 +10,8 @@ from substanced.form import FormError
 from pontus.interfaces import IFormView
 from pontus.view import ElementaryView, merge_dicts
 from pontus.default_behavior import Cancel
+from pontus.schema import Schema
+
 
 try:
       basestring
@@ -22,6 +24,7 @@ class FormView(ElementaryView, SubstanceDFormView):
 
     title = 'Form View'
     chmod = []
+    schema = Schema() 
 
     def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
         self.schema = self.schema.clone()

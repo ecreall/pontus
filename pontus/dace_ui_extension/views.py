@@ -604,7 +604,7 @@ class AssignActionToUsersView(FormView):
 class AssignActionToUsersMultipleView(MultipleView):
     title = 'Assigner l\'action'
     name = 'assign_action'
-    template = 'pontus.dace_ui_extension:templates/multipleview.pt'
+    template = 'pontus.dace_ui_extension:templates/sample_mergedmultipleview.pt'
     views = (AssignedUsersView, AssignActionToUsersView)
     validators = [AssignActionToUsers.get_validator()]
 
