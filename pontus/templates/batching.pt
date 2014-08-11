@@ -25,7 +25,7 @@
             ${prev_batch_label|request.localizer.translate('Previous')}</a>
     </li>
     <li class="${(not batch.next_url and 'disabled') or ''}">
-      <a href="${batch.next_url}">
+      <a href="${batch.next_url}" class="next">
         <i class="glyphicon glyphicon-forward"> </i>
             ${next_batch_label|request.localizer.translate('Next')}</a>
     </li>
