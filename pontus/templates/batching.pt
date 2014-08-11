@@ -1,8 +1,8 @@
-<div metal:define-macro="batching" i18n:domain="substanced">
-  <ul tal:condition="not batch.required"
+<div metal:define-macro="batching" i18n:domain="substanced" class="batch">
+<!--  <ul tal:condition="not batch.required"
       class="pager pager-compact">
       <li i18n:translate="">${batch.seqlen} entries total</li>
-  </ul>
+    </ul>-->
 
   <div tal:condition="batch.required" 
        class="text-center">
