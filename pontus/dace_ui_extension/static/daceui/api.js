@@ -56,7 +56,7 @@ $('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
           var url = $(this).attr('href');
           $.get(url, {}, function(data) {
                 $(target).html($(data).find(target).html());
-                $("html, body").animate({ scrollTop: 0 }, "slow");
+                $("html, body").animate({ scrollTop: $(target)[0].getBoundingClientRect().top }, "slow");
           });
           return false;
     });
