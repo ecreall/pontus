@@ -168,6 +168,7 @@ class MultipleView(MultipleViewsOperation):
         if self.views:
             self._init_views(self.views, **kwargs)
 
+
     def _init_views(self, views, **kwargs):
         self.builder(views, **kwargs)
         self.define_executable()
@@ -266,7 +267,6 @@ class MultipleView(MultipleViewsOperation):
             item = self.adapt_item(body, self.viewid)
             item['isactive'] = isactive
             result['coordinates'][coordinate] = [item]
-
 
         return result
 

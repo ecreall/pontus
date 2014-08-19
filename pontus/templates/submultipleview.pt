@@ -12,7 +12,7 @@
       <div tal:attributes="id (subitem['id']+'_multipleform'+coordinates)" class="tab-content">
           <div tal:repeat="item items" tal:attributes="id item['id']+coordinates;
                                                        class 'tab-pane fade'+(item['isactive'] and ' in active' or '')">
-              <div tal:replace="item['view'].render_item(item, coordinates, subitem['view'])" />         
+              <div tal:replace="item['view'].render_item(item, coordinates, subitem['view'])" />   
           </div>
       </div>
   </div>

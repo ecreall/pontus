@@ -14,7 +14,7 @@
                 </div>
               </div>
             </div>
-            <div tal:replace="structure item['body']" />
+            <div tal:replace="structure item['body']" /> 
         </div>
       </div>
     </div>

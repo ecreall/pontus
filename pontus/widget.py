@@ -12,7 +12,10 @@ from deform.widget import (
     OptGroup,
     FormWidget as OriginFormWidget,
     SelectWidget as OriginSelectWidget,
-    CheckboxChoiceWidget as OriginCheckboxChoiceWidget
+    CheckboxChoiceWidget as OriginCheckboxChoiceWidget,
+    default_resources,
+    default_resource_registry,
+    ResourceRegistry,
     )
 
 from deform.compat import (
@@ -271,9 +274,14 @@ class SelectWidget(OriginSelectWidget):
 
 
 class Select2Widget(SelectWidget):
-    template = 'deform:templates/select2.pt'
-    requirements = (('deform', None), ('select2', None))
+    template = 'pontus:templates/select2.pt'
+    requirements = (('deform', None), ('select2creation', None))
+    create = False
 
+class Select2WidgetCreateSearchChoice(SelectWidget):
+    template = 'pontus:templates/select2.pt'
+    requirements = (('deform', None), ('select2creation', None))
+    create = True
 
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
@@ -364,3 +372,8 @@ class SimpleMappingWidget(MappingWidget):
 class SimpleFormWidget(OriginFormWidget):
 
     item_template = 'pontus:templates/simple_mapping_item.pt'
+
+
+default_resource_registry.set_js_resources('select2creation', None, 'pontus.dace_ui_extension:static/select2/select2.js' )
+default_resource_registry.set_css_resources('select2creation', None, 'pontus.dace_ui_extension:static/select2/select2.css' )
+

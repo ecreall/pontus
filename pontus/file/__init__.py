@@ -222,7 +222,7 @@ class ObjectData(colander.Mapping):
                 if not isinstance(value, (list,tuple,set)):
                     value = [value]
                     is_multiple_cardinality = False
-
+               
                 for item in list(value):
                     if isinstance(item, dict) and OBJECT_DATA in item:
                         is_object_type = True

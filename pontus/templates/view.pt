@@ -24,7 +24,7 @@
                         tal:condition="slot">
       <div tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
-                tal:replace="item['view'].render_item(item, 'left', parent)" />   
+                tal:replace="item['view'].render_item(item, 'left', parent)" /> 
      </div>
    </div>
  </div>

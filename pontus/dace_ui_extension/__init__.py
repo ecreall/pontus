@@ -107,10 +107,16 @@ class Dace_ui_api(object):
 
         return False, action_updated, resources, allbodies_actions
 
-    def _actions(self, request, object):
+    def _actions(self, request, object, process_id=None, action_id=None):
         all_actions = []
         messages = {}
         actions = [a for a in object.actions]
+        if process_id is not None:
+            actions = [a for a in actions if a.action.process_id == process_id]
+
+        if action_id is not None:
+            actions = [a for a in actions if a.action.node_id == action_id]
+
         actions = sorted(actions, key=lambda a: getattr(a.action, '__name__', a.action.__class__.__name__))
         p_actions = [(object,a) for a in actions]
         all_actions.extend(p_actions)
