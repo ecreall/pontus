@@ -113,11 +113,22 @@ class View(Step):
         return True
 
     def params(self, key=None):
+        result = []
         if key is None:
             return self.request.params
 
         if key in self.request.params:
-            return self.request.params[key]
+            dict_copy = self.request.params.copy()
+            try:
+                while True:
+                    result.append(dict_copy.pop(key))
+            except Exception:
+                if len(result) == 1:
+                    return result[0]
+                elif len(result) >1:
+                    return result
+
+                pass
 
         return None
 
