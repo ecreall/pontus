@@ -11,7 +11,7 @@ from dace.util import get_obj, find_service, utility
 from dace.processinstance.core import DEFAULTMAPPING_ACTIONS_VIEWS
 from dace.objectofcollaboration.entity import Entity
 
-from pontus.view import BasicView, merge_dicts
+from pontus.view import BasicView, merge_dicts, ViewError
 from .interfaces import IDaceUIAPI
 
 
@@ -57,7 +57,7 @@ class Dace_ui_api(object):
             view = DEFAULTMAPPING_ACTIONS_VIEWS[a.action._class_]
             view_instance = view(c, request, behaviors=[a.action])
             view_result = {}
-            if not action_updated and form_id is not None and form_id.startswith(view_instance.viewid):
+            if not action_updated and form_id is not None and view_instance.has_id(form_id):
                 action_updated = True
                 updated_view = view_instance
                 view_result = view_instance()
@@ -147,7 +147,7 @@ class Dace_ui_api(object):
 
             return True , messages, resources, allbodies_actions
 
-        if form_id is not None and not action_updated:
+        if form_id is not None and not action_updated and all_actions:
             error = ViewError()
             error.principalmessage = u"Action non realisee"
             error.causes = ["Vous n'avez plus le droit de realiser cette action.", "L'action est verrouillee par un autre utilisateur."]

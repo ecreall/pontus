@@ -113,6 +113,13 @@ class MultipleContextsOperation(ViewOperation):
             self.children.append(subview)
             self.allviews.append(subview)
 
+    def has_id(self, id):
+        for view in self.children:
+            if view.has_id(id):
+                return True
+
+        return False
+
     def get_view_requirements(self):
         result = self.requirements_copy
         for view in self.children:
@@ -204,6 +211,14 @@ class MultipleView(MultipleViewsOperation):
     def before_update(self):
         for view in self.children:
             view.before_update()
+
+
+    def has_id(self, id):
+        for view in self.children:
+            if view.has_id(id):
+                return True
+
+        return False
 
     def update(self,):
         #validation
@@ -357,6 +372,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
         viewsschemanode = self.schema.get('views')
         viewsschemanode.widget = self.widget
         viewsschemanode.children[0].children.append(schema)
+
 
     def before_update(self):
         for view in self.allviews:
@@ -628,6 +644,13 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             multiplecontextsview_class.views = view
             view_instance = multiplecontextsview_class(self.context, self.request, self.parent, self.wizard, self.stepid)
             self.children[key] = view_instance
+
+    def has_id(self, id):
+        for view in self.children.values():
+            if view.has_id(id):
+                return True
+
+        return False
 
     def _additemswidget(self):
         values = [(i, i.get_view(self.request)) for i in self.contexts]

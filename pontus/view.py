@@ -100,6 +100,9 @@ class View(Step):
 
             return copy
 
+    def has_id(self, id):
+        return self.viewid == id
+
     def get_view_requirements(self):
         return self.requirements_copy
 

@@ -46,6 +46,10 @@ class FormView(ElementaryView, SubstanceDFormView):
         result = merge_dicts(_requirements, result)
         return result
 
+    def has_id(self, id):
+        formid = self.viewid + '_' + self.formid
+        return formid == id
+
     def update(self,):
         self.init_stepid(self.schema)  # TODO: in before_update?
         form, reqts = self._build_form()
