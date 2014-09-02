@@ -132,7 +132,7 @@ class Dace_ui_api(object):
             request.POST.clear()
             old_resources = resources
             old_allbodies_actions = allbodies_actions
-            action_updated, messages, resources, allbodies_actions = self._actions(request, object)
+            action_updated, messages, resources, allbodies_actions = self._actions(request, object, process_id, action_id)
             if old_resources is not None:
                 if 'js_links' in old_resources:
                     resources['js_links'].extend(old_resources['js_links'])
