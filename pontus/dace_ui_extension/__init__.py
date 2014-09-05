@@ -2,7 +2,7 @@ import datetime
 from math import ceil
 from zope.interface import implementer
 
-from pyramid.threadlocal import get_current_request
+from pyramid.threadlocal import get_current_request, get_current_registry
 from pyramid.view import view_config
 
 from substanced.util import get_oid
@@ -120,7 +120,6 @@ class Dace_ui_api(object):
         actions = sorted(actions, key=lambda a: getattr(a.action, '__name__', a.action.__class__.__name__))
         p_actions = [(object,a) for a in actions]
         all_actions.extend(p_actions)
-        from substanced.util import get_oid
         object_oid = str(get_oid(object))
         form_id = None
         if '__formid__' in request.POST:
@@ -280,6 +279,22 @@ class Dace_ui_api(object):
         dates = sorted(dates.items(), key=lambda i: i[0])
         return dates
 
+    def get_action_body(self, context, request, action, add_action_discriminator=False):
+        body = ''
+        if action is not None:
+            view = DEFAULTMAPPING_ACTIONS_VIEWS[action._class_]
+            view_instance = view(context, request, behaviors=[action])
+            if add_action_discriminator:
+                action_oid = get_oid(action)
+                view_instance.viewid += str(action_oid)
+ 
+            view_result = view_instance()
+            body = ''
+            if 'coordinates' in view_result:
+                body = view_instance.render_item(view_result['coordinates'][view_instance.coordinates][0], view_instance.coordinates, None)
+
+        return body
+
 
 @view_config(name='dace-ui-api-view', context=Entity, xhr=True, renderer='json')
 class Dace_ui_api_json(BasicView):
@@ -299,12 +314,9 @@ class Dace_ui_api_json(BasicView):
 
         return action
 
-    def update_action(self):
-        action_uid = self.params('action_uid')
-        context_uid = self.params('context_uid')
-        action = None
-        context = None
+    def update_action(self, action=None, context=None):
         result = {}
+        action_uid = self.params('action_uid')
         try:
             if action_uid is not None:
                 action = get_obj(int(action_uid ))
@@ -313,37 +325,15 @@ class Dace_ui_api_json(BasicView):
         except Exception:
             return {}#message erreur
 
+        context_uid = self.params('context_uid')
         try:
             if context_uid is not None:
                 context = get_obj(int(context_uid))
         except Exception:
             pass
 
-        if action is not None:
-            view = DEFAULTMAPPING_ACTIONS_VIEWS[action._class_]
-            view_instance = view(context, self.request, behaviors=[action])
-            view_result = view_instance()
-            body = ''
-            if 'coordinates' in view_result:
-                body = view_instance.render_item(view_result['coordinates'][view_instance.coordinates][0], view_instance.coordinates, None)
-
-            result['body'] = body
-           # if isinstance(result, dict):
-           #     if 'js_links' in view_result and view_result['js_links']:
-           #         js_links = []
-           #         for js in view_result['js_links']:
-           #             js_links.append(self.request.static_url(js))
-           #
-           #         result['js_links'] = js_links
-           #
-           #     if 'css_links' in view_result and view_result['css_links']:
-           #         css_links = []
-           #         for css in view_result['css_links']:
-           #             css_links.append(self.request.static_url(css))
-           #
-           #         result['css_links'] = css_links
-
-
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
+        result['body'] = dace_ui_api.get_action_body(context, self.request, action)
         return result
 
     def after_execution_action(self):
