@@ -70,7 +70,7 @@
      '${field.oid}',
      function(oid) {
        <div tal:omit-tag="" tal:condition="field.widget.create" >
-       var init_ops = {tokenSeparators: [",", " "], 
+       var init_ops = {tokenSeparators: [","], 
                        containerCssClass: 'form-control',
                        createSearchChoice:function(term, data) {
                                  if ($(data).filter(function() {
