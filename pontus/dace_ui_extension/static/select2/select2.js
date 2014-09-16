@@ -700,8 +700,10 @@ function unselect_option(oid, data){
                 opts.element.data("select2").destroy();
             }
 
+            if ($("#"+"s2id_"+opts.element.attr("id")) !== undefined){
+                $("#"+"s2id_"+opts.element.attr("id")).remove()
+            }; 
             this.container = this.createContainer();
-
             this.containerId="s2id_"+(opts.element.attr("id") || "autogen"+nextUid());
             this.containerSelector="#"+this.containerId.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
             this.container.attr("id", this.containerId);
@@ -1814,7 +1816,7 @@ function unselect_option(oid, data){
                 "<input class='select2-focusser select2-offscreen' type='text'/>",
                 "<div class='select2-drop select2-display-none'>",
                 "   <div class='select2-search'>",
-                "       <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'/>",
+                "       <input type='text' autocomplete='on' autocorrect='on' autocapitalize='on' spellcheck='false' class='select2-input'/>",
                 "   </div>",
                 "   <ul class='select2-results'>",
                 "   </ul>",
@@ -2373,7 +2375,7 @@ function unselect_option(oid, data){
             }).html([
                 "<ul class='select2-choices'>",
                 "  <li class='select2-search-field'>",
-                "    <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
+                "    <input type='text' autocomplete='on' autocorrect='on' autocapitalize='on' spellcheck='false' class='select2-input'>",
                 "  </li>",
                 "</ul>",
                 "<div class='select2-drop select2-drop-multi select2-display-none'>",

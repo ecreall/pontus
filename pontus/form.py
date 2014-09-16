@@ -108,6 +108,7 @@ class FormView(ElementaryView, SubstanceDFormView):
             result['coordinates'] = {self.coordinates: [item]}
             result['js_links'] = list(reqts['js'])
             result['css_links'] = list(reqts['css'])
+            result = merge_dicts(self.requirements_copy, result)
         else:
             result = item
 

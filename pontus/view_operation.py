@@ -282,7 +282,7 @@ class MultipleView(MultipleViewsOperation):
             item = self.adapt_item(body, self.viewid)
             item['isactive'] = isactive
             result['coordinates'][coordinate] = [item]
-
+            result = merge_dicts(self.requirements_copy, result)
         return result
 
 
@@ -476,6 +476,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
             result['coordinates'] = {self.view.coordinates:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
+            result = merge_dicts(self.requirements_copy, result)
 
         else:
             result = item
@@ -588,6 +589,7 @@ class CallView(MultipleContextsOperation):
 
         #if not (len(self.children) == len(self.contexts)):
         #    global_result['messages']
+        global_result = merge_dicts(self.requirements_copy, global_result)
         return  global_result
 
     def after_update(self):
@@ -725,6 +727,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             result['coordinates'] = {self.coordinates:[item]}
             result['js_links'] = reqts['js']
             result['css_links'] = reqts['css']
+            result = merge_dicts(self.requirements_copy, result)
         else:
             result = item
 
