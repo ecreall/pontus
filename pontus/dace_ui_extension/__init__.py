@@ -107,7 +107,7 @@ class Dace_ui_api(object):
 
         return False, action_updated, resources, allbodies_actions
 
-    def _actions(self, request, object, process_id=None, action_id=None):
+    def _actions(self, request, object, process_id=None, action_id=None, process_discriminator=None):
         all_actions = []
         messages = {}
         actions = [a for a in object.actions]
@@ -116,6 +116,9 @@ class Dace_ui_api(object):
 
         if action_id is not None:
             actions = [a for a in actions if a.action.node_id == action_id]
+
+        if process_discriminator is not None:
+            actions = [a for a in actions if a.action.node.process.discriminator == process_discriminator]
 
         actions = sorted(actions, key=lambda a: getattr(a.action, '__name__', a.action.__class__.__name__))
         p_actions = [(object,a) for a in actions]
@@ -131,7 +134,7 @@ class Dace_ui_api(object):
             request.POST.clear()
             old_resources = resources
             old_allbodies_actions = allbodies_actions
-            action_updated, messages, resources, allbodies_actions = self._actions(request, object, process_id, action_id)
+            action_updated, messages, resources, allbodies_actions = self._actions(request, object, process_id, action_id, process_discriminator)
             if old_resources is not None:
                 if 'js_links' in old_resources:
                     resources['js_links'].extend(old_resources['js_links'])
