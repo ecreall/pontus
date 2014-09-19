@@ -176,6 +176,17 @@ class AccordionWidget(SequenceWidget):
 
 
 class RichTextWidget(RichTextWidget):
+    default_options = (('height', 240),
+                       ('width', 0),
+                       ('skin', 'lightgray'),
+                       ('fontsize_formats', "8pt 9pt 10pt 11pt 12pt 26pt 36pt"),
+                       ('toolbar', "undo redo pastetext | styleselect | fontselect | fontsizeselect"),
+                       ('theme', 'modern'),
+                       ('mode', 'exact'),
+                       ('strict_loading_mode', True),
+                       ('theme_advanced_resizing', True),
+                       ('theme_advanced_toolbar_align', 'left'),
+                       ('theme_advanced_toolbar_location', 'top'))
 
     template = 'pontus:templates/richtext.pt'
 
