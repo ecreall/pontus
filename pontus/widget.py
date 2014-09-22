@@ -6,7 +6,7 @@ from colander import (
 from deform.i18n import _
 from deform.widget import (
     SequenceWidget as OriginSequenceWidget,
-    MappingWidget,
+    MappingWidget as OriginMappingWidget,
     RichTextWidget,
     FileUploadWidget,
     OptGroup,
@@ -28,6 +28,11 @@ from substanced.util import get_oid
 
 from pontus.file import OBJECT_OID
 from dace.util import get_obj
+
+
+class MappingWidget(OriginMappingWidget):
+
+    template = 'pontus:templates/mapping.pt'
 
 
 class SequenceWidget(OriginSequenceWidget):

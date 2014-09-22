@@ -1,11 +1,13 @@
 <tal:def tal:define="title title|field.title;
-                     oid oid|field.oid;
                      description description|field.description;
                      errormsg errormsg|field.errormsg;
                      item_template item_template|field.widget.item_template"
          i18n:domain="deform">
   
-    <div class="${field.widget.item_css_class or ''}">
+  <div class="panel panel-default ${field.widget.item_css_class or ''}" title="${description}">
+    <div class="panel-heading">${title}</div>
+    <div class="panel-body">
+
       <div tal:condition="errormsg" 
            class="clearfix alert alert-message error">
         <p i18n:translate="">
@@ -19,10 +21,12 @@
       </div>
 
       ${field.start_mapping()}
-       <input tal:condition="'__objectid__' in cstruct" type="hidden" name="__objectid__" value="${cstruct['__objectid__']}" id="${oid}-__objectid__"/>
       <div tal:repeat="child field.children"
            tal:replace="structure child.render_template(item_template)" >
       </div>     
       ${field.end_mapping()}
+
     </div>
+  </div>
+
 </tal:def>

@@ -1,5 +1,6 @@
 import re
 from collections import OrderedDict
+from webob.multidict import MultiDict
 
 from pyramid import renderers
 from pyramid.renderers import get_renderer
@@ -120,15 +121,20 @@ class View(Step):
         if key is None:
             return self.request.params
 
-        if key in self.request.params:
+        islist = False
+        if (key+'[]') in self.request.params:
+            islist = True
+
+        if key in self.request.params or (key+'[]') in self.request.params:
             dict_copy = self.request.params.copy()
+            dict_copy = MultiDict([(k.replace('[]', ''), value) for (k, value) in dict_copy.items()])
             try:
                 while True:
                     result.append(dict_copy.pop(key))
             except Exception:
-                if len(result) == 1:
+                if len(result) == 1 and not islist:
                     return result[0]
-                elif len(result) >1:
+                elif len(result) >1 or islist:
                     return result
 
                 pass
