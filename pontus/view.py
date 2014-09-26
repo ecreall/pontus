@@ -52,12 +52,14 @@ class View(Step):
 
     viewid = None
     title = 'View'
+    description=""
     name = 'view'
     coordinates = 'main' # default value
     validators = []
     item_template = 'templates/subview.pt'
     template = None
     requirements = None
+    css_class = "pontus-main-view"
 
     def render_item(self, item, coordinates, parent):
         body = renderers.render(self.item_template,

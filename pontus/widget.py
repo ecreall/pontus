@@ -390,6 +390,29 @@ class SimpleFormWidget(OriginFormWidget):
     item_template = 'pontus:templates/simple_mapping_item.pt'
 
 
+class Length(object):
+    """ Validator which succeeds if the value passed to it has a
+    length between a minimum and maximum.  The value is most often a
+    string."""
+    def __init__(self, _, min=None, max=None, min_message='Shorter than minimum length ${min}', max_message='Longer than maximum length ${max}'):
+        self.min = min
+        self.max = max
+        self.min_message = min_message
+        self.max_message = max_message
+        self.translationStringFactory = _
+
+    def __call__(self, node, value):
+        if self.min is not None:
+            if len(value) < self.min:
+                min_err = self.translationStringFactory(self.min_message.format(min=self.min))
+                raise Invalid(node, min_err)
+
+        if self.max is not None:
+            if len(value) > self.max:
+                max_err = self.translationStringFactory(self.max_message.format(max=self.max))
+                raise Invalid(node, max_err)
+
+
 default_resource_registry.set_js_resources('select2creation', None, 'pontus.dace_ui_extension:static/select2/select2.js' )
 default_resource_registry.set_css_resources('select2creation', None, 'pontus.dace_ui_extension:static/select2/select2.css' )
 
