@@ -4,7 +4,8 @@
      oid oid|field.oid;
      css_class css_class|field.widget.css_class;
      optgroup_class optgroup_class|field.widget.optgroup_class;
-     multiple multiple|field.widget.multiple;"
+     multiple multiple|field.widget.multiple;
+     id oid+'-'+field.get_root().formid"
      tal:omit-tag="">
 
    <style>
@@ -41,7 +42,7 @@
 
   <select tal:attributes="
           name name;
-          id oid;
+          id id;
           class string: form-control ${css_class};
           data-placeholder field.widget.placeholder|None;
           multiple multiple;
@@ -65,7 +66,7 @@
 
   <script type="text/javascript">
    deform.addCallback(
-     '${field.oid}',
+     '${id}',
      function(oid) {
        <div tal:omit-tag="" tal:condition="field.widget.create" >
        var init_ops = {tokenSeparators: [","], 
