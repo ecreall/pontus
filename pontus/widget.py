@@ -211,6 +211,10 @@ class FileWidget(FileUploadWidget):
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
+        upload = pstruct.get('upload')
+        if hasattr(upload, 'file'):
+            data['upload'] = upload
+
         if data is null:
             return null
 
