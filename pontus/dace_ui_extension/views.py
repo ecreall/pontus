@@ -465,7 +465,7 @@ class DoActivitiesProcessView(BasicView):
                 datas.extend(inv[1])
 
         datas = list(set(datas))
-        datas = sorted(datas, key=lambda d: d.__name__)
+        datas = sorted(datas, key=lambda d: d.title)
         all_actions = []
         messages = {}
         for d in datas:

@@ -232,7 +232,9 @@ def _normalize_choices(values):
                 except Exception:
                     value = str(value)
 
-            result.append((value, description))
+            if not(value in dict(result)): 
+                result.append((value, description))
+
     return result
 
 
