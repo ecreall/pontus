@@ -189,6 +189,7 @@ class RichTextWidget(RichTextWidget):
                        ('theme', 'modern'),
                        ('mode', 'exact'),
                        ('strict_loading_mode', True),
+                       ('remove_linebreaks', False),
                        ('theme_advanced_resizing', True),
                        ('theme_advanced_toolbar_align', 'left'),
                        ('theme_advanced_toolbar_location', 'top'))
