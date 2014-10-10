@@ -9,6 +9,7 @@ from deform.widget import (
     MappingWidget as OriginMappingWidget,
     RichTextWidget,
     FileUploadWidget,
+    TextInputWidget as OriginTextInputWidget, 
     OptGroup,
     FormWidget as OriginFormWidget,
     SelectWidget as OriginSelectWidget,
@@ -28,6 +29,12 @@ from substanced.util import get_oid
 
 from pontus.file import OBJECT_OID
 from dace.util import get_obj
+
+
+
+class TextInputWidget(OriginTextInputWidget):
+
+    template = 'pontus:templates/textinput.pt'
 
 
 class MappingWidget(OriginMappingWidget):
