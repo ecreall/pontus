@@ -35,6 +35,7 @@ from dace.util import get_obj
 class TextInputWidget(OriginTextInputWidget):
 
     template = 'pontus:templates/textinput.pt'
+    readonly_template = 'pontus:templates/readonly/textinput.pt'
 
 
 class MappingWidget(OriginMappingWidget):
