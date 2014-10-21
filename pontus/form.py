@@ -63,7 +63,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         error = False
         if '__formid__' in self.request.POST:
             posted_formid = self.request.POST['__formid__']
-
+        
         if posted_formid is not None and posted_formid == form.formid:
             for button in form.buttons:
                 if button.name in self.request.POST:

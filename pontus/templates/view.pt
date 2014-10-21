@@ -22,7 +22,7 @@
  <div metal:fill-slot="left">
    <div tal:omit-tag="" tal:define="slot coordinates['left']|nothing"
                         tal:condition="slot">
-      <div tal:omit-tag="" tal:define="item slot[0]">
+      <div class="pontus-left" tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
                 tal:replace="item['view'].render_item(item, 'left', parent)" /> 
      </div>
@@ -44,7 +44,7 @@
  <div metal:fill-slot="right">
    <div tal:omit-tag="" tal:define="slot coordinates['right']|nothing"
                         tal:condition="slot">
-      <div tal:omit-tag="" tal:define="item slot[0]">
+      <div class="pontus-right" tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
                 tal:replace="item['view'].render_item(item, 'right', parent)" />   
      </div>      
@@ -55,7 +55,7 @@
  <div metal:fill-slot="footer">
    <div tal:omit-tag="" tal:define="slot coordinates['footer']|nothing"
                         tal:condition="slot">
-      <div tal:omit-tag="" tal:define="item slot[0]">
+      <div class="pontus-footer" tal:omit-tag="" tal:define="item slot[0]">
            <div tal:define="item slot[0]; parent (('ismultipleview' in item) and item['view'] or None)"
                 tal:replace="item['view'].render_item(item, 'footer', parent)" />   
      </div>       
