@@ -3,6 +3,7 @@ from substanced.util import get_oid
 from pyramid.threadlocal import get_current_request
 
 from dace.util import utility
+from dace.objectofcollaboration.principal.util import has_any_roles
 from dace.processinstance.activity import InfiniteCardinality, ActionType
 from dace.interfaces import (
     IProcessDefinition,
@@ -33,7 +34,7 @@ def relation_validationA(process, context):
 
 
 def roles_validationA(process, context):
-    return True
+    return has_any_roles(roles=('Collaborator',))
 
 
 def processsecurity_validationA(process, context):
