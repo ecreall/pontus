@@ -34,7 +34,7 @@ def relation_validationA(process, context):
 
 
 def roles_validationA(process, context):
-    return has_any_roles(roles=('Collaborator',))
+    return has_any_roles(roles=('Admin',))
 
 
 def processsecurity_validationA(process, context):
