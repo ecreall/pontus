@@ -189,15 +189,13 @@ class MultipleView(MultipleViewsOperation):
         return result
 
     def define_executable(self):
-        _isexecutable =False
+        self.isexecutable = False
+        self.finished_successfully = True
         for child in self.children:
             if child.isexecutable:
-                _isexecutable = True
+                self.isexecutable = True
+                self.finished_successfully = False
                 break
-
-        if not _isexecutable:
-            self.isexecutable = False
-            self.finished_successfully = True
 
         return self.isexecutable
 
@@ -283,6 +281,7 @@ class MultipleView(MultipleViewsOperation):
             item['isactive'] = isactive
             result['coordinates'][coordinate] = [item]
             result = merge_dicts(self.requirements_copy, result)
+
         return result
 
 

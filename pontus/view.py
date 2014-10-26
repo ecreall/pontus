@@ -113,8 +113,14 @@ class View(Step):
         for validator in self.validators:
             try:
                 validator.validate(self.context, self.request)
-            except ValidationError:
-                raise ViewError()
+            except ValidationError as e:
+                ve = ViewError()
+                ve.principalmessage = BehaviorViewErrorPrincipalmessage
+                if getattr(e, 'principalmessage', ''):
+                    ve.causes = [e.principalmessage]#BehaviorViewErrorCauses
+
+                ve.solutions = BehaviorViewErrorSolutions
+                raise ve
 
         return True
 
@@ -237,16 +243,14 @@ class ElementaryView(View):
         self.init_behaviorinstances= []
         if 'behaviors' in kwargs:
             bis = kwargs['behaviors']
-            for bi in bis:
-                if bi._class_ in self.behaviors:
-                    self.init_behaviorinstances.append(bi)
+            self.init_behaviorinstances = [bi for bi in bis if bi._class_ in self.behaviors]
 
         _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
         if self.validate_behaviors:
             self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors if not (behavior in _init_behaviors)])
 
         self.behaviorinstances = OrderedDict()
-        self._init_behaviors()
+        self._init_behaviors(_init_behaviors)
 
     def validate(self):
         try:
@@ -268,12 +272,11 @@ class ElementaryView(View):
 
         return True
 
-    def _init_behaviors(self):
+    def _init_behaviors(self, init_behaviors):
         behavior_instances = OrderedDict()
-        _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
         self.errors = []
         for behavior in self.behaviors:
-            if not (behavior in _init_behaviors):
+            if not (behavior in init_behaviors):
                 try:
                     wizard = None
                     if self.wizard is not None:
