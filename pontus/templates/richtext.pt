@@ -19,6 +19,11 @@
   <span id="${oid}-preload" class="tinymce-preload" 
         tal:content="structure cstruct" />
   <script type="text/javascript">
+    function get_language(){
+      var language = '<tal:block i18n:translate="language-code">en</tal:block>';
+      if (language == 'fr'){ language = 'fr_FR'};
+      return  language
+    };
     (function($){
       deform.addCallback('${oid}', function(oid) {
         var jqoid = $('#' + oid);
@@ -28,7 +33,7 @@
           jqoid.show();
           jqoid_preload.remove();
           tinyMCE.init({
-            language: '<tal:block i18n:translate="language-code">en</tal:block>',
+            language: get_language(),
             body_class: 'form-control',
             <tal:block condition="tinymce_options">${tinymce_options},</tal:block>
             elements: oid
