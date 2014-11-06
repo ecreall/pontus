@@ -2,7 +2,6 @@ import unittest
 from pyramid.config import Configurator
 from pyramid.testing import DummyRequest
 from pyramid import testing
-from dace.objectofcollaboration.object import Object
 
 
 from substanced.db import root_factory
@@ -21,7 +20,6 @@ class FunctionalTests(unittest.TestCase):
         import tempfile
         import os.path
         self.tmpdir = tempfile.mkdtemp()
-
         dbpath = os.path.join( self.tmpdir, 'test.db')
         uri = 'file://' + dbpath
         settings = {'zodbconn.uri': uri,
@@ -29,13 +27,13 @@ class FunctionalTests(unittest.TestCase):
                     'substanced.initial_login': 'admin',
                     'substanced.initial_password': 'admin',
                     'pyramid.includes': [
-            'pyramid_chameleon',
-            'pyramid_layout',
-            'pyramid_mailer.testing',
-            'pyramid_tm',
-            'substanced',
-            'dace',
-            'pontus',
+                        'substanced',
+                        'pyramid_chameleon',
+                        'pyramid_layout',
+                        'pyramid_mailer.testing', # have to be after substanced to override the mailer
+                        'pyramid_tm',
+                        'dace',
+                        'pontus',
         ]}
 
         app = main({}, **settings)
