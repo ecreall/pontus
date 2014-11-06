@@ -45,6 +45,7 @@ class FunctionalTests(unittest.TestCase):
         from webtest import TestApp
         self.testapp = TestApp(app)
         self.request = request
+        import time; time.sleep(2)
 
     def tearDown(self):
         from dace.processinstance import event
