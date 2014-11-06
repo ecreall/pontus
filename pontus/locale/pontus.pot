@@ -1,0 +1,25 @@
+# 
+# SOME DESCRIPTIVE TITLE
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE 1.0\n"
+"POT-Creation-Date: 2014-11-06 18:02+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+
+#. Default: Reorder (via drag and drop)
+#: ./src/pontus/pontus/templates/table_item.pt:11
+msgid "title"
+msgstr ""
+
+#: ./src/pontus/pontus/templates/table_item.pt:13
+msgid "Remove"
+msgstr ""
