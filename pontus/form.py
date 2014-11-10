@@ -14,9 +14,9 @@ from pontus.schema import Schema
 
 
 try:
-      basestring
+    basestring
 except NameError:
-      basestring = str
+    basestring = str
 
 
 @implementer(IFormView)
@@ -26,12 +26,22 @@ class FormView(ElementaryView, SubstanceDFormView):
     chmod = []
     schema = Schema() 
 
-    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+    def __init__(self, 
+                 context, 
+                 request, 
+                 parent=None, 
+                 wizard=None, 
+                 stepid=None, 
+                 **kwargs):
         self.schema = self.schema.clone()
         SubstanceDFormView.__init__(self, context, request)
-        ElementaryView.__init__(self, context, request, parent, wizard, stepid, **kwargs)
-        self.buttons = [Button(name=behavior.title,
-                               title=behavior.title) for behavior in self.behaviorinstances.values()]
+        ElementaryView.__init__(self, context, request, parent,
+                                wizard, stepid, **kwargs)
+        self.buttons = [Button(title=getattr(behavior, 
+                                            'submission_title', 
+                                            behavior.title),
+                               name=behavior.title) \
+                        for behavior in self.behaviorinstances.values()]
 
     def setviewid(self, viewid):
         ElementaryView.setviewid(self, viewid)
@@ -42,8 +52,8 @@ class FormView(ElementaryView, SubstanceDFormView):
         result = {}
         result['js_links'] = list(reqts['js'])
         result['css_links'] = list(reqts['css'])
-        _requirements = self.requirements_copy
-        result = merge_dicts(_requirements, result)
+        requirements = self.requirements_copy
+        result = merge_dicts(requirements, result)
         return result
 
     def has_id(self, id):
@@ -51,7 +61,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         return formid == id
 
     def update(self,):
-        self.init_stepid(self.schema)  # TODO: in before_update?
+        self.init_stepid(self.schema)
         form, reqts = self._build_form()
         form.formid = self.viewid + '_' + form.formid
         for c in form.children:
@@ -68,7 +78,9 @@ class FormView(ElementaryView, SubstanceDFormView):
             for button in form.buttons:
                 if button.name in self.request.POST:
                     try:
-                        if (button.name in self.behaviorinstances) and isinstance(self.behaviorinstances[button.name], Cancel):
+                        if (button.name in self.behaviorinstances) and \
+                            isinstance(self.behaviorinstances[button.name],
+                                       Cancel):
                             # bypass form validation for Cancel behavior
                             validated = {}
                         else :
@@ -76,7 +88,7 @@ class FormView(ElementaryView, SubstanceDFormView):
                             validated = form.validate(controls)
 
                     except deform.exception.ValidationFailure as e:
-                        fail = getattr(self, '%s_failure' % button.name, None)
+                        fail = getattr(self, '%s_failure' % button.title, None)
                         if fail is None:
                             fail = self._failure
                         item = fail(e, form)
@@ -146,7 +158,7 @@ class FormView(ElementaryView, SubstanceDFormView):
             node = self._get(form, m[0])
             if node is not None:
                 if isinstance(m[1], basestring):
-                   if m[1] == 'r':
-                       node.widget.readonly = True
+                    if m[1] == 'r':
+                        node.widget.readonly = True
                 else:
                     self._chmod(node.children[0], m[1])

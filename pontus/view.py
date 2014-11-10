@@ -14,7 +14,6 @@ from pontus.interfaces import IView
 from pontus.core import Step
 from pontus.resources import (
                 BehaviorViewErrorPrincipalmessage,
-                BehaviorViewErrorCauses,
                 BehaviorViewErrorSolutions)
 
 
@@ -23,7 +22,7 @@ class ViewError(Error):
     causes = []
     solutions = []
     type = 'danger'
-    template='templates/message.pt'
+    template = 'templates/message.pt'
 
 
 def merge_dicts(source, target):
@@ -45,14 +44,14 @@ def merge_dicts(source, target):
 
 EMPTY_TEMPLATE = 'templates/empty.pt'
 
-#TODO create decorator for pontus views
+
 @implementer(IView)
 class View(Step):
     """Abstract view"""
 
     viewid = None
     title = 'View'
-    description=""
+    description = ""
     name = 'view'
     coordinates = 'main' # default value
     validators = []
@@ -68,13 +67,19 @@ class View(Step):
                  'parent': parent}, self.request)
         return Structure(body)
 
-    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
+    def __init__(self, 
+                 context, 
+                 request, 
+                 parent=None, 
+                 wizard=None, 
+                 stepid=None, 
+                 **kwargs):
         super(View, self).__init__(wizard, stepid)
         self.context = context
         self.request = request
         self.parent = parent
         if self.viewid is None:
-            self.viewid = self.name#re.sub(r'\s', '_', self.name).replace('\'','').replace('-','') #y a plus simple...expression reguliere
+            self.viewid = self.name
 
         if self.parent is not None:
             self.viewid = self.parent.viewid + '_' + self.viewid
@@ -135,17 +140,16 @@ class View(Step):
 
         if key in self.request.params or (key+'[]') in self.request.params:
             dict_copy = self.request.params.copy()
-            dict_copy = MultiDict([(k.replace('[]', ''), value) for (k, value) in dict_copy.items()])
+            dict_copy = MultiDict([(k.replace('[]', ''), value) \
+                                   for (k, value) in dict_copy.items()])
             try:
                 while True:
                     result.append(dict_copy.pop(key))
             except Exception:
                 if len(result) == 1 and not islist:
                     return result[0]
-                elif len(result) >1 or islist:
+                elif len(result) > 1 or islist:
                     return result
-
-                pass
 
         return None
 
@@ -180,11 +184,6 @@ class View(Step):
     def content(self, result, template=None, main_template=None):
         if template is None:
             template = self.template
-            #registry = get_current_registry()
-            #context_iface = providedBy(self.context)
-            #view_deriver = registry.adapters.lookup((IViewClassifier, self.request.request_iface, context_iface), IV, name=self.title, default=None)
-            #discriminator = view_deriver.__discriminator__().resolve()
-            #template = registry.introspector.get('templates', discriminator).title
 
         if main_template is None:
             main_template = get_renderer(EMPTY_TEMPLATE).implementation()
@@ -237,17 +236,27 @@ class ElementaryView(View):
     behaviors = []
     validate_behaviors = True
 
-    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
-        super(ElementaryView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
+    def __init__(self, 
+                 context, 
+                 request, 
+                 parent=None, 
+                 wizard=None, 
+                 stepid=None, 
+                 **kwargs):
+        super(ElementaryView, self).__init__(context, request, parent, 
+                                             wizard, stepid, **kwargs)
         self._allvalidators = list(self.validators)
-        self.init_behaviorinstances= []
+        self.init_behaviorinstances = []
         if 'behaviors' in kwargs:
             bis = kwargs['behaviors']
-            self.init_behaviorinstances = [bi for bi in bis if bi._class_ in self.behaviors]
+            self.init_behaviorinstances = [bi for bi in bis \
+                                           if bi._class_ in self.behaviors]
 
         _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
         if self.validate_behaviors:
-            self._allvalidators.extend([behavior.get_validator() for behavior in self.behaviors if not (behavior in _init_behaviors)])
+            self._allvalidators.extend([behavior.get_validator() \
+                                        for behavior in self.behaviors \
+                                        if not (behavior in _init_behaviors)])
 
         self.behaviorinstances = OrderedDict()
         self._init_behaviors(_init_behaviors)
@@ -265,7 +274,7 @@ class ElementaryView(View):
             ve = ViewError()
             ve.principalmessage = BehaviorViewErrorPrincipalmessage
             if e.principalmessage:
-                ve.causes = [e.principalmessage]#BehaviorViewErrorCauses
+                ve.causes = [e.principalmessage]
 
             ve.solutions = BehaviorViewErrorSolutions
             raise ve
@@ -282,7 +291,9 @@ class ElementaryView(View):
                     if self.wizard is not None:
                         wizard = self.wizard.behaviorinstance
 
-                    behaviorinstance = behavior.get_instance(self.context, self.request, wizard=wizard)
+                    behaviorinstance = behavior.get_instance(self.context, 
+                                                             self.request, 
+                                                             wizard=wizard)
                     if behaviorinstance is not None:
                         key = behaviorinstance._class_.__name__
                         behavior_instances[key] = behaviorinstance
@@ -312,10 +323,7 @@ class ElementaryView(View):
             behavior.execute(self.context, self.request, appstruct)
 
     def after_update(self):
-         pass
-#        if self.finished_successfully:
-#            for behavior in self.behaviorinstances.values():
-#                behavior.after_execution(self.context, self.request)
+        pass
 
 
 class BasicView(ElementaryView):
@@ -323,8 +331,15 @@ class BasicView(ElementaryView):
 
     isexecutable = False
 
-    def __init__(self, context, request, parent=None, wizard=None, stepid=None, **kwargs):
-        super(BasicView, self).__init__(context, request, parent, wizard, stepid, **kwargs)
+    def __init__(self, 
+                 context, 
+                 request, 
+                 parent=None, 
+                 wizard=None, 
+                 stepid=None, 
+                 **kwargs):
+        super(BasicView, self).__init__(context, request, parent, 
+                                        wizard, stepid, **kwargs)
         self.finished_successfully = True
 
     def update(self):

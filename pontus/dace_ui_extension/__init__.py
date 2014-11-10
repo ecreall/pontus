@@ -12,7 +12,7 @@ from dace.processinstance.core import DEFAULTMAPPING_ACTIONS_VIEWS
 from dace.objectofcollaboration.entity import Entity
 
 from pontus.view import BasicView, merge_dicts, ViewError
-from .interfaces import IDaceUIAPI
+from pontus.dace_ui_extension.interfaces import IDaceUIAPI
 
 
 def calculatePage(elements, view, tabid):
@@ -41,7 +41,7 @@ def calculatePage(elements, view, tabid):
 
 @utility(name='dace_ui_api')
 @implementer(IDaceUIAPI)
-class Dace_ui_api(object):
+class DaceUIAPI(object):
 
 
     def _modal_views(self, request, all_actions, form_id):
@@ -107,10 +107,14 @@ class Dace_ui_api(object):
 
         return False, action_updated, resources, allbodies_actions
 
-    def _actions(self, request, object, process_id=None, action_id=None, process_discriminator=None):
-        all_actions = []
+    def _actions(self, 
+                 request,
+                 context, 
+                 process_id=None, 
+                 action_id=None, 
+                 process_discriminator=None):
         messages = {}
-        actions = [a for a in object.actions]
+        actions = [a for a in context.actions]
         if process_id is not None:
             actions = [a for a in actions if a.action.process_id == process_id]
 
@@ -121,9 +125,8 @@ class Dace_ui_api(object):
             actions = [a for a in actions if a.action.node.process.discriminator == process_discriminator]
 
         actions = sorted(actions, key=lambda a: getattr(a.action, '__name__', a.action.__class__.__name__))
-        p_actions = [(object,a) for a in actions]
-        all_actions.extend(p_actions)
-        object_oid = str(get_oid(object))
+        all_actions = [(context,a) for a in actions]
+        object_oid = str(get_oid(context))
         form_id = None
         if '__formid__' in request.POST:
             if request.POST['__formid__'].find(object_oid)>=0:
@@ -134,7 +137,7 @@ class Dace_ui_api(object):
             request.POST.clear()
             old_resources = resources
             old_allbodies_actions = allbodies_actions
-            action_updated, messages, resources, allbodies_actions = self._actions(request, object, process_id, action_id, process_discriminator)
+            action_updated, messages, resources, allbodies_actions = self._actions(request, context, process_id, action_id, process_discriminator)
             if old_resources is not None:
                 if 'js_links' in old_resources:
                     resources['js_links'].extend(old_resources['js_links'])
@@ -300,7 +303,7 @@ class Dace_ui_api(object):
 
 
 @view_config(name='dace-ui-api-view', context=Entity, xhr=True, renderer='json')
-class Dace_ui_api_json(BasicView):
+class DaceUIAPIJson(BasicView):
 
     def _get_start_action(self):
         action = None
