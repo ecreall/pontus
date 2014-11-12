@@ -193,7 +193,7 @@ class RichTextWidget(RichTextWidget):
                        ('width', 0),
                        ('skin', 'lightgray'),
                        ('fontsize_formats', "8pt 9pt 10pt 11pt 12pt 26pt 36pt"),
-                       ('toolbar', "undo redo pastetext | styleselect | fontselect | fontsizeselect"),
+                       ('toolbar', "undo redo pastetext | fontselect | fontsizeselect"),
                        ('theme', 'modern'),
                        ('mode', 'exact'),
                        ('strict_loading_mode', True),
