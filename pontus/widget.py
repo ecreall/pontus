@@ -301,6 +301,10 @@ class SelectWidget(OriginSelectWidget):
                         result.append(ob)
                 except ValueError:
                     result.append(item)
+
+            if not result:
+                return null
+
             return result
 
 

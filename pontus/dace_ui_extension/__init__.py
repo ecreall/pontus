@@ -63,7 +63,7 @@ class DaceUIAPI(object):
                 view_result = view_instance()
             else:
                 view_result = view_instance.get_view_requirements()
-
+            
             if updated_view is view_instance and \
                view_instance.isexecutable and \
                view_instance.finished_successfully:
