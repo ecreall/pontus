@@ -1,11 +1,14 @@
+
 from pyramid.view import view_config
 
 from dace.interfaces import IObject
 from dace.util import getAllBusinessAction
+
 from pontus.view import View, ViewError
 from pontus.view_operation import MultipleView
-from pontus.resources import IndexViewErrorPrincipalmessage, IndexViewErrorCauses
-
+from pontus.resources import (
+    IndexViewErrorPrincipalmessage, IndexViewErrorCauses)
+from pontus import _
 
 @view_config(
     name='index',
@@ -14,11 +17,17 @@ from pontus.resources import IndexViewErrorPrincipalmessage, IndexViewErrorCause
     )
 class Index(View):
 
-    title = 'Voir'
+    title = _('Index')
     viewid = 'index'
 
-    def __init__(self, context, request, parent=None, wizard=None, index=0, **kwargs):
-        View.__init__(self, context, request, parent, wizard, index,**kwargs)
+    def __init__(self, 
+                 context, 
+                 request, 
+                 parent=None, 
+                 wizard=None, 
+                 index=0, 
+                 **kwargs):
+        View.__init__(self, context, request, parent, wizard, index, **kwargs)
         self.title = self.context.title
 
     def update(self):
@@ -29,13 +38,14 @@ class Index(View):
             views.append(action.action_view)
 
         if views:
-            indexmultiview = MultipleView(self.context, self.request, self.parent)
+            indexmultiview = MultipleView(
+                 self.context, self.request, self.parent)
             indexmultiview.coordinates = self.coordinates
             indexmultiview._init_views(views)
             indexmultiview.before_update()
             return indexmultiview.update()
 
-        e = ViewError()
-        e.principalmessage = IndexViewErrorPrincipalmessage
-        e.causes = IndexViewErrorCauses
-        raise e
+        error = ViewError()
+        error.principalmessage = IndexViewErrorPrincipalmessage
+        error.causes = IndexViewErrorCauses
+        raise error

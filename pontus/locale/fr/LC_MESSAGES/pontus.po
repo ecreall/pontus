@@ -1,0 +1,49 @@
+#
+# French translations for PACKAGE package
+# This file is distributed under the same license as the PACKAGE package.
+# amensouissi <amensouissi@ecreall.com>, 2014.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE 1.0\n"
+"POT-Creation-Date: 2014-11-18 17:04+0100\n"
+"PO-Revision-Date: 2014-11-18 16:56+0100\n"
+"Last-Translator: SOUISSI <amensouissi@ecreall.com>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/pontus/pontus/default_behavior.py:11
+msgid "Cancel"
+msgstr "Annuler"
+
+#: src/pontus/pontus/index.py:20
+msgid "Index"
+msgstr ""
+
+#: src/pontus/pontus/view.py:54
+msgid "View"
+msgstr ""
+
+#: src/pontus/pontus/core.py:46
+msgid "Title"
+msgstr "Titre"
+
+#: src/pontus/pontus/core.py:52
+msgid "Lable"
+msgstr ""
+
+#: src/pontus/pontus/core.py:58
+msgid "Description"
+msgstr "Description"
+
+#. Default: Reorder (via drag and drop)
+#: src/pontus/pontus/templates/table_item.pt:11
+msgid "title"
+msgstr "Titre"
+
+#: src/pontus/pontus/templates/table_item.pt:13
+msgid "Remove"
+msgstr "Supprimer"

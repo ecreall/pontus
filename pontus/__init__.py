@@ -1,3 +1,8 @@
+from pyramid.i18n import TranslationStringFactory
+
+_ = TranslationStringFactory('pontus')
+
+
 def includeme(config): # pragma: no cover
     config.include('.')
     config.scan('.')

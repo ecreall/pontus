@@ -30,6 +30,12 @@ setup(name='pontus',
       install_requires=requires,
       tests_require=requires,
       test_suite="pontus",
+      message_extractors={
+          'pontus': [
+              ('**.py', 'python', None), # babel extractor supports plurals
+              ('**.pt', 'chameleon', None),
+          ],
+      },
       extras_require = dict(
           test=['WebTest'],
       ),

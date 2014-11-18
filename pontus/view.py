@@ -15,6 +15,7 @@ from pontus.core import Step
 from pontus.resources import (
                 BehaviorViewErrorPrincipalmessage,
                 BehaviorViewErrorSolutions)
+from pontus import _
 
 
 class ViewError(Error):
@@ -50,7 +51,7 @@ class View(Step):
     """Abstract view"""
 
     viewid = None
-    title = 'View'
+    title = _('View')
     description = ""
     name = 'view'
     coordinates = 'main' # default value

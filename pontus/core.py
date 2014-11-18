@@ -7,6 +7,7 @@ from pyramid_layout.layout import Structure
 
 from .interfaces import IVisualisableElement
 from .schema import Schema
+from pontus import _
 
 STEPID = '__stepid__'
 
@@ -41,17 +42,20 @@ class VisualisableElementSchema(Schema):
     
     title = colander.SchemaNode(
         colander.String(),
-        widget=deform.widget.TextInputWidget()
+        widget=deform.widget.TextInputWidget(),
+        title=_('Title')
         )
 
     label = colander.SchemaNode(
         colander.String(),
-        widget= deform.widget.TextInputWidget()
+        widget= deform.widget.TextInputWidget(),
+        title=_('Lable')
         )
 
     description = colander.SchemaNode(
         colander.String(),
-        widget=deform.widget.TextAreaWidget(rows=10, cols=60)
+        widget=deform.widget.TextAreaWidget(rows=10, cols=60),
+        title=_('Description')
         )
 
 

@@ -6,7 +6,7 @@
                  oid oid|field.oid"
      title="${description}"
      class="form-group row deformSeqItem ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
-     i18n:domain="deform">
+     i18n:domain="pontus">
 
       <span tal:replace="structure field.serialize(cstruct)"/>
 <td>

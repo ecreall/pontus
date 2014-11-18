@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-11-06 18:02+0100\n"
+"POT-Creation-Date: 2014-11-18 17:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,6 +14,30 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: \n"
+
+#: ./src/pontus/pontus/default_behavior.py:11
+msgid "Cancel"
+msgstr ""
+
+#: ./src/pontus/pontus/index.py:20
+msgid "Index"
+msgstr ""
+
+#: ./src/pontus/pontus/view.py:54
+msgid "View"
+msgstr ""
+
+#: ./src/pontus/pontus/core.py:46
+msgid "Title"
+msgstr ""
+
+#: ./src/pontus/pontus/core.py:52
+msgid "Lable"
+msgstr ""
+
+#: ./src/pontus/pontus/core.py:58
+msgid "Description"
+msgstr ""
 
 #. Default: Reorder (via drag and drop)
 #: ./src/pontus/pontus/templates/table_item.pt:11
