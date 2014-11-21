@@ -345,7 +345,7 @@ class DaceUIAPIJson(BasicView):
         behavior_id = self.params('behavior_id')
         def_container = find_service('process_definition_container')
         pd = def_container.get_definition(pd_id)
-        start_wi = pd.start_process(action_id)
+        start_wi = pd.start_process(action_id)[action_id]
         for start_action in start_wi.actions:
             if start_action.behavior_id == behavior_id:
                 action = start_action
