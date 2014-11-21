@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-11-21 15:33+0100\n"
+"POT-Creation-Date: 2014-11-21 15:57+0100\n"
 "PO-Revision-Date: 2014-11-21 15:41+0100\n"
 "Last-Translator: SOUISSI <amensouissi@ecreall.com>\n"
 "Language-Team: French\n"
@@ -51,5 +51,6 @@ msgstr "Supprimer"
 #: src/pontus/pontus/templates/simple_mapping.pt:8
 #: src/pontus/pontus/templates/mapping.pt:14
 msgid "There was a problem with this section"
-msgstr "Un problème a été rencontré avec cette section. Merci de vérifier les informations saisies."
-
+msgstr ""
+"Un problème a été rencontré avec cette section. Merci de vérifier les "
+"informations saisies."
