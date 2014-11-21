@@ -4,6 +4,7 @@ from zope.interface import implementer
 
 from pyramid.threadlocal import get_current_request, get_current_registry
 from pyramid.view import view_config
+from pyramid import renderers
 
 from substanced.util import get_oid
 
@@ -43,6 +44,10 @@ def calculatePage(elements, view, tabid):
 @implementer(IDaceUIAPI)
 class DaceUIAPI(object):
 
+    def _get_message(self, e, request, subject=None):
+        content_message = renderers.render(e.template,
+                {'error': e, 'subject': subject}, request)
+        return content_message
 
     def _modal_views(self, request, actions, form_id):
         action_updated = False
@@ -56,7 +61,7 @@ class DaceUIAPI(object):
             view_instance = view(context, request, 
                      behaviors=[action])
             view_result = {}
-            if not action_updated and form_id is not None and \
+            if not action_updated and form_id and \
                view_instance.has_id(form_id):
                 action_updated = True
                 updated_view = view_instance
@@ -81,8 +86,9 @@ class DaceUIAPI(object):
 
                 body = ''
                 if 'coordinates' in view_result:
-                    body = view_instance.render_item(view_result['coordinates'][view_instance.coordinates][0], 
-                                                     view_instance.coordinates, None)
+                    body = view_instance.render_item(
+                            view_result['coordinates'][view_instance.coordinates][0], 
+                            view_instance.coordinates, None)
 
 
                 action_infos.update(
@@ -121,7 +127,8 @@ class DaceUIAPI(object):
                  context, 
                  process_id=None, 
                  action_id=None, 
-                 process_discriminator=None):
+                 process_discriminator=None,
+                 ignor_form=False):
         messages = {}
         actions = getAllBusinessAction(context, request,
                          process_id=process_id, node_id=action_id,
@@ -145,7 +152,8 @@ class DaceUIAPI(object):
             action_updated, messages, \
             resources, allbodies_actions = self._actions(request, context,
                                                         process_id, action_id, 
-                                                        process_discriminator)
+                                                        process_discriminator,
+                                                        ignor_form)
             if old_resources is not None:
                 if 'js_links' in old_resources:
                     resources['js_links'].extend(old_resources['js_links'])
@@ -160,12 +168,12 @@ class DaceUIAPI(object):
 
             return True , messages, resources, allbodies_actions
 
-        if form_id is not None and not action_updated and all_actions:
+        if not ignor_form and form_id is not None and not action_updated and all_actions:
             error = ViewError()
             error.principalmessage = u"Action non realisee"
             error.causes = ["Vous n'avez plus le droit de realiser cette action.", 
                             "L'action est verrouillee par un autre utilisateur."]
-            message = self._get_message(error)
+            message = self._get_message(error, request)
             messages.update({error.type: [message]})
 
         return action_updated, messages, resources, allbodies_actions

@@ -49,7 +49,7 @@ class VisualisableElementSchema(Schema):
     label = colander.SchemaNode(
         colander.String(),
         widget= deform.widget.TextInputWidget(),
-        title=_('Lable')
+        title=_('Label')
         )
 
     description = colander.SchemaNode(

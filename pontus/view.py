@@ -23,7 +23,7 @@ class ViewError(Error):
     causes = []
     solutions = []
     type = 'danger'
-    template = 'templates/message.pt'
+    template = 'pontus:templates/message.pt'
 
 
 def merge_dicts(source, target):

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-11-20 15:40+0100\n"
-"PO-Revision-Date: 2014-11-18 16:56+0100\n"
+"POT-Creation-Date: 2014-11-21 15:33+0100\n"
+"PO-Revision-Date: 2014-11-21 15:41+0100\n"
 "Last-Translator: SOUISSI <amensouissi@ecreall.com>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -21,18 +21,18 @@ msgstr "Annuler"
 
 #: src/pontus/pontus/index.py:20
 msgid "Index"
-msgstr ""
+msgstr "Index"
 
 #: src/pontus/pontus/view.py:54
 msgid "View"
-msgstr ""
+msgstr "Vue"
 
 #: src/pontus/pontus/core.py:46
 msgid "Title"
 msgstr "Titre"
 
 #: src/pontus/pontus/core.py:52
-msgid "Lable"
+msgid "Label"
 msgstr ""
 
 #: src/pontus/pontus/core.py:58
@@ -42,8 +42,14 @@ msgstr "Description"
 #. Default: Reorder (via drag and drop)
 #: src/pontus/pontus/templates/table_item.pt:11
 msgid "title"
-msgstr "Titre"
+msgstr "titre"
 
 #: src/pontus/pontus/templates/table_item.pt:13
 msgid "Remove"
 msgstr "Supprimer"
+
+#: src/pontus/pontus/templates/simple_mapping.pt:8
+#: src/pontus/pontus/templates/mapping.pt:14
+msgid "There was a problem with this section"
+msgstr "Un problème a été rencontré avec cette section. Merci de vérifier les informations saisies."
+

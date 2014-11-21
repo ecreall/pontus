@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-11-20 15:40+0100\n"
+"POT-Creation-Date: 2014-11-21 15:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgid "Title"
 msgstr ""
 
 #: ./src/pontus/pontus/core.py:52
-msgid "Lable"
+msgid "Label"
 msgstr ""
 
 #: ./src/pontus/pontus/core.py:58
@@ -46,4 +46,9 @@ msgstr ""
 
 #: ./src/pontus/pontus/templates/table_item.pt:13
 msgid "Remove"
+msgstr ""
+
+#: ./src/pontus/pontus/templates/simple_mapping.pt:8
+#: ./src/pontus/pontus/templates/mapping.pt:14
+msgid "There was a problem with this section"
 msgstr ""

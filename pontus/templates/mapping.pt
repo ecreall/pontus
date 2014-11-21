@@ -2,7 +2,7 @@
                      description description|field.description;
                      errormsg errormsg|field.errormsg;
                      item_template item_template|field.widget.item_template"
-         i18n:domain="deform">
+         i18n:domain="pontus">
   
   <div class="panel panel-default ${field.widget.item_css_class or ''}" title="${description}">
     <div class="panel-heading">${title}</div>
