@@ -58,12 +58,13 @@ class StatisticProcesses(InfiniteCardinality):
         query = {}
         try:
             actionuid = get_oid(self)
-            query={'action_uid':actionuid}
+            query = {'action_uid': actionuid}
         except AttributeError:
-            query={'isstart':'True'} 
+            query = {'isstart': 'True'} 
 
         query['coordinates'] = 'main'
-        return get_current_request().resource_url(obj, '@@'+self.view_name,  query=query)
+        return get_current_request().resource_url(
+               obj, '@@'+self.view_name,  query=query)
 
 
 class SeeProcesses(InfiniteCardinality):
@@ -91,13 +92,13 @@ class RuntimeProcessDefinition(ProcessDefinition, VisualisableElement):
                 s = StartEventDefinition(),
                 pg = ParallelGatewayDefinition(),
                 processes_run = ActivityDefinition(contexts=[SeeProcesses], 
-                                                   title="Les processus en cours",
-                                                   groups=['Voir'],
-                                                   description="L'action permet de voir les processus encours"),
+                                    title="Les processus en cours",
+                                    groups=['Voir'],
+                                    description="L'action permet de voir les processus encours"),
                 processes_stat = ActivityDefinition(contexts=[StatisticProcesses],
-                                                   title="Tableau de bord",
-                                                   groups=['Voir','Statistique'],
-                                                   description="L'action permet de voir les statistiques des processus en cours"),
+                                    title="Tableau de bord",
+                                    groups=['Voir','Statistique'],
+                                    description="L'action permet de voir les statistiques des processus en cours"),
                 eg = ExclusiveGatewayDefinition(),
                 e = EndEventDefinition(),
         )
@@ -170,12 +171,13 @@ class StatisticProcessesDef(InfiniteCardinality):
         query = {}
         try:
             actionuid = get_oid(self)
-            query={'action_uid':actionuid}
+            query = {'action_uid': actionuid}
         except AttributeError:
-            query={'isstart':'True'} 
+            query = {'isstart': 'True'} 
   
         query['coordinates'] = 'main'
-        return get_current_request().resource_url(obj, '@@'+self.view_name,  query=query)
+        return get_current_request().resource_url(
+             obj, '@@'+self.view_name,  query=query)
 
 class InstanceProcessesDef(InfiniteCardinality):
 
@@ -253,12 +255,13 @@ class StatisticProcess(InfiniteCardinality):
         query = {}
         try:
             actionuid = get_oid(self)
-            query={'action_uid':actionuid}
+            query = {'action_uid':actionuid}
         except AttributeError:
-            query={'isstart':'True'} 
+            query = {'isstart':'True'} 
 
         query['coordinates'] = 'main'
-        return get_current_request().resource_url(obj, '@@'+self.view_name,  query=query)
+        return get_current_request().resource_url(
+             obj, '@@'+self.view_name,  query=query)
 
 
 class SeeProcessDatas(InfiniteCardinality):
@@ -377,11 +380,6 @@ class ActivityProcessDefinition(ProcessDefinition, VisualisableElement):
                                                    title="Assigner l'action",
                                                    groups=['Administration'],
                                                    description="L'action permet d\' assigner l'action a des utlisateurs"),
-
-                #processes_run = ActivityDefinition(contexts=[InstanceProcessesDef],
-                #                                   title="Voir les processus en cours",
-                #                                   groups=['Voir'],
-                #                                   description="L'action permet de voir les details des processus en cours"),
                 eg = ExclusiveGatewayDefinition(),
                 e = EndEventDefinition(),
         )

@@ -1,12 +1,10 @@
-import sys
-import six
+
+import colander
+import transaction
 from ZODB.blob import Blob
 from ZODB.interfaces import BlobError
-import colander
 from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
-import transaction
-from pyramid.threadlocal import get_current_request
 
 from substanced.file import File as OriginFile
 from substanced.util import get_oid
@@ -14,8 +12,11 @@ from substanced.util import get_oid
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
 
+
 OBJECT_DATA = '_object_data'
+
 OBJECT_OID = '__objectoid__'
+
 NO_VALUES = '_no_values'
 
 USE_MAGIC = object()
@@ -55,8 +56,6 @@ class File(DaceObject, OriginFile):
         return result
 
     def set_data(self, appstruct, omit=('_csrf_token_', '__objectoid__')):
-        request = get_current_request()
-        # If request.params['upload'] is a str, don't upload file data (file hasn't changed)
         if 'upload' in appstruct:
             appstruct.pop('upload')
             super(File, self).set_data(appstruct, omit)
@@ -71,10 +70,11 @@ class File(DaceObject, OriginFile):
     def __setattr__(self, name, value):
         if name == 'mimetype':
             if value is USE_MAGIC:
-                super(File,self).__setattr__('mimetype', 'application/octet-stream')
+                super(File, self).__setattr__('mimetype',
+                              'application/octet-stream')
             else:
                 val = value or 'application/octet-stream'
-                super(File,self).__setattr__('mimetype', val)
+                super(File, self).__setattr__('mimetype', val)
 
         elif name == 'fp':
             if self.mimetype is USE_MAGIC:
@@ -87,7 +87,7 @@ class File(DaceObject, OriginFile):
         elif name == 'filename':
             self.title = value
         else:
-            super(File,self).__setattr__(name, value)
+            super(File, self).__setattr__(name, value)
 
     def url(self, request, view=None, args=None):
         if view is None:
@@ -104,6 +104,7 @@ class File(DaceObject, OriginFile):
 
 class Image(File):
     pass
+
 
 class Object(colander.SchemaType):
 
@@ -173,7 +174,9 @@ class ObjectData(colander.Mapping):
         result = None
         if not (self.factory in self._specialObjects):
             result = colander.Mapping.deserialize(self, node, cstruct)
-            if not self.editable or result is colander.null or cstruct is colander.null:
+            if not self.editable or \
+               result is colander.null or \
+               cstruct is colander.null:
                 return result
         else:
             if cstruct is colander.null:
@@ -196,14 +199,17 @@ class ObjectData(colander.Mapping):
             for key, value in result_copy.items():
                 subnode = node.get(key)
                 missing = getattr(subnode, 'missing', MARKER)
-                if (value != missing and not getattr(subnode, 'to_omit', False)):
+                if (value != missing and \
+                    not getattr(subnode, 'to_omit', False)):
                     has_values = True
 
                 if getattr(subnode, 'to_omit', False):
-                     if not getattr(subnode, 'private', False):
-                         appstruct[key] = value # private is omited and not returned to the user
+                    if not getattr(subnode, 'private', False):
+                        appstruct[key] = value 
+                        # private is omited and not returned to the user
 
-                     result.pop(key) # don't set data if omitted
+                    result.pop(key) 
+                    # don't set data if omitted
 
         if isinstance(result, dict):
             result_copy = dict(result)
@@ -211,7 +217,7 @@ class ObjectData(colander.Mapping):
             for key, value in result_copy.items():
                 is_multiple_cardinality = True
                 is_object_type = False
-                if not isinstance(value, (list,tuple,set)):
+                if not isinstance(value, (list, tuple, set)):
                     value = [value]
                     is_multiple_cardinality = False
                
@@ -254,7 +260,6 @@ class ObjectData(colander.Mapping):
         appstruct[OBJECT_DATA] = obj
         return appstruct
 
-
     def cstruct_children(self, node, cstruct):
         result = []
         if not (self.factory in self._specialObjects):
@@ -262,6 +267,7 @@ class ObjectData(colander.Mapping):
             if result is colander.null or cstruct is colander.null:
                 return result
         return result
+
 
 
 default_widget_makers[ObjectData] = MappingWidget
