@@ -57,25 +57,34 @@ class DaceUIAPI(object):
         allbodies_actions = []
         updated_view = None
         for (context, action) in actions:
+            #get view class
             view = DEFAULTMAPPING_ACTIONS_VIEWS[action._class_]
+            #get view instance
             view_instance = view(context, request, 
                      behaviors=[action])
             view_result = {}
+            #if the view instance is called then update the view
             if not action_updated and form_id and \
                view_instance.has_id(form_id):
                 action_updated = True
                 updated_view = view_instance
                 view_result = view_instance()
             else:
+                #else get view requirements
                 view_result = view_instance.get_view_requirements()
             
+            #if the view instance is executable and it is executable
+            #and finished successfully return
             if updated_view is view_instance and \
                view_instance.isexecutable and \
                view_instance.finished_successfully:
                 return True, True, None, None
 
+            #if the view instance return a result
             if isinstance(view_result, dict):
                 action_infos = {}
+                #if the view instance is not executable or 
+                #it is finished with an error
                 if updated_view is view_instance and \
                    (not view_instance.isexecutable or \
                     (view_instance.isexecutable and \
@@ -87,8 +96,8 @@ class DaceUIAPI(object):
                 body = ''
                 if 'coordinates' in view_result:
                     body = view_instance.render_item(
-                            view_result['coordinates'][view_instance.coordinates][0], 
-                            view_instance.coordinates, None)
+                     view_result['coordinates'][view_instance.coordinates][0], 
+                     view_instance.coordinates, None)
 
 
                 action_infos.update(
@@ -105,17 +114,19 @@ class DaceUIAPI(object):
 
                 if 'css_links' in view_result:
                     resources['css_links'].extend(view_result['css_links'])
-                    resources['css_links'] =list(set(resources['css_links']))
+                    resources['css_links'] = list(set(resources['css_links']))
 
                 if 'finished' in action_infos:
-                    view_resources= {}
+                    view_resources = {}
                     view_resources['js_links'] = []
                     view_resources['css_links'] = []
                     if 'js_links' in view_result:
-                        view_resources['js_links'].extend(view_result['js_links'])
+                        view_resources['js_links'].extend(
+                                   view_result['js_links'])
 
                     if 'css_links' in view_result:
-                        view_resources['css_links'].extend(view_result['css_links'])
+                        view_resources['css_links'].extend(
+                                   view_result['css_links'])
 
                     return True, True, view_resources, [action_infos]
 
@@ -130,6 +141,7 @@ class DaceUIAPI(object):
                  process_discriminator=None,
                  ignor_form=False):
         messages = {}
+        #find all business actions
         actions = getAllBusinessAction(context, request,
                          process_id=process_id, node_id=action_id,
                          process_discriminator=process_discriminator)
@@ -138,6 +150,7 @@ class DaceUIAPI(object):
         all_actions = [(context, a) for a in actions]
         object_oid = str(get_oid(context))
         form_id = None
+        #get submited form view
         if '__formid__' in request.POST:
             if request.POST['__formid__'].find(object_oid) >= 0:
                 form_id = request.POST['__formid__']
@@ -168,7 +181,8 @@ class DaceUIAPI(object):
 
             return True , messages, resources, allbodies_actions
 
-        if not ignor_form and form_id is not None and not action_updated and all_actions:
+        if not ignor_form and form_id is not None and \
+           not action_updated and all_actions:
             error = ViewError()
             error.principalmessage = u"Action non realisee"
             error.causes = ["Vous n'avez plus le droit de realiser cette action.", 

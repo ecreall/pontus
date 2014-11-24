@@ -1,3 +1,4 @@
+
 import weakref
 from colander import (
     Invalid,
@@ -14,9 +15,7 @@ from deform.widget import (
     FormWidget as OriginFormWidget,
     SelectWidget as OriginSelectWidget,
     CheckboxChoiceWidget as OriginCheckboxChoiceWidget,
-    default_resources,
-    default_resource_registry,
-    ResourceRegistry,
+    default_resource_registry
     )
 
 from deform.compat import (
@@ -257,7 +256,8 @@ class SelectWidget(OriginSelectWidget):
         if cstruct in (null, None):
             cstruct = self.null_value
 
-        if cstruct and getattr(self, 'multiple', False) and not isinstance(list(cstruct)[0], string_types):
+        if cstruct and getattr(self, 'multiple', False) and \
+           not isinstance(list(cstruct)[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:
@@ -313,10 +313,12 @@ class Select2Widget(SelectWidget):
     requirements = (('deform', None), ('select2creation', None))
     create = False
 
+
 class Select2WidgetCreateSearchChoice(SelectWidget):
     template = 'pontus:templates/select2.pt'
     requirements = (('deform', None), ('select2creation', None))
     create = True
+
 
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
@@ -326,7 +328,8 @@ class RadioChoiceWidget(SelectWidget):
         if cstruct in (null, None):
             cstruct = self.null_value
 
-        if getattr(self, 'multiple', False) and not isinstance(cstruct, (tuple, list)):
+        if getattr(self, 'multiple', False) and \
+           not isinstance(cstruct, (tuple, list)):
                 cstruct = [cstruct]
 
         return super(RadioChoiceWidget, self).serialize(field, cstruct, **kw)
@@ -335,7 +338,8 @@ class RadioChoiceWidget(SelectWidget):
         if pstruct in (null, self.null_value):
             return null
 
-        if not getattr(self, 'multiple', False) and isinstance(pstruct, (list, tuple)):
+        if not getattr(self, 'multiple', False) and \
+           isinstance(pstruct, (list, tuple)):
             pstruct = pstruct[0]
 
         try:
@@ -353,10 +357,11 @@ class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
             cstruct = ()
 
         is_multiple = getattr(self, 'multiple', False)
-        if is_multiple and not isinstance(cstruct,(list,tuple)):
+        if is_multiple and not isinstance(cstruct, (list, tuple)):
             cstruct = [cstruct]
 
-        if cstruct and is_multiple and not isinstance(list(cstruct)[0], string_types):
+        if cstruct and is_multiple and \
+           not isinstance(list(cstruct)[0], string_types):
             try:
                 cstruct = [str(get_oid(value)) for value in cstruct]
             except Exception:
@@ -413,7 +418,9 @@ class Length(object):
     """ Validator which succeeds if the value passed to it has a
     length between a minimum and maximum.  The value is most often a
     string."""
-    def __init__(self, _, min=None, max=None, min_message='Shorter than minimum length ${min}', max_message='Longer than maximum length ${max}'):
+    def __init__(self, _, min=None, max=None,
+                 min_message='Shorter than minimum length ${min}',
+                 max_message='Longer than maximum length ${max}'):
         self.min = min
         self.max = max
         self.min_message = min_message
@@ -423,15 +430,19 @@ class Length(object):
     def __call__(self, node, value):
         if self.min is not None:
             if len(value) < self.min:
-                min_err = self.translationStringFactory(self.min_message.format(min=self.min))
+                min_err = self.translationStringFactory(
+                              self.min_message.format(min=self.min))
                 raise Invalid(node, min_err)
 
         if self.max is not None:
             if len(value) > self.max:
-                max_err = self.translationStringFactory(self.max_message.format(max=self.max))
+                max_err = self.translationStringFactory(
+                              self.max_message.format(max=self.max))
                 raise Invalid(node, max_err)
 
 
-default_resource_registry.set_js_resources('select2creation', None, 'pontus.dace_ui_extension:static/select2/select2.js' )
-default_resource_registry.set_css_resources('select2creation', None, 'pontus.dace_ui_extension:static/select2/select2.css' )
+default_resource_registry.set_js_resources('select2creation', None, 
+               'pontus.dace_ui_extension:static/select2/select2.js' )
+default_resource_registry.set_css_resources('select2creation', None, 
+               'pontus.dace_ui_extension:static/select2/select2.css' )
 
