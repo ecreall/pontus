@@ -4,7 +4,7 @@
                    <a id="${aa['action_id']}-btn" 
                       class="btn btn-primary btn-sm dace-action" 
                       style="max-width: 300px;"
-                      href="${aa['actionurl']}"   
+                      href="${aa['action'].url(aa['context'])}"   
                       data-toggle="modal"
                       data-actionid ="${aa['action_id']}" 
                       data-target="#${aa['action_id']}"
@@ -42,7 +42,7 @@
                    </div>
  </ul>
 
-<p><a href="${defurl}" class="btn">Voir plus de détails »</a></p>
+<p><a href="${request.resource_url(definition, '@@index')}" class="btn">Voir plus de détails »</a></p>
 
 <h3>Le modèle du processus:</h3>
 

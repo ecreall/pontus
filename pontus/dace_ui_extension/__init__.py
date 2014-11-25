@@ -15,6 +15,11 @@ from dace.objectofcollaboration.entity import Entity
 from pontus.view import BasicView, merge_dicts, ViewError
 from pontus.dace_ui_extension.interfaces import IDaceUIAPI
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 def calculatePage(elements, view, tabid):
     page = view.params('page'+tabid)
@@ -44,12 +49,45 @@ def calculatePage(elements, view, tabid):
 @implementer(IDaceUIAPI)
 class DaceUIAPI(object):
 
+    def get_actions(self, 
+                    contexts,
+                    request,
+                    process_or_id=None,
+                    action_id=None, 
+                    process_discriminator=None):
+        all_actions = []
+        process_id = None
+        process = None
+        if process_or_id and isinstance(process_or_id, basestring):
+            process_id = process_or_id
+        elif process_or_id:
+            process = process_or_id
+
+        for context in contexts:
+            actions = getAllBusinessAction(context, request,
+                         process_id=process_id, node_id=action_id,
+                         process_discriminator=process_discriminator)
+            if process:
+                actions = [action for action in actions \
+                           if action.process is process]
+
+            actions = sorted(actions, key=lambda action: action.node_id)
+            p_actions = [(context, a) for a in actions]
+            all_actions.extend(p_actions)
+
+        return all_actions
+
+
     def _get_message(self, e, request, subject=None):
         content_message = renderers.render(e.template,
                 {'error': e, 'subject': subject}, request)
         return content_message
 
-    def _modal_views(self, request, actions, form_id):
+    def _modal_views(self, 
+                     request, 
+                     actions, 
+                     form_id,
+                     ignor_actionsofactions=True):
         action_updated = False
         resources = {}
         resources['js_links'] = []
@@ -93,20 +131,43 @@ class DaceUIAPI(object):
                     if not view_instance.isexecutable:
                         action_infos['finished'] = True
 
+                if not ignor_actionsofactions:
+                    actions_as = sorted(action.actions, 
+                        key=lambda call_action: call_action.action.behavior_id)
+                    a_actions = [(action, call_action.action) \
+                                 for call_action in actions_as]
+                    toreplay, action_updated_as, \
+                    resources_as, allbodies_actions_as = self._modal_views(
+                                              request, a_actions, form_id)
+                    if toreplay:
+                        return True, True, None, None
+
+                    if action_updated_as:
+                        action_updated = True
+
+                    resources['js_links'].extend(resources_as['js_links'])
+                    resources['js_links'] = list(set(resources['js_links']))
+                    resources['css_links'].extend(resources_as['css_links'])
+                    resources['css_links'] = list(set(resources['css_links']))
+                    action_infos['actions'] = allbodies_actions_as
+
+
                 body = ''
                 if 'coordinates' in view_result:
                     body = view_instance.render_item(
                      view_result['coordinates'][view_instance.coordinates][0], 
                      view_instance.coordinates, None)
 
-
                 action_infos.update(
                         self.action_infomrations(action=action, 
                                                  context=context, 
                                                  request=request))
-                action_infos.update({'body':body,
-                                     'actionurl': action.url(context),
-                                     'data': context})
+                action_infos.update({
+                        'body':body,
+                        'context': context,
+                        'assigned_to': sorted(action.assigned_to, 
+                                            key=lambda u: getattr(u, 'title', 
+                                                                u.__name__))})
                 allbodies_actions.append(action_infos)
                 if 'js_links' in view_result:
                     resources['js_links'].extend(view_result['js_links'])
@@ -133,40 +194,31 @@ class DaceUIAPI(object):
 
         return False, action_updated, resources, allbodies_actions
 
-    def _actions(self, 
+    def update_actions(self, 
                  request,
-                 context, 
-                 process_id=None, 
-                 action_id=None, 
-                 process_discriminator=None,
-                 ignor_form=False):
+                 all_actions,
+                 ignor_form=False,
+                 ignor_actionsofactions=True):
         messages = {}
         #find all business actions
-        actions = getAllBusinessAction(context, request,
-                         process_id=process_id, node_id=action_id,
-                         process_discriminator=process_discriminator)
-        actions = sorted(actions, key=lambda a: getattr(a, '__name__',
-                                                 a.__class__.__name__))
-        all_actions = [(context, a) for a in actions]
-        object_oid = str(get_oid(context))
         form_id = None
         #get submited form view
-        if '__formid__' in request.POST:
-            if request.POST['__formid__'].find(object_oid) >= 0:
-                form_id = request.POST['__formid__']
+        if not ignor_form and '__formid__' in request.POST:
+            #if request.POST['__formid__'].find(object_oid) >= 0:
+            form_id = request.POST['__formid__']
 
         toreplay, action_updated, \
         resources, allbodies_actions = self._modal_views(
-                                        request, all_actions, form_id)
+                                        request, all_actions,
+                                        form_id, ignor_actionsofactions)
         if toreplay:
             request.POST.clear()
             old_resources = resources
             old_allbodies_actions = allbodies_actions
             action_updated, messages, \
-            resources, allbodies_actions = self._actions(request, context,
-                                                        process_id, action_id, 
-                                                        process_discriminator,
-                                                        ignor_form)
+            resources, allbodies_actions = self.update_actions(request, 
+                                                         all_actions,
+                                                         ignor_form)
             if old_resources is not None:
                 if 'js_links' in old_resources:
                     resources['js_links'].extend(old_resources['js_links'])
@@ -181,7 +233,7 @@ class DaceUIAPI(object):
 
             return True , messages, resources, allbodies_actions
 
-        if not ignor_form and form_id is not None and \
+        if form_id and \
            not action_updated and all_actions:
             error = ViewError()
             error.principalmessage = u"Action non realisee"
@@ -347,7 +399,7 @@ class DaceUIAPI(object):
  
             view_result = view_instance()
             body = ''
-            if 'coordinates' in view_result:
+            if isinstance(view_result, dict) and 'coordinates' in view_result:
                 body = view_instance.render_item(view_result['coordinates'][view_instance.coordinates][0], 
                                                  view_instance.coordinates, None)
 

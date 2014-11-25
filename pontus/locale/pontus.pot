@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-11-23 13:56+0100\n"
+"POT-Creation-Date: 2014-11-25 14:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: \n"
 
-#: ./src/pontus/pontus/default_behavior.py:11
+#: ./src/pontus/pontus/default_behavior.py:12
 msgid "Cancel"
 msgstr ""
 
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Index"
 msgstr ""
 
-#: ./src/pontus/pontus/view.py:54
+#: ./src/pontus/pontus/view.py:55
 msgid "View"
 msgstr ""
 

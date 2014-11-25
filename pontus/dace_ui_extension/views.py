@@ -9,7 +9,7 @@ from dace.objectofcollaboration.services.processdef_container import (
 from dace.processdefinition.processdef import ProcessDefinition
 from dace.processinstance.core import DEFAULTMAPPING_ACTIONS_VIEWS
 from dace.processinstance.process import Process
-from dace.util import getSite, getAllBusinessAction
+from dace.util import getSite
 from dace.interfaces import (
     IActivity,
     IBusinessAction)
@@ -27,7 +27,7 @@ from .processes import (
            DoActivitiesProcess,
            AssignToUsers,
            AssignActionToUsers)
-from pontus.view import BasicView, ViewError, merge_dicts
+from pontus.view import BasicView, merge_dicts
 from pontus.form import FormView
 from pontus.schema import Schema
 from pontus.widget import Select2Widget
@@ -52,7 +52,8 @@ class RuntimeView(BasicView):
 
     def update(self):
         self.execute(None)
-        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,'dace_ui_api')
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,
+                                                        'dace_ui_api')
         result = dace_ui_api.update_processes(self, self.context.processes, 
                                       self.__class__.__name__+'AllProcesses')
         return result
@@ -230,7 +231,8 @@ class ProcessesPDDefinitionView(BasicView):
                   'tabid':tabid,
                   'page': page,
                   'pages': pages,
-                  'url': self.request.resource_url(self.context, '@@ProcessInst')}
+                  'url': self.request.resource_url(self.context, 
+                                                   '@@ProcessInst')}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -250,48 +252,24 @@ class ProcessView(BasicView):
     name = 'Process'
     behaviors = [SeeProcess]
 
-    def _actions(self):
-        definition = self.context.definition
-        definition_actions = sorted(definition.actions,
-                                    key=lambda a: a.title) 
-        alldefinitions_actions = []
-        resources = {}
-        resources['js_links'] = []
-        resources['css_links'] = []
-        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,
-                                                        'dace_ui_api')
-        for action_call in definition_actions:
-            view = DEFAULTMAPPING_ACTIONS_VIEWS[action_call.action._class_]
-            view_instance = view(definition, self.request)
-            view_result = view_instance.get_view_requirements()
-            body = ''
-            if 'coordinates' in view_result:
-                body = view_result['coordinates'][view_instance .coordinates][0]['body']
-
-            action_infos = dace_ui_api.action_infomrations(
-                                 action=action_call.action, 
-                                 context=definition, 
-                                 request=self.request)
-            action_infos.update({'body':body, 'actionurl': action_call.url})
-            alldefinitions_actions.append(action_infos)
-            if 'js_links' in view_result:
-                resources['js_links'].extend(view_result['js_links'])
-
-            if 'css_links' in view_result:
-                resources['css_links'].extend(view_result['css_links'])
-
-        return resources, alldefinitions_actions
 
     def update(self):
         self.execute(None)
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,
+                                                        'dace_ui_api')
+        all_actions = dace_ui_api.get_actions(
+                                     [self.context.definition], self.request)
+        action_updated, messages, \
+        resources, actions = dace_ui_api.update_actions(
+                                          self.request, all_actions,
+                                          False, True)
         result = {}
-        resources, actions = self._actions()
         values = {'actions': actions, 
-                  'definition':self.context.definition ,
-                  'defurl':self.request.resource_url(
-                             self.context.definition, '@@index')}
+                  'definition':self.context.definition}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
+        item['messages'] = messages
+        item['isactive'] = action_updated
         result['coordinates'] = {self.coordinates:[item]}
         result.update(resources)
         return result
@@ -311,14 +289,10 @@ class StatisticProcessView(BasicView):
     coordinates = 'left'
     behaviors = [StatisticProcess]
 
-    def _actions(self):
-        allactions = {}
-        return allactions
-
     def update(self):
         self.execute(None)
         result = {}
-        values = {'actions': self._actions()}
+        values = {}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)
         result['coordinates'] = {self.coordinates:[item]}
@@ -343,21 +317,22 @@ class ProcessDataView(BasicView):
         alldatas = []
         for pname, inv in involveds.items():
             name = pname
-            for i, d in enumerate(inv[1]):
-                iscurrent = inv[4]
-                index = inv[3]
-                name = inv[2]
+            for i, entity in enumerate(inv['entities']):
+                iscurrent = inv['is_current']
+                index = inv['index']
+                name = inv['name']
                 if index == -1:
                     index = i+1
 
                 if iscurrent is None:
-                    if i == (len(inv[1]) - 1):
+                    if i == (len(inv['entities']) - 1):
                         iscurrent = True
 
-                alldatas.append({'url':self.request.resource_url(d, '@@index'),
-                                 'data':d,
-                                 'iscreator': inv[5] == 'created',
-                                 'iscollection': inv[0] == 'collection',
+                alldatas.append({'url':self.request.resource_url(entity, 
+                                                                 '@@index'),
+                                 'data':entity,
+                                 'iscreator': inv['assocition_kind']=='created',
+                                 'iscollection': inv['type']=='collection',
                                  'relationname': name,
                                  'index': index,
                                  'iscurrent': iscurrent})
@@ -397,190 +372,22 @@ class DoActivitiesProcessView(BasicView):
     requirements = {'css_links':[],
                     'js_links':['pontus.dace_ui_extension:static/tablesorter-master/js/jquery.tablesorter.min.js']}
 
-    def _modal_views(self, actions, form_id, caa=False):
-        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,
-                                                        'dace_ui_api')
-        action_updated = False
-        resources = {}
-        resources['js_links'] = []
-        resources['css_links'] = []
-        allbodies_actions = []
-        updated_view = None
-        for (context, action) in actions:
-            #get view class
-            view = DEFAULTMAPPING_ACTIONS_VIEWS[action._class_]
-            #get view instance
-            view_instance = view(context, self.request, 
-                     behaviors=[action])
-            view_result = {}
-            #if the view instance is called then update the view
-            if not action_updated and form_id and \
-               view_instance.has_id(form_id):
-                action_updated = True
-                updated_view = view_instance
-                view_result = view_instance()
-            else:
-                #else get view requirements
-                view_result = view_instance.get_view_requirements()
-            
-            #if the view instance is executable and it is executable
-            #and finished successfully return
-            if updated_view is view_instance and \
-               view_instance.isexecutable and \
-               view_instance.finished_successfully:
-                return True, True, None, None
-
-            #if the view instance return a result
-            if isinstance(view_result, dict):
-                action_infos = {}
-                #if the view instance is not executable or 
-                #it is finished with an error then replay the view
-
-                if updated_view is view_instance and \
-                   (not view_instance.isexecutable or \
-                    (view_instance.isexecutable and \
-                     not view_instance.finished_successfully)) :
-                    action_infos['toreplay'] = True
-                    if not view_instance.isexecutable:
-                        action_infos['finished'] = True
-
-
-                if caa:
-                    actions_as = sorted(action.actions, 
-                        key=lambda call_action: call_action.action.behavior_id)
-                    a_actions = [(action, call_action.action) \
-                                 for call_action in actions_as]
-                    toreplay, action_updated_as, \
-                    resources_as, allbodies_actions_as = self._modal_views(
-                                                          a_actions, form_id)
-                    if toreplay:
-                        return True, True, None, None
-
-                    if action_updated_as:
-                        action_updated = True
-
-                    resources['js_links'].extend(resources_as['js_links'])
-                    resources['js_links'] = list(set(resources['js_links']))
-                    resources['css_links'].extend(resources_as['css_links'])
-                    resources['css_links'] = list(set(resources['css_links']))
-                    action_infos['actions'] = allbodies_actions_as
-
-                body = ''
-                if 'coordinates' in view_result:
-                    body = view_instance.render_item(
-                            view_result['coordinates'][view_instance.coordinates][0],
-                            view_instance.coordinates,
-                            None)
-                assigned_to = sorted(action.assigned_to, 
-                                     key=lambda u: u.__name__)
-                users = []
-                for user in assigned_to:
-                    users.append({'title':user.__name__, 
-                                  'userurl': self.request.resource_url(user,
-                                                                '@@contents')})
-
-                action_infos.update(dace_ui_api.action_infomrations(
-                                 action=action, 
-                                 context=context, 
-                                 request=self.request))
-                action_infos.update({'body':body,
-                            'ismultiinstance':hasattr(action,'principalaction'),
-                            'actionurl': action.url(context),
-                            'data': context,
-                            'dataurl': self.request.resource_url(context, 
-                                                                '@@index'),
-                            'assignedto': users})
-                allbodies_actions.append(action_infos)
-                if 'js_links' in view_result:
-                    resources['js_links'].extend(view_result['js_links'])
-                    resources['js_links'] = list(set(resources['js_links']))
-
-                if 'css_links' in view_result:
-                    resources['css_links'].extend(view_result['css_links'])
-                    resources['css_links'] = list(set(resources['css_links']))
-
-                if 'finished' in action_infos:
-                    view_resources = {}
-                    view_resources['js_links'] = []
-                    view_resources['css_links'] = []
-                    if 'js_links' in view_result:
-                        view_resources['js_links'].extend(
-                                   view_result['js_links'])
-
-                    if 'css_links' in view_result:
-                        view_resources['css_links'].extend(
-                                   view_result['css_links'])
-
-                    return True, True, view_resources, [action_infos]
-
-
-        return False, action_updated, resources, allbodies_actions
-
-    def _actions(self):
-        involveds = self.context.execution_context.all_active_involveds().values()
-        contexts = []
-        for inv in involveds:
-            if not(inv[1] in contexts):
-                contexts.extend(inv[1])
-
-        contexts = list(set(contexts))
-        contexts = sorted(contexts, key=lambda d: d.title)
-        all_actions = []
-        messages = {}
-        for context in contexts:
-            actions = getAllBusinessAction(context, self.request,
-                         process_id=self.context.id)
-            actions = [action for action in actions \
-                       if action.process is self.context]
-            actions = sorted(actions, key=lambda action: action.__name__)
-            p_actions = [(context, a) for a in actions]
-            all_actions.extend(p_actions)
-
-        form_id = None
-        if '__formid__' in self.request.POST:
-            form_id = self.request.POST['__formid__']
-
-        toreplay, action_updated, \
-        resources, allbodies_actions = self._modal_views(
-                               all_actions, form_id, True)
-        if toreplay:
-            self.request.POST.clear()
-            old_resources = resources
-            old_allbodies_actions = allbodies_actions
-            action_updated, messages, \
-            resources, allbodies_actions = self._actions()
-            if old_resources is not None:
-                if 'js_links' in old_resources:
-                    resources['js_links'].extend(old_resources['js_links'])
-                    resources['js_links'] = list(set(resources['js_links']))
-
-                if 'css_links' in old_resources:
-                    resources['css_links'].extend(old_resources['css_links'])
-                    resources['css_links'] = list(set(resources['css_links']))
-
-            if old_allbodies_actions is not None:
-                allbodies_actions.extend(old_allbodies_actions)
-
-            return True , messages, resources, allbodies_actions
-
-        if form_id is not None and not action_updated:
-            error = ViewError()
-            error.principalmessage = u"Action non realisee"
-            error.causes = ["Vous n'avez plus le droit de realiser cette action.", 
-                            "L'action est verrouillee par un autre utilisateur."]
-            message = self._get_message(error)
-            messages.update({error.type: [message]})
-
-        return action_updated, messages, resources, allbodies_actions
-
     def update(self):
         self.execute(None)
+        involveds = self.context.execution_context.all_active_involveds().values()
+        involveds = [e['entities'] for e in involveds]
+        involveds = [entity for entities in involveds for entity in entities]
+        dace_ui_api = get_current_registry().getUtility(IDaceUIAPI,
+                                                        'dace_ui_api')
+        all_actions = dace_ui_api.get_actions(
+                                     involveds, self.request, self.context)
+        action_updated, messages, \
+        resources, actions = dace_ui_api.update_actions(
+                                          self.request, all_actions,
+                                          False, False)
         result = {}
-        action_updated, messages, resources, actions = self._actions()
         values = {'actions': actions,
                   'process':self.context,
-                  'defurl':self.request.resource_url(self.context.definition, 
-                                                     '@@index'),
                   'tabid':self.__class__.__name__+'AllActions'}
         body = self.content(result=values, template=self.template)['body']
         item = self.adapt_item(body, self.viewid)

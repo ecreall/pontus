@@ -14,7 +14,7 @@
           <div tal:condition="not process._finished and bloced" class="alert alert-dismissable alert-warning">
            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
            <h4>Le processus est bloqué!</h4>
-		Le processus n'a pas d'action à réaliser. Voir la <a href="${defurl}" class="alert-link">définition</a> du processus pour plus d'informations
+		Le processus n'a pas d'action à réaliser. Voir la <a href="${request.resource_url(process.definition, '@@index')}" class="alert-link">définition</a> du processus pour plus d'informations
           </div>
 </div>
 
@@ -25,7 +25,7 @@
                    <a id="${a['action_id']}-btn" 
                       class="alert-link dace-action" 
                       style="max-width: 300px;"
-                      href="${a['actionurl']}"   
+                      href="${a['action'].url(a['context'])}"   
                       data-toggle="modal"
                       data-actionid ="${a['action_id']}" 
                       data-target="#${a['action_id']}-result"
@@ -86,7 +86,7 @@
                    <a id="${a['action_id']}-btn" 
                       class="btn btn-primary btn-sm dace-action" 
                       style="max-width: 300px;"
-                      href="${a['actionurl']}"   
+                      href="${a['action'].url(a['context'])}"   
                       data-toggle="modal"
                       data-actionid ="${a['action_id']}" 
                       data-target="#${a['action_id']}"
@@ -110,16 +110,16 @@
                 <td >
                    ${a['action'].description}
                    <small>
-                     <blockquote tal:condition="a['ismultiinstance']"> 
+                     <blockquote tal:condition="hasattr(a['action'],'principalaction')"> 
                         Cette action est une instance de l'action <strong>${a['action'].principalaction.title}</strong>
                      </blockquote>
                    </small>
                 </td>
                 <td >
-                   <a href="${a['dataurl']}">${a['data'].title}</a>
+                   <a href="${request.resource_url(a['context'],'@@index')}">${a['context'].title}</a>
                 </td>
                 <td >
-                  <ul tal:condition="a['assignedto']" class="nav nav-pills nav-stacked" tal:repeat="u a['assignedto']">
+                  <ul tal:condition="a['assigned_to']" class="nav nav-pills nav-stacked" tal:repeat="u a['assigned_to']">
                     <li >
                        <a href="${u['userurl']}">${u['title']}</a>
                     </li>
@@ -131,7 +131,7 @@
                    <a id="${aa['action_id']}-btn" 
                       class="btn btn-primary btn-sm dace-action"
                       style="max-width: 300px;"
-                      href="${aa['actionurl']}"   
+                      href="${aa['action'].url(aa['context'])}"   
                       data-toggle="modal"
                       data-actionid ="${aa['action_id']}" 
                       data-target="#${aa['action_id']}"
