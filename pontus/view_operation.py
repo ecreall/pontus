@@ -1,3 +1,4 @@
+
 import re
 import deform.widget
 import colander
@@ -9,7 +10,8 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 from pontus.schema import Schema
-from pontus.view import View, merge_dicts, ViewError
+from pontus.view import View, ViewError
+from pontus.util import merge_dicts
 from pontus.form import FormView
 from pontus.widget import (
         SimpleFormWidget,
@@ -1036,11 +1038,7 @@ class Wizard(MultipleViewsOperation):
 
         if isinstance(result, dict) and self.include_informations:
             wizardinfo = self.getwizardinformationsview()
-            if 'js_links' in result:
-                result['js_links'].extend(list(wizardinfo['js_links']))
-            if 'css_links' in result:
-                result['css_links'].extend(list(wizardinfo['css_links']))
-
+            result = merge_dicts(result, wizardinfo, ('js_links', 'css_links'))
             for coordinates in result['coordinates']:
                 item = result['coordinates'][coordinates][0]
                 body = item['body']

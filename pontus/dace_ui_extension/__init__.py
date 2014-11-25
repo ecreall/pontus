@@ -12,7 +12,8 @@ from dace.util import get_obj, find_service, utility, getAllBusinessAction
 from dace.processinstance.core import DEFAULTMAPPING_ACTIONS_VIEWS
 from dace.objectofcollaboration.entity import Entity
 
-from pontus.view import BasicView, merge_dicts, ViewError
+from pontus.view import BasicView, ViewError
+from pontus.util import merge_dicts
 from pontus.dace_ui_extension.interfaces import IDaceUIAPI
 
 try:
@@ -169,25 +170,17 @@ class DaceUIAPI(object):
                                             key=lambda u: getattr(u, 'title', 
                                                                 u.__name__))})
                 allbodies_actions.append(action_infos)
-                if 'js_links' in view_result:
-                    resources['js_links'].extend(view_result['js_links'])
-                    resources['js_links'] = list(set(resources['js_links']))
-
-                if 'css_links' in view_result:
-                    resources['css_links'].extend(view_result['css_links'])
-                    resources['css_links'] = list(set(resources['css_links']))
+                resources = merge_dicts(view_result, resources, 
+                                        ('js_links', 'css_links'))
+                resources['js_links'] = list(set(resources['js_links']))
+                resources['css_links'] = list(set(resources['css_links']))
 
                 if 'finished' in action_infos:
                     view_resources = {}
                     view_resources['js_links'] = []
                     view_resources['css_links'] = []
-                    if 'js_links' in view_result:
-                        view_resources['js_links'].extend(
-                                   view_result['js_links'])
-
-                    if 'css_links' in view_result:
-                        view_resources['css_links'].extend(
-                                   view_result['css_links'])
+                    view_resources = merge_dicts(view_result, view_resources, 
+                                        ('js_links', 'css_links'))
 
                     return True, True, view_resources, [action_infos]
 
@@ -220,13 +213,10 @@ class DaceUIAPI(object):
                                                          all_actions,
                                                          ignor_form)
             if old_resources is not None:
-                if 'js_links' in old_resources:
-                    resources['js_links'].extend(old_resources['js_links'])
-                    resources['js_links'] = list(set(resources['js_links']))
-
-                if 'css_links' in old_resources:
-                    resources['css_links'].extend(old_resources['css_links'])
-                    resources['css_links'] = list(set(resources['css_links']))
+                resources = merge_dicts(old_resources, resources, 
+                                        ('js_links', 'css_links'))
+                resources['js_links'] = list(set(resources['js_links']))
+                resources['css_links'] = list(set(resources['css_links']))
 
             if old_allbodies_actions is not None:
                 allbodies_actions.extend(old_allbodies_actions)
@@ -336,7 +326,7 @@ class DaceUIAPI(object):
         body = view.content(result=values, template='pontus:dace_ui_extension/templates/runtime_view.pt')['body']
         item = view.adapt_item(body, view.viewid)
         result['coordinates'] = {view.coordinates:[item]}
-        result  = merge_dicts(dict(view.requirements), result)
+        result  = merge_dicts(view.requirements, result)
         return result
 
     def statistic_processes(self, view, processes, tabid):

@@ -1,3 +1,12 @@
+
+.pontus-main{
+   background-color: white;
+}
+
+.tab-content{
+  padding: 20px
+}
+
 /* source: http://www.bootply.com/92442# */
 .dropdown-submenu{position:relative;}
 .dropdown-submenu>.dropdown-menu{top:0;

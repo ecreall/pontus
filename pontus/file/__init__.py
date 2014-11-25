@@ -91,14 +91,14 @@ class File(DaceObject, OriginFile):
 
     def url(self, request, view=None, args=None):
         if view is None:
-            #generalement c est la vue de l index associer qu'il faut retourner
             return request.resource_url(self)
         else:
             return request.resource_url(self, '@@'+view)
 
     def get_response(self, **kw):
         response = super(File, self).get_response(**kw)
-        response.content_disposition = 'attachment; filename="%s"' % self.filename
+        response.content_disposition = 'attachment; filename="%s"' % \
+                                      self.filename
         return response
 
 

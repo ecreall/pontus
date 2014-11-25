@@ -8,7 +8,8 @@ from substanced.form import FormView as SubstanceDFormView
 from substanced.form import FormError
 
 from pontus.interfaces import IFormView
-from pontus.view import ElementaryView, merge_dicts
+from pontus.view import ElementaryView
+from pontus.util import merge_dicts
 from pontus.default_behavior import Cancel
 from pontus.schema import Schema
 
@@ -52,8 +53,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         result = {}
         result['js_links'] = list(reqts['js'])
         result['css_links'] = list(reqts['css'])
-        requirements = self.requirements_copy
-        result = merge_dicts(requirements, result)
+        result = merge_dicts(self.requirements_copy, result)
         return result
 
     def has_id(self, id):

@@ -13,6 +13,7 @@ from dace.processinstance.core import  Error, ValidationError
 
 from pontus.interfaces import IView
 from pontus.core import Step
+from pontus.util import copy_dict
 from pontus.resources import (
                 BehaviorViewErrorPrincipalmessage,
                 BehaviorViewErrorSolutions)
@@ -25,23 +26,6 @@ class ViewError(Error):
     solutions = []
     type = 'danger'
     template = 'pontus:templates/message.pt'
-
-
-def merge_dicts(source, target):
-    result = dict(target)
-    for k in source.keys():
-        if k in result.keys():
-            if isinstance(result[k], list):
-                result[k].extend(list(source[k]))
-            elif isinstance(result[k], dict):
-                result[k] = merge_dicts(source[k], result[k])
-        else:
-            if isinstance(source[k], list):
-                result[k] = list(source[k])
-            else:
-                result[k] = source[k]
-
-    return result
 
 
 EMPTY_TEMPLATE = 'templates/empty.pt'
@@ -101,14 +85,7 @@ class View(Step):
         if self.requirements is None:
             return {'css_links': [], 'js_links': []}
         else:
-            copy = {}
-            if 'css_links' in self.requirements:
-                copy['css_links'] = list(self.requirements['css_links'])
-
-            if 'js_links' in self.requirements:
-                copy['js_links'] = list(self.requirements['js_links'])
-
-            return copy
+            return copy_dict(self.requirements)
 
     def has_id(self, id):
         return self.viewid == id

@@ -27,7 +27,8 @@ from .processes import (
            DoActivitiesProcess,
            AssignToUsers,
            AssignActionToUsers)
-from pontus.view import BasicView, merge_dicts
+from pontus.view import BasicView
+from pontus.util import merge_dicts
 from pontus.form import FormView
 from pontus.schema import Schema
 from pontus.widget import Select2Widget
