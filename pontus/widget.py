@@ -192,14 +192,14 @@ class RichTextWidget(RichTextWidget):
                        ('width', 0),
                        ('skin', 'lightgray'),
                        ('fontsize_formats', "8pt 9pt 10pt 11pt 12pt 26pt 36pt"),
-                       ('toolbar', "undo redo pastetext | fontselect | fontsizeselect"),
+                       ('toolbar', "undo redo pastetext | fontselect | fontsizeselect| forecolor backcolor | insertfile | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"),
                        ('theme', 'modern'),
                        ('mode', 'exact'),
                        ('strict_loading_mode', True),
                        ('remove_linebreaks', False),
                        ('theme_advanced_resizing', True),
                        ('theme_advanced_toolbar_align', 'left'),
-                       ('theme_advanced_toolbar_location', 'top'))
+                       ('theme_advanced_toolbar_location', 'top')) 
 
     template = 'pontus:templates/richtext.pt'
 
