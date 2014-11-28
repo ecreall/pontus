@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2014 by Ecreall under licence AGPL terms 
+# avalaible on http://www.gnu.org/licenses/agpl.html 
+
+# licence: AGPL
+# author: Amen Souissi
+
 
 IndexViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour accéder à l'information demandée."
 IndexViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
