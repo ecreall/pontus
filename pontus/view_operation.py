@@ -267,6 +267,7 @@ class MultipleView(MultipleViewsOperation):
             if self.isexecutable and view.isexecutable and \
                view.finished_successfully:
                 self.finished_successfully = True
+                #for wizards
                 view.init_stepid()
                 return self.success(view_result)
 
@@ -502,7 +503,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                 item['isactive'] = True
 
             if messages:
-                item['messages']={}
+                item['messages'] = {}
                 for e, messagecontent in messages.items():
                     if e.type in item['messages']:
                         item['messages'][e.type].append(messagecontent)
@@ -631,7 +632,7 @@ class CallView(MultipleContextsOperation):
             values = {'items': items, 'id':self.viewid+coordinate }
             body = self.content(result=values, template=self.template)['body']
             item = self.adapt_item(body, self.viewid)
-            global_result['coordinates'][coordinate]=[item]
+            global_result['coordinates'][coordinate] = [item]
 
         #if not (len(self.children) == len(self.contexts)):
         #    global_result['messages']

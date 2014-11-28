@@ -225,6 +225,7 @@ class ObjectData(colander.Mapping):
                     if isinstance(item, dict) and OBJECT_DATA in item:
                         is_object_type = True
                         subobject = item.pop(OBJECT_DATA)
+                        #to_result.update({key: subobject})
                         if not(key in to_result):
                             to_result[key] = [subobject]
                         else:

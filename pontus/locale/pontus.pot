@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-11-25 14:12+0100\n"
+"POT-Creation-Date: 2014-11-28 10:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Index"
 msgstr ""
 
-#: ./src/pontus/pontus/view.py:55
+#: ./src/pontus/pontus/view.py:39
 msgid "View"
 msgstr ""
 
@@ -51,4 +51,17 @@ msgstr ""
 #: ./src/pontus/pontus/templates/simple_mapping.pt:8
 #: ./src/pontus/pontus/templates/mapping.pt:14
 msgid "There was a problem with this section"
+msgstr ""
+
+#. Default: en
+#: ./src/pontus/pontus/templates/richtext.pt:20
+msgid "language-code"
+msgstr ""
+
+#: ./src/pontus/pontus/templates/panels/usermenu.pt:18
+msgid "${icon} Account"
+msgstr ""
+
+#: ./src/pontus/pontus/templates/panels/usermenu.pt:27
+msgid "${icon} Log Out"
 msgstr ""

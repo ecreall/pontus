@@ -4,7 +4,7 @@
                  oid oid|formid+'-'+field.oid;
                  name name|field.name;"
     xmlns:i18n="http://xml.zope.org/namespaces/i18n" 
-    i18n:domain="deform"
+    i18n:domain="pontus"
     tal:omit-tag="">
 
     <style type="text/css">

@@ -1,7 +1,7 @@
 <tal:def tal:define="title title|field.title;
                      description description|field.description;
                      item_template item_template|field.widget.item_template"
-         i18n:domain="deform">
+         i18n:domain="pontus">
 
       <td tal:repeat="child field.children">
            <div tal:replace="structure child.render_template(item_template)" />

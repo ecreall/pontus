@@ -7,7 +7,7 @@
                  rootid field.get_root().formid|''"
      title="${description}"
      class="form-group row deformSeqItem ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
-     i18n:domain="deform">
+     i18n:domain="pontus">
 
     <div tal:omit-tag="field.widget.hidden"
      class="panel-heading">
