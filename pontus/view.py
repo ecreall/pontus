@@ -30,10 +30,10 @@ class ViewError(Error):
     causes = []
     solutions = []
     type = 'danger'
-    template = 'pontus:templates/message.pt'
+    template = 'pontus:templates/views_templates/alert_message.pt'
 
 
-EMPTY_TEMPLATE = 'templates/empty.pt'
+EMPTY_TEMPLATE = 'templates/views_templates/empty.pt'
 
 
 @implementer(IView)
@@ -46,13 +46,13 @@ class View(Step):
     name = 'view'
     coordinates = 'main' # default value
     validators = []
-    item_template = 'templates/subview.pt'
+    wrapper_template = 'templates/views_templates/view_wrapper.pt'
     template = None
     requirements = None
     css_class = "pontus-main-view"
 
     def render_item(self, item, coordinates, parent):
-        body = renderers.render(self.item_template,
+        body = renderers.render(self.wrapper_template,
                 {'coordinates': coordinates,
                  'subitem': item,
                  'parent': parent}, self.request)

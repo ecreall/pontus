@@ -190,7 +190,7 @@ class MultipleView(MultipleViewsOperation):
     title = 'Multiple View'
     name = 'multipleview'
     builder = default_builder
-    template = 'templates/submultipleview.pt'
+    template = 'templates/views_templates/multipleview.pt'
 
     def __init__(self, 
                  context, 
@@ -555,7 +555,7 @@ class CallView(MultipleContextsOperation):
 
     title = 'CallView'
     name = 'callview'
-    template = 'pontus:templates/global_accordion.pt'
+    template = 'pontus:templates/views_templates/global_accordion.pt'
 
     def __init__(self, 
                  context, 
@@ -864,7 +864,7 @@ class Wizard(MultipleViewsOperation):
     name = 'wizard'
     durable = False # session ou pas?
     behavior = None
-    informations_template = 'pontus:templates/wizard_info.pt'
+    informations_template = 'pontus:templates/views_templates/wizard_info.pt'
     informations_requirements = None
     include_informations = False
 

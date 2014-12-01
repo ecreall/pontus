@@ -11,9 +11,7 @@
      id="item-${oid}"
      tal:omit-tag="structural"
      i18n:domain="pontus">
-
-
-
+     
   <p tal:condition="field.description and not field.widget.hidden"
      class="help-block" >
     ${field.description}

@@ -18,7 +18,7 @@ from pontus import _
 @view_config(
     name='index',
     context=IObject,
-    renderer='templates/view.pt',
+    renderer='templates/views_templates/grid.pt',
     )
 class Index(View):
 

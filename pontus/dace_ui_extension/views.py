@@ -45,7 +45,7 @@ from pontus.view_operation import MultipleView
 @view_config(
     name='Processes',
     context=Runtime,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class RuntimeView(BasicView):
 
@@ -68,12 +68,12 @@ class RuntimeView(BasicView):
 @view_config(
     name='StatisticRun',
     context=Runtime,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class ProcessStatisticView(BasicView):
 
     title = 'Tableau de bord'
-    item_template = 'pontus:templates/subview_sample.pt'
+    wrapper_template = 'pontus:dace_ui_extension/templates/simple_view_wrapper.pt'
     template = 'pontus:dace_ui_extension/templates/runtimeprocesses_statistic_view.pt'
     name = 'StatisticRun'
     coordinates = 'left'
@@ -101,7 +101,7 @@ class ProcessStatisticView(BasicView):
 @view_config(
     name='ProcessesDef',
     context=ProcessDefinitionContainer,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class ProcessDefinitionContainerView(BasicView):
 
@@ -146,12 +146,12 @@ class ProcessDefinitionContainerView(BasicView):
 @view_config(
     name='StatisticDef',
     context=ProcessDefinition,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class ProcessDefinitionStatisticView(BasicView):
 
     title = 'Tableau de bord'
-    item_template = 'pontus:templates/subview_sample.pt'
+    wrapper_template = 'pontus:dace_ui_extension/templates/simple_view_wrapper.pt'
     template = 'pontus:dace_ui_extension/templates/processdef_statistic_view.pt'
     name = 'StatisticDef'
     coordinates = 'left'
@@ -181,7 +181,7 @@ class ProcessDefinitionStatisticView(BasicView):
 @view_config(
     name='ProcessDef',
     context=ProcessDefinition,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class ProcessDefinitionView(BasicView):
 
@@ -203,7 +203,7 @@ class ProcessDefinitionView(BasicView):
 @view_config(
     name='ProcessInst',
     context=ProcessDefinition,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class ProcessesPDDefinitionView(BasicView):
 
@@ -249,7 +249,7 @@ class ProcessesPDDefinitionView(BasicView):
 @view_config(
     name='Process',
     context=Process,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class ProcessView(BasicView):
 
@@ -284,12 +284,12 @@ class ProcessView(BasicView):
 @view_config(
     name = 'Statistic',
     context=Process,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class StatisticProcessView(BasicView):
 
     title = 'Tableau de bord'
-    item_template = 'pontus:templates/subview_sample.pt'
+    wrapper_template = 'pontus:dace_ui_extension/templates/simple_view_wrapper.pt'
     template = 'pontus:dace_ui_extension/templates/processstatistic_view.pt'
     name = 'Statistic'
     coordinates = 'left'
@@ -308,7 +308,7 @@ class StatisticProcessView(BasicView):
 @view_config(
     name = 'lesdonneesmanipulees',
     context=Process,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class ProcessDataView(BasicView):
 
@@ -367,7 +367,7 @@ class ProcessDataView(BasicView):
 @view_config(
     name = 'actionsrealiser',
     context=Process,
-    renderer='pontus:templates/view.pt'
+    renderer='pontus:templates/views_templates/grid.pt'
     )
 class DoActivitiesProcessView(BasicView):
 
@@ -432,7 +432,7 @@ class AssignToUsersViewSchema(Schema):
 @view_config(
     name='assign_activity',
     context=IActivity,
-    renderer='pontus:templates/view.pt',
+    renderer='pontus:templates/views_templates/grid.pt',
     )
 class AssignToUsersView(FormView):
 
@@ -480,12 +480,12 @@ class AssignActionToUsersView(FormView):
 @view_config(
     name='assign_action',
     context=IBusinessAction,
-    renderer='pontus:templates/view.pt',
+    renderer='pontus:templates/views_templates/grid.pt',
     )
 class AssignActionToUsersMultipleView(MultipleView):
     title = 'Assigner l\'action'
     name = 'assign_action'
-    template = 'pontus.dace_ui_extension:templates/sample_mergedmultipleview.pt'
+    template = 'pontus.dace_ui_extension:templates/simple_mergedmultipleview.pt'
     views = (AssignedUsersView, AssignActionToUsersView)
     validators = [AssignActionToUsers.get_validator()]
 

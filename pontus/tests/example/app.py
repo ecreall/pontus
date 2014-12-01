@@ -165,7 +165,7 @@ class FormViewA(FormView):
 @view_config(
     name='multipleformviewa',
     context=Runtime,
-    renderer='pontus:templates/view.pt',
+    renderer='pontus:templates/views_templates/grid.pt',
     )
 class MultipleFromViewA(MultipleView):
     title = 'MultipleFormView A'
@@ -182,7 +182,7 @@ def get_item(view=None):
 @view_config(
     name='mergedformsviewa',
     context=Runtime,
-    renderer='pontus:templates/view.pt',
+    renderer='pontus:templates/views_templates/grid.pt',
     )
 class MergedFormsViewA(MergedFormsView):
     views = FormViewA
@@ -219,7 +219,7 @@ class SchemaB(Schema):
 @view_config(
     name='formviewb',
     context=Runtime,
-    renderer='pontus:templates/view.pt',
+    renderer='pontus:templates/views_templates/grid.pt',
     )
 class FormViewB(FormView):
 
@@ -256,7 +256,7 @@ class SchemaC(Schema):
 @view_config(
     name='formviewc',
     context=ProcessDefinitionContainer,
-    renderer='pontus:templates/view.pt',
+    renderer='pontus:templates/views_templates/grid.pt',
     )
 class FormViewC(FormView):
 

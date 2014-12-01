@@ -3,6 +3,7 @@
 
 # licence: AGPL
 # author: Amen Souissi
+
 import unittest
 from pyramid.config import Configurator
 from pyramid.testing import DummyRequest

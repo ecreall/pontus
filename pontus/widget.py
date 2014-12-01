@@ -355,7 +355,6 @@ class RadioChoiceWidget(SelectWidget):
 
 class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
 
-    #template = 'pontus:templates/checkbox_choice.pt'
 
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
@@ -447,7 +446,7 @@ class Length(object):
 
 
 default_resource_registry.set_js_resources('select2creation', None, 
-               'pontus.dace_ui_extension:static/select2/select2.js' )
+               'pontus:static/select2/select2.js' )
 default_resource_registry.set_css_resources('select2creation', None, 
-               'pontus.dace_ui_extension:static/select2/select2.css' )
+               'pontus:static/select2/select2.css' )
 
