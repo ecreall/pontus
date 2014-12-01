@@ -121,7 +121,7 @@
                 <td >
                   <ul tal:condition="a['assigned_to']" class="nav nav-pills nav-stacked" tal:repeat="u a['assigned_to']">
                     <li >
-                       <a href="${u['userurl']}">${u['title']}</a>
+                       <a href="${request.resource_url(u, '@@index')}">${getattr(u, 'title', name)}</a>
                     </li>
                   </ul>
                 </td>

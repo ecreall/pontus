@@ -455,7 +455,7 @@ class AssignedUsersView(BasicView):
         for user in assigned_to:
             users.append({'title':user.__name__, 
                           'userurl': self.request.resource_url(user, 
-                                                       '@@contents')})
+                                                       '@@index')})
 
         result = {}
         values = {
