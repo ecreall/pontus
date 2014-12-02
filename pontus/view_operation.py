@@ -75,7 +75,14 @@ class ViewOperation(View):
             self.views = [self.views]
 
         self.contexts = self.contexts()
+        self.validated_children = []
+        self.failed_children = []
 
+    @property
+    def all_children(self):
+        result = list(self.validated_children)
+        result.extend(list(self.failed_children))
+        return result
 
     def _request_configuration(self):
         super(ViewOperation, self)._request_configuration()
@@ -103,9 +110,6 @@ class MultipleContextsOperation(ViewOperation):
                  **kwargs):
         super(MultipleContextsOperation, self).__init__(context, request, 
                                            parent, wizard, stepid, **kwargs)
-        self.children = []
-        self.children_notvalitaed = []
-        self.allviews = []
         self.view = None
         if self.views:
             self.view = self.views[0]
@@ -113,11 +117,12 @@ class MultipleContextsOperation(ViewOperation):
         if self.view is not None:
             self._init_children(self.contexts)
 
+
     def _init_children(self, contexts=None):
         if contexts is None:
             contexts = self.contexts
 
-        self.children = []
+        self.validated_children = []
         if not isinstance(contexts, (list, tuple)):
             contexts = [contexts]
 
@@ -126,16 +131,13 @@ class MultipleContextsOperation(ViewOperation):
                                 self.wizard, self.stepid,**{})
             try:
                 subview.validate()
-            except ViewError as e:
-                self.children_notvalitaed.append(item_context)
-                self.errors.append(e)
-                continue
-
-            self.children.append(subview)
-            self.allviews.append(subview)
+                self.validated_children.append(subview)
+            except ViewError as error:
+                self.failed_children.append(subview)
+                self.errors.append((subview, error))
 
     def has_id(self, id):
-        for view in self.children:
+        for view in self.validated_children:
             if view.has_id(id):
                 return True
 
@@ -143,7 +145,7 @@ class MultipleContextsOperation(ViewOperation):
 
     def get_view_requirements(self):
         result = self.requirements_copy
-        for view in self.children:
+        for view in self.validated_children:
             view_requirements = view.get_view_requirements()
             result = merge_dicts(view_requirements, result)
 
@@ -168,21 +170,23 @@ def default_builder(parent, views, **kwargs):
 
             viewinstance.title = view[0]
             viewinstance.builder(view[1])
-            if viewinstance.children:
-                parent.children.append(viewinstance)
+            if viewinstance.validated_children:
+                parent.validated_children.append(viewinstance)
+            else:
+                parent.failed_children.append(viewinstance)
+
         else:
             viewinstance = view(parent.context, parent.request, 
                  parent, parent.wizard, parent.stepid, **kwargs)
             try:
                 viewinstance.validate()
-            except ViewError as e:
-                parent.errors.append(e)
-                continue
-
+                parent.validated_children.append(viewinstance)
+            except ViewError as error:
+                parent.errors.append((viewinstance, error))
+                parent.failed_children.append(viewinstance)
+                
             if parent.merged:
                 viewinstance.coordinates = parent.coordinates
-
-            parent.children.append(viewinstance)
 
 
 class MultipleView(MultipleViewsOperation):
@@ -190,6 +194,7 @@ class MultipleView(MultipleViewsOperation):
     title = 'Multiple View'
     name = 'multipleview'
     builder = default_builder
+    include_failed_views = False
     template = 'templates/views_templates/multipleview.pt'
 
     def __init__(self, 
@@ -201,11 +206,9 @@ class MultipleView(MultipleViewsOperation):
                  **kwargs):
         super(MultipleView, self).__init__(context, request, parent,
                                             wizard, stepid, **kwargs)
-        self.children = []
         self._coordinates = []
         if self.views:
             self._init_views(self.views, **kwargs)
-
 
     def _init_views(self, views, **kwargs):
         self.builder(views, **kwargs)
@@ -213,7 +216,7 @@ class MultipleView(MultipleViewsOperation):
 
     def get_view_requirements(self):
         result = self.requirements_copy
-        for view in self.children:
+        for view in self.validated_children:
             view_requirements = view.get_view_requirements()
             result = merge_dicts(view_requirements, result)
 
@@ -222,7 +225,7 @@ class MultipleView(MultipleViewsOperation):
     def define_executable(self):
         self.isexecutable = False
         self.finished_successfully = True
-        for child in self.children:
+        for child in self.validated_children:
             if child.isexecutable:
                 self.isexecutable = True
                 self.finished_successfully = False
@@ -238,32 +241,46 @@ class MultipleView(MultipleViewsOperation):
                 self._activate(item['items'])
 
     def before_update(self):
-        for view in self.children:
+        for view in self.validated_children:
             view.before_update()
 
 
     def has_id(self, id):
-        for view in self.children:
+        for view in self.validated_children:
             if view.has_id(id):
                 return True
 
         return False
 
-    def update(self,):
-        #validation
-        if not self.children:
-            e = ViewError()
-            e.principalmessage = MutltipleViewErrorPrincipalmessage
-            causes = set()
-            for er in self.errors:
-                causes.update(er.causes)
-
-            e.causes = list(causes)#MutltipleViewErrorCauses
-            raise e
-
-        #faire l'update
+    def _update_all_children(self):
         result = {}
-        for view in self.children:
+        for view in self.all_children:
+            try:
+                if view in self.failed_children:
+                    error = dict(self.errors)[view]
+                    view_result = view.failure(error)
+                else:
+                    view_result = view.update()
+            except ViewError as e:
+                continue
+
+            if self.isexecutable and view.isexecutable and \
+               view.finished_successfully:
+                self.finished_successfully = True
+                #for wizards
+                view.init_stepid()
+                return self.success(view_result)
+
+            if not isinstance(view_result, dict):
+                return view_result
+
+            result = merge_dicts(view_result, result)
+
+        return result
+
+    def _update_validated_children(self):
+        result = {}
+        for view in self.validated_children:
             try:
                 view_result = view.update()
             except ViewError as e:
@@ -281,11 +298,36 @@ class MultipleView(MultipleViewsOperation):
 
             result = merge_dicts(view_result, result)
 
+        return result
+
+    def update(self,):
+        #validation
+        if not self.validated_children and \
+           not self.include_failed_views:
+            error = ViewError()
+            error.principalmessage = MutltipleViewErrorPrincipalmessage
+            causes = set()
+            for viewinstance, er in self.errors:
+                causes.update(er.causes)
+
+            error.causes = list(causes)
+            raise error
+
+        #update children
+        result = {}
+        if self.include_failed_views:
+            result = self._update_all_children()
+        else:
+            result = self._update_validated_children()
+
         if not result:
-            e = ViewError()
-            e.principalmessage = MutltipleViewErrorPrincipalmessage
-            e.causes = MutltipleViewErrorCauses
-            raise e
+            error = ViewError()
+            error.principalmessage = MutltipleViewErrorPrincipalmessage
+            error.causes = MutltipleViewErrorCauses
+            raise error
+
+        if not isinstance(result, dict):
+            return result
 
         for _coordinate in result['coordinates']:
             coordinate = _coordinate
@@ -327,10 +369,10 @@ class MultipleView(MultipleViewsOperation):
 
     def after_update(self):
         if self.finished_successfully:
-            for view in self.children:
+            for view in self.validated_children:
                 view.after_update()
         else:
-            for view in self.children:
+            for view in self.validated_children:
                 if view.finished_successfully:
                     view.after_update()
 
@@ -395,14 +437,14 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
     def _init_children(self, contexts):
         MultipleContextsOperation._init_children(self, contexts)
-        items = self.children
-        self.children = {}
+        items = self.validated_children
+        self.children_by_context = {}
         for subform in items:
             context_oid = str(get_oid(subform.context))
-            if context_oid in self.children:
-                self.children[context_oid].append(subform)
+            if context_oid in self.children_by_context:
+                self.children_by_context[context_oid].append(subform)
             else:
-                self.children[context_oid] = [subform]
+                self.children_by_context[context_oid] = [subform]
 
     def _addItemsNode(self):
         if self.schema.get('views').children[0].get('item') is not None:
@@ -417,27 +459,27 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
 
     def before_update(self):
-        for view in self.allviews:
+        for view in self.all_children:
             view.before_update()
 
     def update(self,):
-        if not self.children:
-            e = ViewError()
-            e.principalmessage = CallViewErrorPrincipalmessage
+        if not self.children_by_context:
+            error = ViewError()
+            error.principalmessage = CallViewErrorPrincipalmessage
             causes = set()
-            for er in self.errors:
+            for view, er in self.errors:
                 causes.update(er.causes)
 
-            e.causes = list(causes)#= CallViewViewErrorCauses
-            raise e
+            error.causes = list(causes)
+            raise error
 
         messages = {}
-        if self.children_notvalitaed:
-            e = ViewError()
-            e.type = 'warning'
-            e.principalmessage = CallViewErrorCildrenNotValidatedmessage
-            e.causes = CallViewViewErrorCauses
-            messages[e] = self._get_message(e)
+        if self.failed_children:
+            error = ViewError()
+            error.type = 'warning'
+            error.principalmessage = CallViewErrorCildrenNotValidatedmessage
+            error.causes = CallViewViewErrorCauses
+            messages[error] = self._get_message(error)
 
         self.init_stepid(self.schema)
         form, reqts = self._build_form()
@@ -467,8 +509,8 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                             views = validated['views']
                             for v in views:
                                 views_context = None
-                                if v['context_oid'] in self.children:
-                                    views_context = self.children[v['context_oid']]
+                                if v['context_oid'] in self.children_by_context:
+                                    views_context = self.children_by_context[v['context_oid']]
                                 else:
                                     continue
 
@@ -527,7 +569,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
     def after_update(self):
         if self.finished_successfully:
-            for view in self.allviews:
+            for view in self.all_children:
                 view.after_update()
 
     def success(self, validated):
@@ -537,7 +579,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
     def default_data(self):
         result = {'views':[]}
         views = list(itertools.chain.from_iterable(
-                          list(self.children.values())))
+                          list(self.children_by_context.values())))
         for item in views:
             item_default_data = item.default_data()
             if item_default_data is None:
@@ -570,7 +612,7 @@ class CallView(MultipleContextsOperation):
 
     def define_executable(self):
         _isexecutable = False
-        for child in self.children:
+        for child in self.validated_children:
             if child.isexecutable:
                 _isexecutable = True
                 break
@@ -582,23 +624,23 @@ class CallView(MultipleContextsOperation):
         return self.isexecutable
 
     def before_update(self):
-        for view in self.children:
+        for view in self.validated_children:
             view.before_update()
 
     def update(self,):
-        if not self.children:
+        if not self.validated_children:
             e = ViewError()
             e.principalmessage = CallViewErrorPrincipalmessage
             causes = set()
-            for er in self.errors:
+            for view, er in self.errors:
                 causes.update(er.causes)
 
-            e.causes = list(causes)#CallViewViewErrorCauses
+            e.causes = list(causes)
             raise e
 
         result = {}
         global_result = {}
-        for view in self.children:
+        for view in self.validated_children:
             try:
                 view_result = view.update()
             except ViewError as e:
@@ -639,17 +681,17 @@ class CallView(MultipleContextsOperation):
             item = self.adapt_item(body, self.viewid)
             global_result['coordinates'][coordinate] = [item]
 
-        #if not (len(self.children) == len(self.contexts)):
+        #if not (len(self.validated_children) == len(self.contexts)):
         #    global_result['messages']
         global_result = merge_dicts(self.requirements_copy, global_result)
         return  global_result
 
     def after_update(self):
         if self.finished_successfully:
-            for view in self.children:
+            for view in self.validated_children:
                 view.before_update()
         else:
-            for view in self.children:
+            for view in self.validated_children:
                 if view.finished_successfully:
                     view.before_update()
 
@@ -684,18 +726,14 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         super(CallSelectedContextsViews, self).__init__(context, request, 
                                         parent, wizard, stepid, **kwargs)
         self.validated_items = []
-        self.children = {}
+        self.validated_children = {}
         self._additemswidget()
         self._init_children()
         self.buttons = [b.title for b in self.views]
 
     def _init_children(self):
-        _views = {}
         for view in self.views:
             name = re.sub(r'\s', '_', view.title)
-            _views[name] = view
-
-        for key, view in _views.items():
             multiplecontextsview_class = CallView
             if IFormView.implementedBy(view):
                 multiplecontextsview_class = MergedFormsView
@@ -705,10 +743,10 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             view_instance = multiplecontextsview_class(self.context, 
                                             self.request, self.parent,
                                             self.wizard, self.stepid)
-            self.children[key] = view_instance
+            self.validated_children[name] = view_instance
 
     def has_id(self, id):
-        for view in self.children.values():
+        for view in self.validated_children.values():
             if view.has_id(id):
                 return True
 
@@ -796,7 +834,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         return result
 
     def _call_callview(self, viewname):
-        callview = self.children[viewname]
+        callview = self.validated_children[viewname]
         callview._init_children(self.validated_items)
         callview.define_executable()
         if not callview.isexecutable:
@@ -878,11 +916,11 @@ class Wizard(MultipleViewsOperation):
         super(Wizard, self).__init__(context, request, parent, 
                                      wizard, stepid, **kwargs)
         self.transitionsinstances = {}
-        self.viewsinstances = {}
+        self.nodes = {}
         self.startnode = None
         self.endnode = None
         self.behaviorinstance = None
-        if self.behavior is not None:
+        if self.behavior:
             try:
                 self.behavior.get_validator().validate(self.context, 
                                                        self.request)
@@ -893,11 +931,11 @@ class Wizard(MultipleViewsOperation):
 
         for key, view in self.views.items():
             viewinstance = view(self.context, self.request, self, self, key)
-            self.viewsinstances[key] = viewinstance
+            self.nodes[key] = viewinstance
 
         for transition in self.transitions:
-            sourceinstance = self.viewsinstances[transition[0]]
-            targetinstance = self.viewsinstances[transition[1]]
+            sourceinstance = self.nodes[transition[0]]
+            targetinstance = self.nodes[transition[1]]
             transitionid = transition[0]+'->'+transition[1]
             condition = None
             try:
@@ -922,7 +960,7 @@ class Wizard(MultipleViewsOperation):
     def get_view_requirements(self):
         stepidkey = STEPID + self.viewid
         if stepidkey in self.request.session:
-            self.currentsteps = [self.viewsinstances[self.request.session.pop(stepidkey)]]
+            self.currentsteps = [self.nodes[self.request.session.pop(stepidkey)]]
 
         result = self.requirements_copy
         for view in self.currentsteps:
@@ -949,7 +987,7 @@ class Wizard(MultipleViewsOperation):
 
     def _getinitnodes(self):
         result = []
-        for view in self.viewsinstances.values():
+        for view in self.nodes.values():
             if not view._incoming:
                 result.append(view)
 
@@ -957,7 +995,7 @@ class Wizard(MultipleViewsOperation):
 
     def _getfinalnodes(self):
         result = []
-        for view in self.viewsinstances.values():
+        for view in self.nodes.values():
             if not view._outgoing:
                 result.append(view)
 
@@ -988,7 +1026,7 @@ class Wizard(MultipleViewsOperation):
         stepidkey = STEPID + self.viewid
         currentsteps = []
         if stepidkey in self.request.session:
-            currentsteps = [self.viewsinstances[self.request.session[stepidkey]]]
+            currentsteps = [self.nodes[self.request.session[stepidkey]]]
 
         currentstep = currentsteps[0]
         covered = self._count_path(currentstep, self.startnode)-1
@@ -1075,7 +1113,7 @@ class Wizard(MultipleViewsOperation):
         else:
             multipleviewinstance = MultipleView(self.context, self.request, 
                                                 self, self)
-            multipleviewinstance.children = sourceviews
+            multipleviewinstance.validated_children = sourceviews
             multipleviewinstance.define_executable()
             multipleviewinstance.before_update()
             result = multipleviewinstance.update()
