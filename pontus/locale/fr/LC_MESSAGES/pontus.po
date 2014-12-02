@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-11-28 10:39+0100\n"
+"POT-Creation-Date: 2014-12-02 10:15+0100\n"
 "PO-Revision-Date: 2014-11-28 10:41+0100\n"
 "Last-Translator: SOUISSI <amensouissi@ecreall.com>\n"
 "Language-Team: French\n"
@@ -15,27 +15,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: src/pontus/pontus/default_behavior.py:12
+#: src/pontus/pontus/default_behavior.py:17
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/pontus/pontus/index.py:20
+#: src/pontus/pontus/index.py:25
 msgid "Index"
 msgstr "Index"
 
-#: src/pontus/pontus/view.py:39
+#: src/pontus/pontus/view.py:44
 msgid "View"
 msgstr "Vue"
 
-#: src/pontus/pontus/core.py:46
+#: src/pontus/pontus/core.py:52
 msgid "Title"
 msgstr "Titre"
 
-#: src/pontus/pontus/core.py:52
+#: src/pontus/pontus/core.py:58
 msgid "Label"
 msgstr ""
 
-#: src/pontus/pontus/core.py:58
+#: src/pontus/pontus/core.py:64
 msgid "Description"
 msgstr "Description"
 
@@ -51,7 +51,9 @@ msgstr "Supprimer"
 #: src/pontus/pontus/templates/simple_mapping.pt:8
 #: src/pontus/pontus/templates/mapping.pt:14
 msgid "There was a problem with this section"
-msgstr "Un problème a été rencontré avec cette section. Merci de vérifier les informations saisies."
+msgstr ""
+"Un problème a été rencontré avec cette section. Merci de vérifier les "
+"informations saisies."
 
 #. Default: en
 #: src/pontus/pontus/templates/richtext.pt:20
@@ -65,4 +67,3 @@ msgstr "${icon} Mon profil"
 #: src/pontus/pontus/templates/panels/usermenu.pt:27
 msgid "${icon} Log Out"
 msgstr "${icon} Se déconnecter"
-

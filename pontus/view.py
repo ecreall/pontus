@@ -202,7 +202,7 @@ class View(Step):
 
     def failure(self, e, subject=None):
         #TODO
-        content_message = self. _get_message(e, subject)
+        content_message = self._get_message(e, subject)
         item = self.adapt_item('', self.viewid)
         item['messages'] = {e.type: [content_message]}
         item['isactive'] = True
