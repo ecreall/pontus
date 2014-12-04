@@ -48,7 +48,7 @@ class FormView(ElementaryView, SubstanceDFormView):
                                             'submission_title', 
                                             behavior.title),
                                name=behavior.title) \
-                        for behavior in self.behaviorinstances.values()]
+                        for behavior in self.behaviors_instances.values()]
 
     def setviewid(self, viewid):
         ElementaryView.setviewid(self, viewid)
@@ -84,8 +84,8 @@ class FormView(ElementaryView, SubstanceDFormView):
             for button in form.buttons:
                 if button.name in self.request.POST:
                     try:
-                        if (button.name in self.behaviorinstances) and \
-                            isinstance(self.behaviorinstances[button.name],
+                        if (button.name in self.behaviors_instances) and \
+                            isinstance(self.behaviors_instances[button.name],
                                        Cancel):
                             # bypass form validation for Cancel behavior
                             validated = {}
@@ -101,7 +101,7 @@ class FormView(ElementaryView, SubstanceDFormView):
                         error = True
                     else:
                         try:
-                            behavior = self.behaviorinstances[button.name]
+                            behavior = self.behaviors_instances[button.name]
                             item = behavior.execute(self.context,
                                     self.request, validated)
                             self.finished_successfully = True

@@ -86,7 +86,7 @@ class View(Step):
         self._request_configuration()
 
     def _request_configuration(self):
-        coordinates = self.params('coordinates') #++
+        coordinates = self.params('coordinates')
         if coordinates is not None:
             self.coordinates = coordinates
 
@@ -158,8 +158,8 @@ class View(Step):
             self.before_update()
             result = self.update()
             self.after_update()
-        except ViewError as e:
-            return self.failure(e)
+        except ViewError as error:
+            return self.failure(error)
 
         if isinstance(result, dict):
             if not ('js_links' in result):
@@ -228,81 +228,78 @@ class ElementaryView(View):
                  **kwargs):
         super(ElementaryView, self).__init__(context, request, parent, 
                                              wizard, stepid, **kwargs)
-        self._allvalidators = list(self.validators)
-        self.init_behaviorinstances = []
+        self._all_validators = list(self.validators)
+        self.specific_behaviors_instances = []
+        self.behaviors_instances = OrderedDict()
+        self.errors = []
         if 'behaviors' in kwargs:
             bis = kwargs['behaviors']
-            self.init_behaviorinstances = [bi for bi in bis \
+            self.specific_behaviors_instances = [bi for bi in bis \
                                            if bi._class_ in self.behaviors]
 
-        _init_behaviors = [b._class_ for b in self.init_behaviorinstances]
+        specific_behaviors = [b._class_ for b in \
+                              self.specific_behaviors_instances]
         if self.validate_behaviors:
-            self._allvalidators.extend([behavior.get_validator() \
-                                        for behavior in self.behaviors \
-                                        if not (behavior in _init_behaviors)])
+            self._all_validators.extend([behavior.get_validator() \
+                                       for behavior in self.behaviors \
+                                       if not (behavior in specific_behaviors)])
 
-        self.behaviorinstances = OrderedDict()
-        self._init_behaviors(_init_behaviors)
+        self._init_behaviors(specific_behaviors)
 
     def validate(self):
         try:
-            for validator in self._allvalidators:
+            for validator in self._all_validators:
                 validator.validate(self.context, self.request)
 
-            if self.validate_behaviors and self.init_behaviorinstances:
-                for init_v in self.init_behaviorinstances:
+            if self.validate_behaviors and self.specific_behaviors_instances:
+                for init_v in self.specific_behaviors_instances:
                     init_v.validate(self.context, self.request)
 
-        except ValidationError as e:
-            ve = ViewError()
-            ve.principalmessage = BehaviorViewErrorPrincipalmessage
-            if e.principalmessage:
-                ve.causes = [e.principalmessage]
+        except ValidationError as error:
+            view_error = ViewError()
+            view_error.principalmessage = BehaviorViewErrorPrincipalmessage
+            if error.principalmessage:
+                view_error.causes = [error.principalmessage]
 
-            ve.solutions = BehaviorViewErrorSolutions
-            raise ve
+            view_error.solutions = BehaviorViewErrorSolutions
+            raise view_error
 
         return True
 
-    def _init_behaviors(self, init_behaviors):
-        behavior_instances = OrderedDict()
-        self.errors = []
-        for behavior in self.behaviors:
-            if not (behavior in init_behaviors):
-                try:
-                    wizard = None
-                    if self.wizard is not None:
-                        wizard = self.wizard.behaviorinstance
+    def _add_behaviorinstance(self, behaviorinstance):
+        key = re.sub(r'\s', '_', behaviorinstance.title)
+        self.behaviors_instances[key] = behaviorinstance
+        try:
+            self.viewid = self.viewid+'_'+str(get_oid(behaviorinstance))
+        except Exception:
+            pass
 
-                    behaviorinstance = behavior.get_instance(self.context, 
-                                                             self.request, 
-                                                             wizard=wizard)
-                    if behaviorinstance is not None:
-                        key = behaviorinstance._class_.__name__
-                        behavior_instances[key] = behaviorinstance
-                except ValidationError as e:
-                    self.errors.append(e)
+    def _init_behaviors(self, specific_behaviors):
+        behaviors = [behavior for behavior in self.behaviors \
+                     if not (behavior in specific_behaviors)]
+        for behavior in behaviors:
+            try:
+                wizard_behavior = None
+                if self.wizard:
+                    wizard_behavior = self.wizard.behaviorinstance
 
-        for behaviorinstance in self.init_behaviorinstances:
-            key = behaviorinstance._class_.__name__
-            behavior_instances[key] = behaviorinstance
+                behaviorinstance = behavior.get_instance(self.context, 
+                                                         self.request, 
+                                                         wizard=wizard_behavior)
+                if behaviorinstance:
+                    self._add_behaviorinstance(behaviorinstance)
+            except ValidationError as error:
+                self.errors.append(error)
 
-        if behavior_instances:
-            sorted_behaviors = behavior_instances.values()
-            for behaviorinstance in sorted_behaviors:
-                key = re.sub(r'\s', '_', behaviorinstance.title)
-                self.behaviorinstances[key] = behaviorinstance
-                try:
-                    self.viewid = self.viewid+'_'+str(get_oid(behaviorinstance))
-                except Exception:
-                    continue
+        for behaviorinstance in self.specific_behaviors_instances:
+            self._add_behaviorinstance(behaviorinstance)
 
     def before_update(self):
-        for behavior in self.behaviorinstances.values():
+        for behavior in self.behaviors_instances.values():
             behavior.before_execution(self.context, self.request)
 
     def execute(self, appstruct=None):
-        for behavior in self.behaviorinstances.values():
+        for behavior in self.behaviors_instances.values():
             behavior.execute(self.context, self.request, appstruct)
 
     def after_update(self):

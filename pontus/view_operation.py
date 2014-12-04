@@ -514,8 +514,8 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                                     continue
 
                                 bname = button.name.replace(('_'+self.suffixe), '')
-                                if bname in view_instance.behaviorinstances:
-                                    behavior = view_instance.behaviorinstances[bname]
+                                if bname in view_instance.behaviors_instances:
+                                    behavior = view_instance.behaviors_instances[bname]
                                     behavior.execute(view_instance.context, 
                                                      self.request, v['item'])
                                     view_instance.finished_successfully = True
