@@ -32,6 +32,11 @@ class ViewError(Error):
     type = 'danger'
     template = 'pontus:templates/views_templates/alert_message.pt'
 
+    def render_message(self, request, subject=None):
+        content_message = renderers.render(self.template,
+                {'error': self, 'subject': subject}, request)
+        return content_message
+
 
 EMPTY_TEMPLATE = 'templates/views_templates/empty.pt'
 
@@ -102,14 +107,14 @@ class View(Step):
         for validator in self.validators:
             try:
                 validator.validate(self.context, self.request)
-            except ValidationError as e:
-                ve = ViewError()
-                ve.principalmessage = BehaviorViewErrorPrincipalmessage
-                if getattr(e, 'principalmessage', ''):
-                    ve.causes = [e.principalmessage]#BehaviorViewErrorCauses
+            except ValidationError as error:
+                view_error = ViewError()
+                view_error.principalmessage = BehaviorViewErrorPrincipalmessage
+                if getattr(error, 'principalmessage', ''):
+                    view_error.causes = [error.principalmessage]
 
-                ve.solutions = BehaviorViewErrorSolutions
-                raise ve
+                view_error.solutions = BehaviorViewErrorSolutions
+                raise view_error
 
         return True
 
@@ -195,18 +200,12 @@ class View(Step):
     def setviewid(self, viewid):
         self.viewid = viewid
 
-    def _get_message(self, e, subject=None):
-        content_message = renderers.render(e.template,
-                {'error': e, 'subject': subject}, self.request)
-        return content_message
-
     def failure(self, e, subject=None):
-        #TODO
-        content_message = self._get_message(e, subject)
-        item = self.adapt_item('', self.viewid)
-        item['messages'] = {e.type: [content_message]}
-        item['isactive'] = True
-        result = {'js_links': [], 'css_links': [],
+        error_body = e.render_message(self.request, subject)
+        item = self.adapt_item('', self.viewid, True)
+        item['messages'] = {e.type: [error_body]}
+        result = {'js_links': [], 
+                  'css_links': [],
                   'coordinates': {self.coordinates: [item]}}
         return result
 

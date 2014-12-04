@@ -83,12 +83,6 @@ class DaceUIAPI(object):
 
         return all_actions
 
-
-    def _get_message(self, e, request, subject=None):
-        content_message = renderers.render(e.template,
-                {'error': e, 'subject': subject}, request)
-        return content_message
-
     def _modal_views(self, 
                      request, 
                      actions, 
@@ -234,7 +228,7 @@ class DaceUIAPI(object):
             error.principalmessage = u"Action non realisee"
             error.causes = ["Vous n'avez plus le droit de realiser cette action.", 
                             "L'action est verrouillee par un autre utilisateur."]
-            message = self._get_message(error, request)
+            message = error.render_message(request)
             messages.update({error.type: [message]})
 
         return action_updated, messages, resources, allbodies_actions

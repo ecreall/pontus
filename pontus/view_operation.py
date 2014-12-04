@@ -376,16 +376,6 @@ class MultipleView(MultipleViewsOperation):
                 if view.finished_successfully:
                     view.after_update()
 
-    def failure(self, e, subject=None):#...
-        content_message = self._get_message(e, subject)
-        item = self.adapt_item('', self.viewid)
-        item['messages'] = {e.type: [content_message]}
-        item['isactive'] = True
-        result = {'js_links': [],  
-                  'css_links': [], 
-                  'coordinates': {self.coordinates:[item]}}
-        return result
-
     def success(self, validated=None):
         return validated
 
@@ -479,7 +469,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
             error.type = 'warning'
             error.principalmessage = CallViewErrorCildrenNotValidatedmessage
             error.causes = CallViewViewErrorCauses
-            messages[error] = self._get_message(error)
+            messages[error] = error.render_message(self.request)
 
         self.init_stepid(self.schema)
         form, reqts = self._build_form()
