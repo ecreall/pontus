@@ -14,5 +14,3 @@ def includeme(config): # pragma: no cover
     config.scan('.')
     YEAR = 86400 * 365
     config.add_static_view('pontusstatic', 'pontus:static', cache_max_age=YEAR)
-    config.add_static_view(
-    	 'daceuistatic', 'pontus.dace_ui_extension:static', cache_max_age=YEAR)

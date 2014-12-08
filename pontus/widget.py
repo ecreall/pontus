@@ -31,8 +31,9 @@ from deform.compat import (
 from translationstring import TranslationString
 from substanced.util import get_oid
 
-from pontus.file import OBJECT_OID
 from dace.util import get_obj
+
+from pontus.file import OBJECT_OID
 
 
 

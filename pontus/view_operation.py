@@ -876,6 +876,7 @@ class Transition(object):
             behavior_transitions = dict(self.wizard.behaviorinstance.transitionsinstances)
             if self.id in behavior_transitions:
                 behavior_transition = behavior_transitions[self.id]
+                
         if behavior_transition is not None:
             return self.condition(self.wizard.context, 
                                   self.wizard.request) and \
