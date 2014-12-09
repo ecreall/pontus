@@ -5,7 +5,8 @@
      css_class css_class|field.widget.css_class;
      optgroup_class optgroup_class|field.widget.optgroup_class;
      multiple multiple|field.widget.multiple;
-     id oid+'-'+field.get_root().formid"
+     root field.get_root();
+     id oid+'-'+getattr(root, 'formid', root.oid)"
      tal:omit-tag="">
 
    <style>
