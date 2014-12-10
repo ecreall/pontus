@@ -5,7 +5,7 @@
                      item_template item_template|field.widget.item_template"
          i18n:domain="pontus">
   
-    <div class="${field.widget.item_css_class or ''}">
+    <div class="${field.widget.css_class or ''}">
       <div tal:condition="errormsg" 
            class="clearfix alert alert-message error">
         <p i18n:translate="">
