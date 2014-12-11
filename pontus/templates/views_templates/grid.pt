@@ -12,10 +12,13 @@
      </tal:block>
 
     <!-- JavaScript -->
-    <tal:block repeat="reqt list(set(js_links))|[]">
+    <tal:block tal:define="set_js_links []" repeat="reqt js_links|[]">
+      <tal:if condition="reqt not in set_js_links">
       <script type="text/javascript"
               src="${request.static_url(reqt)}"
        ></script>
+        <tal:block tal:define="set_js_links set_js_links.append(reqt)"></tal:block>
+     </tal:if>
     </tal:block>
   </metal:head-more>
 
