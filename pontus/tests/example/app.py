@@ -3,24 +3,25 @@
 
 # licence: AGPL
 # author: Amen Souissi
+
 import colander
 import deform
 import deform.widget
-from zope.interface import Interface
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
-from substanced.sdi import RIGHT
+from dace.processinstance.core import Behavior, ValidationError
+from dace.objectofcollaboration.runtime import Runtime
+from dace.objectofcollaboration.object import Object
+from dace.objectofcollaboration.services.processdef_container import (
+    ProcessDefinitionContainer)
 
 from pontus.view import BasicView
 from pontus.form import FormView
 from pontus.view_operation import MultipleView, MergedFormsView
 from pontus.schema import select, Schema, omit
-from pontus.widget import TableWidget, LineWidget, CheckboxChoiceWidget
-from dace.processinstance.core import Behavior, ValidationError
-from dace.objectofcollaboration.runtime import Runtime
-from dace.objectofcollaboration.object import Object
-from dace.objectofcollaboration.services.processdef_container import ProcessDefinitionContainer
+from pontus.widget import TableWidget, LineWidget
+
 
 
 class BehaviorAValidator(object):
@@ -55,9 +56,9 @@ class BehaviorA(Behavior):
             if 'title' in appstruct:
                 context.title = appstruct['title']
 
-            return True
+            return {}
         
-        return True
+        return {}
 
     def redirect(self, context, request, **kw):
         return HTTPFound(request.resource_url(context, "@@index"))
@@ -112,9 +113,9 @@ class BehaviorB(Behavior):
         try:
             request.viewexecuted.append('behaviorB')
         except AttributeError:
-            return True
+            return {}
 
-        return True
+        return {}
 
 
 class ViewB(BasicView):
@@ -162,6 +163,7 @@ class FormViewA(FormView):
     def default_data(self):
         return self.context 
 
+
 @view_config(
     name='multipleformviewa',
     context=Runtime,
@@ -176,8 +178,10 @@ class MultipleFromViewA(MultipleView):
 objectA = Object(title='objecta')
 objectB = Object(title='objectb')
 
+
 def get_item(view=None):
     return [objectA, objectB]
+
 
 @view_config(
     name='mergedformsviewa',
@@ -197,7 +201,7 @@ class BehaviorC(Behavior):
     behavior_id = 'behaviorc'
 
     def start(self, context, request, appstruct, **kw):
-        return True
+        return {}
 
     def redirect(self, context, request, **kw):
         return HTTPFound(request.resource_url(context, "@@index"))

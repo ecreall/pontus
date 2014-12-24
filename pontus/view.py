@@ -299,8 +299,12 @@ class ElementaryView(View):
             behavior.before_execution(self.context, self.request)
 
     def execute(self, appstruct=None):
+        results = []
         for behavior in self.behaviors_instances.values():
-            behavior.execute(self.context, self.request, appstruct)
+            results.append(behavior.execute(
+                     self.context, self.request, appstruct))
+
+        return results
 
     def after_update(self):
         pass

@@ -18,7 +18,7 @@ class Cancel(Behavior):
     description = ""
 
     def start(self, context, request, appstruct, **kw):
-        return True
+        return {}
 
     def redirect(self, context, request, **kw):
         return HTTPFound(request.resource_url(context, "@@index"))
