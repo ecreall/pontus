@@ -18,6 +18,13 @@ class Cancel(Behavior):
     description = ""
 
     def start(self, context, request, appstruct, **kw):
+        behaviors_to_cancel = list(appstruct.get('behaviors', []))
+        if self in  behaviors_to_cancel:
+            behaviors_to_cancel.remove(self)
+
+        for behavio in behaviors_to_cancel:
+            behavio.cancel_execution(context, request, **kw)
+
         return {}
 
     def redirect(self, context, request, **kw):

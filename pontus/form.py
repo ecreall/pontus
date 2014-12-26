@@ -88,7 +88,12 @@ class FormView(ElementaryView, SubstanceDFormView):
                             isinstance(self.behaviors_instances[button.name],
                                        Cancel):
                             # bypass form validation for Cancel behavior
+                            cancel_beh = self.behaviors_instances[button.name]
+                            behaviors = self.behaviors_instances.values()
+                            cancel_beh.execute(self.context,
+                                    self.request, {'behaviors': behaviors})
                             validated = {}
+
                         else :
                             controls = self.request.POST.items()
                             validated = form.validate(controls)
