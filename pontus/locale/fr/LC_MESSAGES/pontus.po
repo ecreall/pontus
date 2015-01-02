@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2014-12-23 18:19+0100\n"
-"PO-Revision-Date: 2014-11-28 10:41+0100\n"
+"POT-Creation-Date: 2014-12-29 14:42+0100\n"
+"PO-Revision-Date: 2015-01-02 15:08+0100\n"
 "Last-Translator: SOUISSI <amensouissi@ecreall.com>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -51,14 +51,12 @@ msgstr "Supprimer"
 #: src/pontus/pontus/templates/simple_mapping.pt:8
 #: src/pontus/pontus/templates/mapping.pt:14
 msgid "There was a problem with this section"
-msgstr ""
-"Un problème a été rencontré avec cette section. Merci de vérifier les "
-"informations saisies."
+msgstr "Un problème a été rencontré avec cette section. Merci de vérifier les informations saisies."
 
 #. Default: en
 #: src/pontus/pontus/templates/richtext.pt:20
 msgid "language-code"
-msgstr ""
+msgstr "fr"
 
 #: src/pontus/pontus/templates/panels/usermenu.pt:18
 msgid "${icon} Account"
@@ -67,3 +65,4 @@ msgstr "${icon} Mon profil"
 #: src/pontus/pontus/templates/panels/usermenu.pt:27
 msgid "${icon} Log Out"
 msgstr "${icon} Se déconnecter"
+
