@@ -447,7 +447,8 @@ class Length(object):
 
 
 default_resource_registry.set_js_resources('select2creation', None, 
-               'pontus:static/select2/select2.js' )
+               'pontus:static/select2/dist/js/select2.js' )
+
 default_resource_registry.set_css_resources('select2creation', None, 
-               'pontus:static/select2/select2.css' )
+               'pontus:static/select2/dist/css/select2.min.css' )
 
