@@ -320,12 +320,6 @@ class Select2Widget(SelectWidget):
     create = False
 
 
-class Select2WidgetCreateSearchChoice(SelectWidget):
-    template = 'pontus:templates/select2.pt'
-    requirements = (('deform', None), ('select2creation', None))
-    create = True
-
-
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
     readonly_template = 'deform:templates/readonly/radio_choice.pt'
