@@ -2780,7 +2780,7 @@ define('select2/data/select',[
       option.label = data.text;
     } else {
       option = document.createElement('option');
-      option.text(data.text);
+      option.innerText = data.text;
     }
 
     if (data.id) {
