@@ -320,6 +320,11 @@ class Select2Widget(SelectWidget):
     create = False
 
 
+class AjaxSelect2Widget(Select2Widget):
+    template = 'creationculturelle:views/templates/ajax_select2.pt'
+    requirements = ( ('ajaxselect2', None),) 
+
+
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
     readonly_template = 'deform:templates/readonly/radio_choice.pt'
@@ -446,3 +451,10 @@ default_resource_registry.set_js_resources('select2creation', None,
 default_resource_registry.set_css_resources('select2creation', None, 
                'pontus:static/select2/dist/css/select2.min.css' )
 
+
+default_resource_registry.set_js_resources('ajaxselect2', None, 
+               'pontus:static/select2/dist/js/select2.js', 
+               'pontus:static/js/select2_ajax_extension.js')
+
+default_resource_registry.set_css_resources('ajaxselect2', None, 
+              'pontus:static/select2/dist/css/select2.min.css')

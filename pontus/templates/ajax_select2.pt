@@ -1,0 +1,151 @@
+<div tal:define="
+     name name|field.name;
+     style field.widget.style;
+     oid oid|field.oid;
+     css_class css_class|field.widget.css_class;
+     optgroup_class optgroup_class|field.widget.optgroup_class;
+     multiple multiple|field.widget.multiple;
+     root field.get_root();
+     id oid+'-'+getattr(root, 'formid', root.oid);
+     ajax_url ajax_url|field.widget.ajax_url;
+     dependencies getattr(field.widget, 'dependencies', []);
+     ajax_item_template getattr(field.widget, 'ajax_item_template', 'default_item_template');
+     ajax_selection_template getattr(field.widget, 'ajax_selection_template', 'default_selection_template');
+     minimum_input_length getattr(field.widget, 'minimum_input_length', 1);
+     page_limit getattr(field.widget, 'page_limit', 30);
+     "
+     tal:omit-tag="">
+
+   <style>
+    .form-control .select2-choice {
+        border: 0;
+        border-radius: 2px;
+    }
+
+    .form-control .select2-choice .select2-arrow {
+        border-radius: 0 2px 2px 0;   
+    }
+
+    select.form-control {
+        height: auto !important;
+        padding: 0px;
+        display: inline;
+    }
+
+    .form-group select2-container {
+        height: auto !important;
+        padding: 0px;
+        display: inline;
+    }
+
+    .form-group .select2-container--default .select2-selection--single .select2-selection__arrow {
+        border-left: 1px solid #aaa;
+        border-radius: 0 2px 2px 0;
+        display: block;
+        float: right !important;
+        left: 0;
+        position: relative;
+        top: -15px;
+        width: 20px;
+        height: 0;
+    }
+
+    .form-control.select2-container.select2-dropdown-open {
+        border-color: #5897FB;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .form-control .select2-container.select2-dropdown-open .select2-choices {
+        border-radius: 3px 3px 0 0;
+    }
+
+    .form-control.select2-container .select2-choices {
+        border: 0 !important;
+        border-radius: 3px;
+    }
+   </style>
+  <input type="hidden" name="__start__" value="${name}:sequence"
+         tal:condition="multiple" />
+
+  <select tal:attributes="
+          name name;
+          id id;
+          class string: form-control ${css_class};
+          data-placeholder field.widget.placeholder|None;
+          multiple multiple;
+          style style;"
+          data-context="${','.join(dependencies)}">
+    <tal:loop tal:repeat="item values">
+      <optgroup tal:condition="isinstance(item, optgroup_class)"
+                tal:attributes="label item.label">
+        <option tal:repeat="(value, description) item.options"
+                tal:attributes="
+                selected (multiple and value in cstruct or value == cstruct) and 'selected';
+                label field.widget.long_label_generator and description;
+                value value"
+                tal:content="field.widget.long_label_generator and field.widget.long_label_generator(item.label, description) or description"/>
+      </optgroup>
+
+      <option tal:condition="not isinstance(item, optgroup_class)"
+              tal:attributes="
+              selected (multiple and item[0] in cstruct or item[0] == cstruct) and 'selected';
+              value item[0]">${item[1]}</option>
+    </tal:loop>
+  </select>
+
+  <script type="text/javascript">
+   deform.addCallback(
+     '${id}',
+     function(oid) {
+        var ajax_options = {ajax: {
+                                  url: "${ajax_url}",
+                                  dataType: 'json',
+                                  delay: 250,
+                                  data: function (params) {
+                                        var contextData = get_context_data('#'+oid);
+                                        var data = {
+                                            q: params.term,
+                                            page: params.page,
+                                            pageLimit: ${page_limit}
+                                        };
+                                         
+                                        $.extend(data, contextData); 
+                                        return data;
+                                      },
+                                  processResults: function (data, params) {
+                                         // parse the results into the format expected by Select2
+                                        // since we are using custom formatting functions we do not need to
+                                        // alter the remote JSON data, except to indicate that infinite
+                                        // scrolling can be used
+                                        params.page = params.page || 1;
+                                        return {
+                                           results: data.items,
+                                           pagination: {
+                                               more: (params.page * ${page_limit}) < data.total_count
+                                            }
+                                        };
+                                  },
+                                  cache: true
+                              },
+                              minimumInputLength: ${minimum_input_length},
+                              templateResult: select2_ajac_templates['${ajax_item_template}'] || select2_ajac_templates.default_item_template,
+                              templateSelection: select2_ajac_templates['${ajax_selection_template}'] || select2_ajac_templates.default_select_template,
+                        };
+       <div tal:omit-tag="" tal:condition="field.widget.create" >
+       var init_ops = {tokenSeparators: [","], 
+                       containerCssClass: 'form-control',
+                       tags: true,
+                      };
+       </div>
+       <div tal:omit-tag="" tal:condition="not field.widget.create" >
+        var init_ops = {containerCssClass: 'form-control'};
+       </div>
+       $.extend(init_ops, ajax_options)
+       $('#' + oid).select2(init_ops);
+     }
+   );
+  </script>
+
+  <input type="hidden" name="__end__" value="${name}:sequence"
+         tal:condition="multiple" />
+</div>
