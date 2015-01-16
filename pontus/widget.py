@@ -321,7 +321,7 @@ class Select2Widget(SelectWidget):
 
 
 class AjaxSelect2Widget(Select2Widget):
-    template = 'creationculturelle:views/templates/ajax_select2.pt'
+    template = 'pontus:templates/ajax_select2.pt'
     requirements = ( ('ajaxselect2', None),) 
 
 
