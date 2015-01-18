@@ -50,6 +50,12 @@ class MappingWidget(OriginMappingWidget):
 
 class SequenceWidget(OriginSequenceWidget):
 
+    template = 'pontus:templates/sequence.pt'
+    item_template = 'pontus:templates/sequence_item.pt'
+    requirements = (('deform', None), 
+                    ('sortable', None), 
+                    ('sequence_pontus', None))
+
 
     def prototype(self, field):
         # we clone the item field to bump the oid (for easier
@@ -458,3 +464,8 @@ default_resource_registry.set_js_resources('ajaxselect2', None,
 
 default_resource_registry.set_css_resources('ajaxselect2', None, 
               'pontus:static/select2/dist/css/select2.min.css')
+
+
+default_resource_registry.set_css_resources('sequence_pontus', None, 
+              'pontus:static/css/sequence_widget.css')
+
