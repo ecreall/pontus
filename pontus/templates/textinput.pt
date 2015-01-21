@@ -3,7 +3,7 @@
                   oid oid|field.oid;
                   mask mask|field.widget.mask;
                   mask_placeholder mask_placeholder|field.widget.mask_placeholder;
-                  placeholder placeholder|field.widget.placeholder;
+                  placeholder placeholder|getattr(field.widget, 'placeholder', None);
                   style style|field.widget.style;
 "
       tal:omit-tag="">
