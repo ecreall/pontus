@@ -7,7 +7,9 @@ README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 requires = [
-        'pyramid_layout',
+    'dace',
+    'pyramid_layout',
+    'substanced',
     ]
 
 setup(name='pontus',
