@@ -18,7 +18,7 @@
          tal:attributes="class css_class;
                          style style;"
          id="${oid}"/>
-  <div tal:condition="${read}" class="${reader_style}" >
+  <div tal:condition="read" class="${reader_style}" >
     <img id="${oid}-img" src="#" />
     <script>
       $("#${oid}").on( "change", readImg)
