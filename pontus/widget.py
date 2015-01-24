@@ -224,6 +224,7 @@ class MemoryTmpStore(dict):
 class FileWidget(FileUploadWidget):
 
     template = 'pontus:file/templates/file_upload.pt'
+    requirements = (('file_upload', None),)
 
     def __init__(self, **kw):
         tmpstro= MemoryTmpStore()
@@ -454,6 +455,7 @@ class Length(object):
 default_resource_registry.set_js_resources('select2creation', None, 
                'pontus:static/select2/dist/js/select2.js' )
 
+
 default_resource_registry.set_css_resources('select2creation', None, 
                'pontus:static/select2/dist/css/select2.min.css' )
 
@@ -462,10 +464,15 @@ default_resource_registry.set_js_resources('ajaxselect2', None,
                'pontus:static/select2/dist/js/select2.js', 
                'pontus:static/js/select2_ajax_extension.js')
 
+
 default_resource_registry.set_css_resources('ajaxselect2', None, 
               'pontus:static/select2/dist/css/select2.min.css')
 
 
 default_resource_registry.set_css_resources('sequence_pontus', None, 
               'pontus:static/css/sequence_widget.css')
+
+
+default_resource_registry.set_js_resources('file_upload', None, 
+               'pontus:static/js/file_upload.js' )
 
