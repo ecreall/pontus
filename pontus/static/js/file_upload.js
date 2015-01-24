@@ -1,7 +1,7 @@
 
 function readImg() {
         var input = $(this);
-        var img = $('#'+input.attr(id)+'-img');
+        var img_tag = $('#'+input.attr(id)+'-img');
         if (input.files && input.files[0]) {
             var reader = new FileReader();
 

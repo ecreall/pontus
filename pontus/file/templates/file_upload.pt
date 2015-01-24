@@ -3,7 +3,7 @@
                  css_class css_class|field.widget.css_class;
                  style style|field.widget.style;
                  reader_style getattr(field.widget, 'reader_style', '');
-                 read getattr(field.widget, 'reader', False)">
+                 read getattr(field.widget, 'read', False)">
 
   ${field.start_mapping()}
 
