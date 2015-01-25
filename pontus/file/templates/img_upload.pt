@@ -22,7 +22,7 @@
          id="${oid}"
          onchange="${read and 'readImg(this);'}"/>
   <div tal:condition="read" id="reader">
-    <img class="${reader_style}" id="${oid}-img" src="#" 
+    <img class="img-upload ${reader_style}" id="${oid}-img" src="#" 
     onclick="$('#${oid}').click();" alt="- Select -"
     data-width="${width}"
     data-height="${height}"/>
