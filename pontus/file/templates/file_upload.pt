@@ -17,12 +17,10 @@
   <input type="file" name="upload"
          tal:attributes="class css_class;
                          style style;"
-         id="${oid}"/>
+         id="${oid}"
+         onchange="${read and 'readImg(this);'}"/>
   <div tal:condition="read" class="${reader_style}" >
     <img id="${oid}-img" src="#" />
-    <script>
-      $("#${oid}").on( "change", readImg)
-    </script>
   </div>
 
   ${field.end_mapping()}
