@@ -1,0 +1,38 @@
+<div class="deformFileupload"
+     tal:define="oid oid|field.oid;
+                 css_class css_class|field.widget.css_class;
+                 style style|field.widget.style;
+                 reader_style getattr(field.widget, 'reader_style', '');
+                 read getattr(field.widget, 'read', False);
+                 width  getattr(field.widget, 'width', 150);
+                 height  getattr(field.widget, 'height', 100);">
+
+  ${field.start_mapping()}
+
+  <div class="deformReplaces" tal:condition="cstruct.get('uid')">
+    <input type="hidden" name="uid" value="${cstruct['uid']}"
+           id="${oid}-uid"/>
+    <input tal:condition="'__objectoid__' in cstruct" type="hidden" name="__objectoid__" value="${cstruct['__objectoid__']}" id="${oid}-__objectoid__"/>
+    <span tal:content="cstruct.get('filename')" id="${oid}-filename"/>
+  </div>
+
+  <input type="file" name="upload"
+         tal:attributes="class css_class;
+                         style style;"
+         id="${oid}"
+         onchange="${read and 'readImg(this);'}"/>
+  <div tal:condition="read" id="reader">
+    <img class="${reader_style}" id="${oid}-img" src="#" 
+    onclick="$('#${oid}').click();" alt="- Select -"
+    data-width="${width}"
+    data-height="${height}"/>
+   <script>
+    $(document).ready(function(){
+       $('#${oid}').css('display', 'none')
+    })
+  </script>
+  </div>
+
+  ${field.end_mapping()}
+
+</div>

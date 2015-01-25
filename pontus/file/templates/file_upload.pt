@@ -1,9 +1,7 @@
 <div class="deformFileupload"
      tal:define="oid oid|field.oid;
                  css_class css_class|field.widget.css_class;
-                 style style|field.widget.style;
-                 reader_style getattr(field.widget, 'reader_style', '');
-                 read getattr(field.widget, 'read', False)">
+                 style style|field.widget.style;">
 
   ${field.start_mapping()}
 
@@ -17,11 +15,7 @@
   <input type="file" name="upload"
          tal:attributes="class css_class;
                          style style;"
-         id="${oid}"
-         onchange="${read and 'readImg(this);'}"/>
-  <div tal:condition="read" class="${reader_style}" >
-    <img id="${oid}-img" src="#" />
-  </div>
+         id="${oid}"/>
 
   ${field.end_mapping()}
 

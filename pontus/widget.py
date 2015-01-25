@@ -224,7 +224,6 @@ class MemoryTmpStore(dict):
 class FileWidget(FileUploadWidget):
 
     template = 'pontus:file/templates/file_upload.pt'
-    requirements = (('file_upload', None),)
 
     def __init__(self, **kw):
         tmpstro= MemoryTmpStore()
@@ -261,6 +260,11 @@ def _normalize_choices(values):
                 result.append((value, description))
 
     return result
+
+
+class ImageWidget(FileWidget):
+    template = 'pontus:file/templates/img_upload.pt'
+    requirements = (('img_upload', None),)
 
 
 class SelectWidget(OriginSelectWidget):
@@ -473,6 +477,8 @@ default_resource_registry.set_css_resources('sequence_pontus', None,
               'pontus:static/css/sequence_widget.css')
 
 
-default_resource_registry.set_js_resources('file_upload', None, 
-               'pontus:static/js/file_upload.js' )
+default_resource_registry.set_js_resources('img_upload', None, 
+               'pontus:static/js/img_upload.js' )
 
+default_resource_registry.set_css_resources('img_upload', None, 
+              'pontus:static/css/img_upload.css')
