@@ -4,35 +4,100 @@
                  style style|field.widget.style;
                  reader_style getattr(field.widget, 'reader_style', '');
                  read getattr(field.widget, 'read', False);
-                 width  getattr(field.widget, 'width', 150);
-                 height  getattr(field.widget, 'height', 100);">
+                 min_width  getattr(field.widget, 'min_width', -1);
+                 min_height  getattr(field.widget, 'min_height', -1);
+                 max_width  getattr(field.widget, 'max_width', -1);
+                 max_height  getattr(field.widget, 'max_height', -1);
+                 img_src getattr(field.widget, 'img_src', '#');
+                 error_message getattr(field.widget, 'error_message', 'error');
+                 selection_message getattr(field.widget, 'selection_message', '- Select -');">
 
   ${field.start_mapping()}
-
   <div class="deformReplaces" tal:condition="cstruct.get('uid')">
     <input type="hidden" name="uid" value="${cstruct['uid']}"
            id="${oid}-uid"/>
     <input tal:condition="'__objectoid__' in cstruct" type="hidden" name="__objectoid__" value="${cstruct['__objectoid__']}" id="${oid}-__objectoid__"/>
-    <span tal:content="cstruct.get('filename')" id="${oid}-filename"/>
+    <span tal:condition="not read" tal:content="cstruct.get('filename')" id="${oid}-filename"/>
   </div>
-
-  <input type="file" name="upload"
-         tal:attributes="class css_class;
-                         style style;"
-         id="${oid}"
-         onchange="${read and 'readImg(this);'}"/>
-  <div tal:condition="read" id="reader">
-    <img class="img-upload ${reader_style}" id="${oid}-img" src="#" 
-    onclick="$('#${oid}').click();" alt="- Select -"
-    data-width="${width}"
-    data-height="${height}"/>
-   <script>
-    $(document).ready(function(){
-       $('#${oid}').css('display', 'none')
-    })
-  </script>
-  </div>
-
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-12 col-sm-9">
+       <div class="img-container">
+          <img class="cropper" 
+               id="${oid}-img"
+               src="${img_src}" 
+               alt="${selection_message}"
+               data-min_width="${min_width}"
+               data-min_height="${min_height}"
+               data-max_width="${max_width}"
+               data-max_height="${max_height}"/>
+       </div>
+       <div class="docs-toolbar">
+          <div class="btn-group">
+              <button id="${oid}-zoomIn" type="button" data-option="0.1" data-method="zoom" class="btn btn-primary">
+                 <span class="glyphicon glyphicon-zoom-in"></span>
+               </button>
+              <button id="${oid}-zoomOut" type="button" data-option="-0.1" data-method="zoom" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-zoom-out"></span>
+              </button>
+              <button id="${oid}-rotateLeft" type="button" style="transform: scale(-1, 1);" data-method="rotate" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-share-alt docs-flip-horizontal"></span>
+              </button>
+              <button id="${oid}-rotateRight" type="button"  class="btn btn-primary">
+                  <span class="glyphicon glyphicon-share-alt"></span>
+              </button>
+              <button id="${oid}-move" type="button" data-option="move" data-method="setDragMode" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-move"></span>
+              </button>
+              <button id="${oid}-crop" type="button" data-option="crop" data-method="setDragMode" class="btn btn-primary">
+                 <span class="glyphicon glyphicon-plus"></span>
+              </button>
+              <button id="${oid}-clear" type="button" data-method="clear" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-remove"></span>
+              </button>
+              <label title="Upload image file" for="inputImage" class="btn btn-primary" onclick="$('#${oid}')[0].click()">
+                <input type="file" name="upload" tal:attributes="class css_class; style style;"
+                   id="${oid}"
+                 />
+                <span title="" data-toggle="tooltip" class="docs-tooltip" data-original-title="Import image with FileReader">
+                  <span class="glyphicon glyphicon-upload"></span>
+                </span>
+              </label>
+            </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div  id="${oid}-preview" class="row">
+          <div class="col-md-8">
+            <div class="preview preview-sm"></div>
+          </div>
+          <div class="col-md-4">
+            <div class="preview preview-xs"></div>
+          </div>
+        </div>
+        <hr/>
+        <div class="docs-data">
+          <div class="input-group">
+            <span class="input-group-addon">Width</span>
+            <input class="form-control" id="${oid}-dataWidth" type="text" placeholder="width">
+            <span class="input-group-addon">px</span>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">Height</span>
+            <input class="form-control" id="${oid}-dataHeight" type="text" placeholder="height">
+            <span class="input-group-addon">px</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="reader">
+       <script>
+        $(document).ready(function(){
+           $('#${oid}').css('display', 'none');
+           readImg('${oid}')
+        })
+      </script>
+    </div>
+</div>
   ${field.end_mapping()}
-
 </div>

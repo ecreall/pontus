@@ -2,7 +2,50 @@
     background: none repeat scroll 0 0 #fafafa;
     cursor: pointer;
     font-size: 15px;
-    height: 30px;
     text-align: center;
-    width: 150px;
   }
+
+.img-remove{
+    display: block;
+    font-size: 9px;
+    height: 15px;
+    padding: 1px;
+    position: absolute;
+    width: 15px;
+}
+
+.img-container{
+    background-color: #f7f7f7;
+    border: 1px solid #c6c6c6;
+    border-radius: 4px;
+    box-shadow: 0 0 6px #c6c6c6 inset;
+    height: 200px;
+    overflow: hidden;
+    text-align: center;
+}
+
+
+.preview{
+    background-color: #f7f7f7;
+    border: 1px solid #c6c6c6;
+    border-radius: 4px;
+    box-shadow: 0 0 6px #c6c6c6 inset;
+    overflow: hidden;
+    text-align: center;
+}
+
+.preview-sm{
+    height: 90px;
+    width: 160px;
+}
+
+.preview-xs{
+    height: 36px;
+    width: 64px;
+}
+
+.docs-toolbar{
+    margin-bottom: -10px;
+    margin-top: 10px;
+    text-align: center;
+}

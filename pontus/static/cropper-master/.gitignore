@@ -1,0 +1,10 @@
+# Files to ignore
+
+node_modules
+releases
+build
+tests
+utils
+workspace
+CHANGELOG.md
+TODO.md

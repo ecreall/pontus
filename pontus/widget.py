@@ -478,7 +478,9 @@ default_resource_registry.set_css_resources('sequence_pontus', None,
 
 
 default_resource_registry.set_js_resources('img_upload', None, 
-               'pontus:static/js/img_upload.js' )
+               'pontus:static/js/img_upload.js',
+               'pontus:static/cropper-master/dist/cropper.js' )
 
 default_resource_registry.set_css_resources('img_upload', None, 
-              'pontus:static/css/img_upload.css')
+              'pontus:static/css/img_upload.css',
+               'pontus:static/cropper-master/dist/cropper.css')
