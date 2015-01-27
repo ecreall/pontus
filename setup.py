@@ -10,6 +10,7 @@ requires = [
     'dace',
     'pyramid_layout',
     'substanced',
+    'pillow'
     ]
 
 setup(name='pontus',
