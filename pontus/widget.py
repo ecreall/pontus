@@ -5,6 +5,7 @@
 # author: Amen Souissi
 
 import weakref
+import io
 from colander import (
     Invalid,
     null,
@@ -22,13 +23,13 @@ from deform.widget import (
     CheckboxChoiceWidget as OriginCheckboxChoiceWidget,
     default_resource_registry
     )
-
 from deform.compat import (
     string_types,
     url_quote
     )
-
 from translationstring import TranslationString
+from PIL import Image
+
 from substanced.util import get_oid
 
 from dace.util import get_obj
@@ -263,8 +264,48 @@ def _normalize_choices(values):
 
 
 class ImageWidget(FileWidget):
+    
     template = 'pontus:file/templates/img_upload.pt'
     requirements = (('img_upload', None),)
+
+    def deserialize(self, field, pstruct):
+        data = super(FileWidget, self).deserialize(field, pstruct)
+        upload = pstruct.get('upload')
+        if hasattr(upload, 'file'):
+            data['upload'] = upload
+
+        fp = None
+        if data is null:
+            image_oid = pstruct.get(OBJECT_OID, None)
+            if image_oid:
+                image = get_obj(int(image_oid))
+                fp = image.fp
+                data = {'filename': image.filename,
+                        'upload': True,
+                        'deferred_error': True}
+            else:
+                return null
+        else:
+            fp = data['fp'].raw
+
+        data[OBJECT_OID] = pstruct.get(OBJECT_OID)
+        left = round(float(pstruct['x']))
+        upper = round(float(pstruct['y']))
+        right = round(left + float(pstruct['width']))
+        lower = round(upper + float(pstruct['height']))
+        img = Image.open(fp)
+        old_size = img.size
+        img = img.crop((left, upper, right, lower))
+        buf = io.BytesIO()
+        img.save(buf, data['filename'].split('.')[1])
+        result_size = img.size
+        buf.seek(0)
+        if 'deferred_error' in data and\
+           result_size == old_size:
+            return null
+
+        data['fp'] = io.BufferedRandom(buf)
+        return data
 
 
 class SelectWidget(OriginSelectWidget):

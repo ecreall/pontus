@@ -11,7 +11,8 @@ function readImg(input_id){
               min_height: parseInt(image.data('min_height'))};
   var dataHeight = $('#'+input_id+'-dataHeight'),
       dataWidth = $('#'+input_id+'-dataWidth'),
-      console = window.console || {log:$.noop},
+      dataX = $('#'+input_id+'-dataX'),
+      dataY = $('#'+input_id+'-dataY'),
       cropper;
 
   image.cropper({
@@ -45,6 +46,8 @@ function readImg(input_id){
     done: function(data) {
       dataHeight.val(data.height);
       dataWidth.val(data.width);
+      dataX.val(data.x);
+      dataY.val(data.y);
       //var dataURL = image.cropper("getDataURL");
       //var blob = dataURItoBlob(dataURL);
       //cant set input.files attribute (for security reasons)
@@ -52,29 +55,6 @@ function readImg(input_id){
   });
 
   cropper = image.data("cropper");
-
-  image.on({
-    "build.cropper": function(e) {
-      console.log(e.type);
-      // e.preventDefault();
-    },
-    "built.cropper": function(e) {
-      console.log(e.type);
-      // e.preventDefault();
-    },
-    "dragstart.cropper": function(e) {
-      console.log(e.type);
-      // e.preventDefault();
-    },
-    "dragmove.cropper": function(e) {
-      console.log(e.type);
-      // e.preventDefault();
-    },
-    "dragend.cropper": function(e) {
-      console.log(e.type);
-      // e.preventDefault();
-    }
-  });
 
   $('#'+input_id+'-clear').click(function() {
     image.cropper("clear");

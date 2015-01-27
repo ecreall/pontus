@@ -9,7 +9,6 @@
                  max_width  getattr(field.widget, 'max_width', -1);
                  max_height  getattr(field.widget, 'max_height', -1);
                  img_src getattr(field.widget, 'img_src', '#');
-                 error_message getattr(field.widget, 'error_message', 'error');
                  selection_message getattr(field.widget, 'selection_message', '- Select -');">
 
   ${field.start_mapping()}
@@ -65,26 +64,31 @@
             </div>
         </div>
       </div>
-      <div class="col-md-3">
-        <div  id="${oid}-preview" class="row">
-          <div class="col-md-8">
+      <div class="col-md-3 img-data">
+        <div  id="${oid}-preview" class="row preview-container">
+          <div class="col-md-9 preview-item-md">
             <div class="preview preview-sm"></div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4 preview-item-xs">
             <div class="preview preview-xs"></div>
           </div>
         </div>
         <hr/>
         <div class="docs-data">
           <div class="input-group">
+            <input name="x" id="${oid}-dataX" type="hidden" placeholder="x">
+          </div>
+          <div class="input-group">
+            <input name="y" id="${oid}-dataY"  type="hidden" placeholder="y">
+          </div>
+
+          <div class="input-group">
             <span class="input-group-addon">Width</span>
-            <input class="form-control" id="${oid}-dataWidth" type="text" placeholder="width">
-            <span class="input-group-addon">px</span>
+            <input  name="width" id="${oid}-dataWidth" placeholder="width">
           </div>
           <div class="input-group">
             <span class="input-group-addon">Height</span>
-            <input class="form-control" id="${oid}-dataHeight" type="text" placeholder="height">
-            <span class="input-group-addon">px</span>
+            <input  name="height" id="${oid}-dataHeight" placeholder="height">
           </div>
         </div>
       </div>

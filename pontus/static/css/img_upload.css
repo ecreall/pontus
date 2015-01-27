@@ -49,3 +49,30 @@
     margin-top: 10px;
     text-align: center;
 }
+
+.docs-data > .input-group > .input-group-addon {
+    min-width: 70px;
+}
+
+.docs-data  input{
+    background-color: #ffffff;
+    background-image: none;
+    border: 1px solid #cccccc;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+    color: #555555;
+    display: block;
+    font-size: 14px;
+    height: 34px;
+    line-height: 1.42857;
+    padding: 6px 12px;
+    transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+    width: 100%;
+}
+
+.preview-item-md{
+    margin-bottom: 5px 
+}
+
+.img-data{
+    padding: 0px
+}
