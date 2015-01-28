@@ -280,9 +280,9 @@ class ImageWidget(FileWidget):
             if image_oid:
                 image = get_obj(int(image_oid))
                 fp = image.fp
-                data = {'filename': image.filename,
-                        'upload': True,
-                        'deferred_error': True}
+                data = image.get_data(None)
+                data.update({'upload': True,
+                            'deferred_error': True})
             else:
                 return null
         else:
@@ -294,16 +294,13 @@ class ImageWidget(FileWidget):
         right = round(left + float(pstruct['width']))
         lower = round(upper + float(pstruct['height']))
         img = Image.open(fp)
-        old_size = img.size
         img = img.crop((left, upper, right, lower))
         buf = io.BytesIO()
         img.save(buf, data['filename'].split('.')[1])
-        result_size = img.size
         buf.seek(0)
-        if 'deferred_error' in data and\
-           result_size == old_size:
-            return null
-
+        old_buf = data.get('fp', None)
+        if old_buf:
+            old_buf.seek(0)
         data['fp'] = io.BufferedRandom(buf)
         return data
 
