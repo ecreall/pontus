@@ -21,9 +21,9 @@
     <div class="row">
       <div class="col-xs-12 col-sm-9">
        <div class="img-container">
-          <img class="cropper" 
+          <img class="cropper"
                id="${oid}-img"
-               src="${img_src}" 
+               src="${img_src}"
                alt="${selection_message}"
                data-min_width="${min_width}"
                data-min_height="${min_height}"
@@ -54,7 +54,7 @@
                   <span class="glyphicon glyphicon-remove"></span>
               </button>
               <label title="Upload image file" for="inputImage" class="btn btn-primary" onclick="$('#${oid}')[0].click()">
-                <input type="file" name="upload" tal:attributes="class css_class; style style;"
+                <input accept="image/*" type="file" name="upload" tal:attributes="class css_class; style style;"
                    id="${oid}"
                  />
                 <span title="" data-toggle="tooltip" class="docs-tooltip" data-original-title="Import image with FileReader">
