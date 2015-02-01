@@ -35,7 +35,7 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 
-from pontus.file import OBJECT_OID, OBJECT_REMOVED
+from pontus.file import OBJECT_OID
 
 
 
@@ -238,11 +238,6 @@ class FileWidget(FileUploadWidget):
             return null
 
         data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
-        todel = pstruct[OBJECT_REMOVED] == 'true'
-        if todel:
-            data[OBJECT_REMOVED] = True
-            return data
-
         if 'fp' not in data and \
            OBJECT_OID in pstruct:
             image = get_obj(int(pstruct[OBJECT_OID]))
@@ -279,11 +274,6 @@ class ImageWidget(FileWidget):
             return null
 
         data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
-        todel = pstruct[OBJECT_REMOVED] == 'true'
-        if todel:
-            data[OBJECT_REMOVED] = True
-            return data
-
         fp = None
         if 'fp' in data:
             fp = data['fp'].raw

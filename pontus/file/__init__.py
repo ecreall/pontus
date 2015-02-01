@@ -20,8 +20,6 @@ from dace.objectofcollaboration.object import Object as DaceObject
 
 OBJECT_DATA = '_object_data'
 
-OBJECT_REMOVED = '_object_removed'
-
 OBJECT_OID = '__objectoid__'
 
 NO_VALUES = '_no_values'
@@ -184,9 +182,6 @@ class ObjectData(colander.Mapping):
 
         if result is None:
             result = cstruct
-
-        if OBJECT_REMOVED in result and result[OBJECT_REMOVED]:
-            return colander.null
 
         obj = None
         if obj_oid is not None:

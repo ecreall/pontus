@@ -2,7 +2,7 @@
 
 var _URL = window.URL || window.webkitURL;
 
-function init_reader(input_id, image, dataDel){
+function init_reader(input_id, image){
   if (window.FileReader) {
     $('#'+input_id).change(function() {
       var fileReader = new FileReader(),
@@ -19,7 +19,6 @@ function init_reader(input_id, image, dataDel){
         fileReader.readAsDataURL(file);
         fileReader.onload = function () {
           image.cropper("reset", true).cropper("replace", this.result);
-          dataDel.val('false')
         };
       } else {
         showMessage("Please choose an image file.");
@@ -42,7 +41,7 @@ function readImg(input_id){
       dataX = $('#'+input_id+'-dataX'),
       dataY = $('#'+input_id+'-dataY'),
       dataR = $('#'+input_id+'-dataR'),
-      dataDel = $('#'+input_id+'-dataDel'),
+      dataUID = $('#'+input_id+'-uid'),
       cropper;
 
   var options = {
@@ -80,9 +79,6 @@ function readImg(input_id){
       dataY.val(data.y);
       if (dataR.val() == ''){
           dataR.val('0')
-      };
-      if (dataDel.val() == ''){
-          dataDel.val('false')
       };
     },
   }
@@ -130,15 +126,15 @@ function readImg(input_id){
       $('#'+input_id).css('display', 'none');
       image.attr('src', '#');
       image.cropper("destroy");
-      dataDel.val('true');
+      dataUID.val('');
       dataX.val('');
       dataY.val('');
       dataWidth.val('');
       dataHeight.val('');
       image.cropper(options);
-      init_reader(input_id, image, dataDel);
+      init_reader(input_id, image);
   });
   
-    init_reader(input_id, image, dataDel);
+    init_reader(input_id, image);
 
 };
