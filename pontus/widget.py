@@ -6,6 +6,9 @@
 
 import weakref
 import io
+from translationstring import TranslationString
+from PIL import Image
+from pyramid.threadlocal import get_current_request
 from colander import (
     Invalid,
     null,
@@ -27,9 +30,7 @@ from deform.compat import (
     string_types,
     url_quote
     )
-from translationstring import TranslationString
-from PIL import Image
-
+from substanced.file import FileUploadTempStore
 from substanced.util import get_oid
 
 from dace.util import get_obj
@@ -227,8 +228,9 @@ class FileWidget(FileUploadWidget):
     template = 'pontus:file/templates/file_upload.pt'
 
     def __init__(self, **kw):
-        tmpstro= MemoryTmpStore()
-        FileUploadWidget.__init__(self,tmpstro, **kw)
+        request = get_current_request()
+        tmpstore = FileUploadTempStore(request)
+        FileUploadWidget.__init__(self, tmpstore, **kw)
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
@@ -270,25 +272,17 @@ class ImageWidget(FileWidget):
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
-        upload = pstruct.get('upload')
-        if hasattr(upload, 'file'):
-            data['upload'] = upload
+        if data is null:
+            return null
 
         fp = None
-        if data is null:
-            image_oid = pstruct.get(OBJECT_OID, None)
-            if image_oid:
-                image = get_obj(int(image_oid))
-                fp = image.fp
-                data = image.get_data(None)
-                data.update({'upload': True,
-                            'deferred_error': True})
-            else:
-                return null
-        else:
+        if 'fp' in data:
             fp = data['fp'].raw
+        elif OBJECT_OID in data:
+            image = get_obj(int(data[OBJECT_OID]))
+            fp = image.fp
 
-        data[OBJECT_OID] = pstruct.get(OBJECT_OID)
+        fp.seek(0)
         left = round(float(pstruct['x']))
         upper = round(float(pstruct['y']))
         right = round(left + float(pstruct['width']))
@@ -302,6 +296,9 @@ class ImageWidget(FileWidget):
         if old_buf:
             old_buf.seek(0)
         data['fp'] = io.BufferedRandom(buf)
+        upload = pstruct.get('upload')
+        data['upload'] = upload
+        self.tmpstore.clear()
         return data
 
 

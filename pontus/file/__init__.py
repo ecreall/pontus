@@ -31,7 +31,7 @@ MARKER = object()
 
 class File(DaceObject, OriginFile):
 
-    def __init__(self, fp, mimetype, filename, preview_url, uid, **kwargs):
+    def __init__(self, fp, mimetype, filename, uid, **kwargs):
         DaceObject.__init__(self, **kwargs)
         if fp:
             fp.seek(0)
@@ -39,7 +39,6 @@ class File(DaceObject, OriginFile):
             fp = None
         mimetype = mimetype or USE_MAGIC
         OriginFile.__init__(self, fp, mimetype, filename)
-        self.preview_url = preview_url
         self.uid = uid
 
     @property
@@ -55,7 +54,6 @@ class File(DaceObject, OriginFile):
         result['filename'] = self.title
         result['uid'] = self.uid
         result['mimetype'] = self.mimetype
-        result['preview_url'] = self.preview_url
         result['size'] = self.get_size()
         result['fp'] = self.blob.open('r')
         return result
