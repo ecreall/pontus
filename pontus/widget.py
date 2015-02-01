@@ -6,9 +6,9 @@
 
 import weakref
 import io
+import colander
 from translationstring import TranslationString
 from PIL import Image
-from pyramid.threadlocal import get_current_request
 from colander import (
     Invalid,
     null,
@@ -228,9 +228,10 @@ class FileWidget(FileUploadWidget):
     template = 'pontus:file/templates/file_upload.pt'
 
     def __init__(self, **kw):
-        request = get_current_request()
-        tmpstore = FileUploadTempStore(request)
-        FileUploadWidget.__init__(self, tmpstore, **kw)
+        if 'tmpstore' not in kw:
+            kw['tmpstore'] = MemoryTmpStore()
+
+        FileUploadWidget.__init__(self, **kw)
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
@@ -282,6 +283,9 @@ class ImageWidget(FileWidget):
             image = get_obj(int(data[OBJECT_OID]))
             fp = image.fp
 
+        if fp is None:
+            return null
+
         fp.seek(0)
         left = round(float(pstruct['x']))
         upper = round(float(pstruct['y']))
@@ -300,6 +304,13 @@ class ImageWidget(FileWidget):
         data['upload'] = upload
         self.tmpstore.clear()
         return data
+
+
+@colander.deferred
+def image_upload_widget(node, kw):
+    request = node.bindings['request']
+    tmpstore = FileUploadTempStore(request)
+    return ImageWidget(tmpstore)
 
 
 class SelectWidget(OriginSelectWidget):
