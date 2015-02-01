@@ -53,7 +53,10 @@
               <button id="${oid}-clear" type="button" data-method="clear" class="btn btn-primary">
                   <span class="glyphicon glyphicon-remove"></span>
               </button>
-              <label title="Upload image file" for="inputImage" class="btn btn-primary" onclick="$('#${oid}')[0].click()">
+              <button id="${oid}-remove" type="button" data-method="remove" class="btn btn-danger">
+                  <span class="glyphicon glyphicon-trash"></span>
+              </button>
+              <label title="Upload image file" for="inputImage" class="btn btn-success" onclick="$('#${oid}')[0].click()">
                 <input accept="image/*" type="file" name="upload" tal:attributes="class css_class; style style;"
                    id="${oid}"
                  />
@@ -81,7 +84,12 @@
           <div class="input-group">
             <input name="y" id="${oid}-dataY"  type="hidden" placeholder="y">
           </div>
-
+          <div class="input-group">
+            <input name="r" id="${oid}-dataR"  type="hidden">
+          </div>
+          <div class="input-group">
+              <input name="_object_removed" id="${oid}-dataDel"  type="hidden">
+          </div>
           <div class="input-group">
             <span class="input-group-addon">Width</span>
             <input  name="width" id="${oid}-dataWidth" placeholder="width">

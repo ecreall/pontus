@@ -35,7 +35,7 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 
-from pontus.file import OBJECT_OID
+from pontus.file import OBJECT_OID, OBJECT_REMOVED
 
 
 
@@ -105,7 +105,6 @@ class SequenceWidget(OriginSequenceWidget):
             for val in cstruct:
                 cloned = item_field.clone()
                 # root ++ Ecreall++ Amen
-                #import pdb; pdb.set_trace()
                 if item_field.parent is not None:
                     cloned._parent = weakref.ref(item_field.parent)
                 # root ++ Ecreall++ Amen
@@ -235,15 +234,78 @@ class FileWidget(FileUploadWidget):
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
-        upload = pstruct.get('upload')
-        if hasattr(upload, 'file'):
-            data['upload'] = upload
-
         if data is null:
             return null
 
-        data[OBJECT_OID] = pstruct.get(OBJECT_OID)
+        data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
+        todel = pstruct[OBJECT_REMOVED] == 'true'
+        if todel:
+            data[OBJECT_REMOVED] = True
+            return data
+
+        if 'fp' not in data and \
+           OBJECT_OID in pstruct:
+            image = get_obj(int(pstruct[OBJECT_OID]))
+            data['fp'] = image.fp
+
         return data
+
+
+class ImageWidget(FileWidget):
+    
+    template = 'pontus:file/templates/img_upload.pt'
+    requirements = (('img_upload', None),)
+
+    def _transforme_image(self, fp, pstruct, data):
+        left = round(float(pstruct['x']))
+        upper = round(float(pstruct['y']))
+        right = round(left + float(pstruct['width']))
+        lower = round(upper + float(pstruct['height']))
+        deg = round(float(pstruct['r']))
+        img = Image.open(fp)
+        img = img.rotate(deg).crop((left, upper, right, lower))
+        buf = io.BytesIO()
+        img.save(buf, data['filename'].split('.')[1])
+        buf.seek(0)
+        old_buf = data.get('fp', None)
+        if old_buf:
+            old_buf.seek(0)
+
+        return buf
+
+    def deserialize(self, field, pstruct):
+        data = super(FileWidget, self).deserialize(field, pstruct)
+        if data is null:
+            return null
+
+        data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
+        todel = pstruct[OBJECT_REMOVED] == 'true'
+        if todel:
+            data[OBJECT_REMOVED] = True
+            return data
+
+        fp = None
+        if 'fp' in data:
+            fp = data['fp'].raw
+        elif OBJECT_OID in pstruct:
+            image = get_obj(int(pstruct[OBJECT_OID]))
+            fp = image.fp
+
+        if fp is None:
+            return null
+
+        fp.seek(0)
+        buf = self._transforme_image(fp, pstruct, data)
+        data['fp'] = io.BufferedRandom(buf)
+        self.tmpstore.clear()
+        return data
+
+
+@colander.deferred
+def image_upload_widget(node, kw):
+    request = node.bindings['request']
+    tmpstore = FileUploadTempStore(request)
+    return ImageWidget(tmpstore)
 
 
 def _normalize_choices(values):
@@ -265,54 +327,7 @@ def _normalize_choices(values):
 
     return result
 
-
-class ImageWidget(FileWidget):
-    
-    template = 'pontus:file/templates/img_upload.pt'
-    requirements = (('img_upload', None),)
-
-    def deserialize(self, field, pstruct):
-        data = super(FileWidget, self).deserialize(field, pstruct)
-        if data is null:
-            return null
-
-        fp = None
-        if 'fp' in data:
-            fp = data['fp'].raw
-        elif OBJECT_OID in data:
-            image = get_obj(int(data[OBJECT_OID]))
-            fp = image.fp
-
-        if fp is None:
-            return null
-
-        fp.seek(0)
-        left = round(float(pstruct['x']))
-        upper = round(float(pstruct['y']))
-        right = round(left + float(pstruct['width']))
-        lower = round(upper + float(pstruct['height']))
-        img = Image.open(fp)
-        img = img.crop((left, upper, right, lower))
-        buf = io.BytesIO()
-        img.save(buf, data['filename'].split('.')[1])
-        buf.seek(0)
-        old_buf = data.get('fp', None)
-        if old_buf:
-            old_buf.seek(0)
-        data['fp'] = io.BufferedRandom(buf)
-        upload = pstruct.get('upload')
-        data['upload'] = upload
-        self.tmpstore.clear()
-        return data
-
-
-@colander.deferred
-def image_upload_widget(node, kw):
-    request = node.bindings['request']
-    tmpstore = FileUploadTempStore(request)
-    return ImageWidget(tmpstore)
-
-
+ 
 class SelectWidget(OriginSelectWidget):
 
     def serialize(self, field, cstruct, **kw):

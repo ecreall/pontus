@@ -2,6 +2,34 @@
 
 var _URL = window.URL || window.webkitURL;
 
+function init_reader(input_id, image, dataDel){
+  if (window.FileReader) {
+    $('#'+input_id).change(function() {
+      var fileReader = new FileReader(),
+          files = this.files,
+          file;
+
+      if (!files.length) {
+        return;
+      }
+
+      file = files[0];
+
+      if (/^image\/\w+$/.test(file.type)) {
+        fileReader.readAsDataURL(file);
+        fileReader.onload = function () {
+          image.cropper("reset", true).cropper("replace", this.result);
+          dataDel.val('false')
+        };
+      } else {
+        showMessage("Please choose an image file.");
+      }
+    });
+  } else {
+    $('#'+input_id).addClass("hide");
+  }
+
+};
 
 function readImg(input_id){
   var image = $('#'+input_id+'-img');
@@ -13,9 +41,11 @@ function readImg(input_id){
       dataWidth = $('#'+input_id+'-dataWidth'),
       dataX = $('#'+input_id+'-dataX'),
       dataY = $('#'+input_id+'-dataY'),
+      dataR = $('#'+input_id+'-dataR'),
+      dataDel = $('#'+input_id+'-dataDel'),
       cropper;
 
-  image.cropper({
+  var options = {
     autoCropArea: 1,
     maxWidth: size.max_width == -1 && Infinity || size.max_width,
     minWidth:size.min_width == -1 && 0 || size.min_width,
@@ -48,11 +78,15 @@ function readImg(input_id){
       dataWidth.val(data.width);
       dataX.val(data.x);
       dataY.val(data.y);
-      //var dataURL = image.cropper("getDataURL");
-      //var blob = dataURItoBlob(dataURL);
-      //cant set input.files attribute (for security reasons)
+      if (dataR.val() == ''){
+          dataR.val('0')
+      };
+      if (dataDel.val() == ''){
+          dataDel.val('false')
+      };
     },
-  });
+  }
+  image.cropper(options);
 
   cropper = image.data("cropper");
 
@@ -82,37 +116,29 @@ function readImg(input_id){
 
   $('#'+input_id+'-rotateLeft').click(function() {
     image.cropper("rotate", -90);
+    dataR.val(parseInt(dataR.val())+90);
   });
 
   $('#'+input_id+'-rotateRight').click(function() {
     image.cropper("rotate", 90);
+    dataR.val(parseInt(dataR.val())-90);
   });
 
-  var inputImage = $('#'+input_id);
-
-  if (window.FileReader) {
-    inputImage.change(function() {
-      var fileReader = new FileReader(),
-          files = this.files,
-          file;
-
-      if (!files.length) {
-        return;
-      }
-
-      file = files[0];
-
-      if (/^image\/\w+$/.test(file.type)) {
-        fileReader.readAsDataURL(file);
-        fileReader.onload = function () {
-          image.cropper("reset", true).cropper("replace", this.result);
-        };
-      } else {
-        showMessage("Please choose an image file.");
-      }
-    });
-  } else {
-    inputImage.addClass("hide");
-  }
+  $('#'+input_id+'-remove').click(function() {
+    var css =  $('#'+input_id).attr('class');
+      $('#'+input_id).replaceWith('<input accept=\"image/*\" type=\"file\" name=\"upload\" class=\"'+css+'\" id=\"'+input_id+'\"/>');
+      $('#'+input_id).css('display', 'none');
+      image.attr('src', '#');
+      image.cropper("destroy");
+      dataDel.val('true');
+      dataX.val('');
+      dataY.val('');
+      dataWidth.val('');
+      dataHeight.val('');
+      image.cropper(options);
+      init_reader(input_id, image, dataDel);
+  });
+  
+    init_reader(input_id, image, dataDel);
 
 };

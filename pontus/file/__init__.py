@@ -20,6 +20,8 @@ from dace.objectofcollaboration.object import Object as DaceObject
 
 OBJECT_DATA = '_object_data'
 
+OBJECT_REMOVED = '_object_removed'
+
 OBJECT_OID = '__objectoid__'
 
 NO_VALUES = '_no_values'
@@ -57,11 +59,6 @@ class File(DaceObject, OriginFile):
         result['size'] = self.get_size()
         result['fp'] = self.blob.open('r')
         return result
-
-    def set_data(self, appstruct, omit=('_csrf_token_', '__objectoid__')):
-        if 'upload' in appstruct:
-            appstruct.pop('upload')
-            super(File, self).set_data(appstruct, omit)
 
     def get_size(self):
         try:
@@ -188,6 +185,9 @@ class ObjectData(colander.Mapping):
         if result is None:
             result = cstruct
 
+        if OBJECT_REMOVED in result and result[OBJECT_REMOVED]:
+            return colander.null
+
         obj = None
         if obj_oid is not None:
             obj = get_obj(int(obj_oid))
@@ -258,7 +258,6 @@ class ObjectData(colander.Mapping):
             return appstruct
 
         # edit form
-        #import pdb; pdb.set_trace()
         obj.set_data(result)
         appstruct[NO_VALUES] = not has_values
         appstruct[OBJECT_DATA] = obj
