@@ -10,8 +10,10 @@ import deform.exception
 import deform.widget
 from deform.form import Button
 
-from substanced.form import FormView as SubstanceDFormView
-from substanced.form import FormError
+from substanced.form import (
+    FormView as SubstanceDFormView,
+    FileUploadTempStore as FileUploadTempStoreOrigine,
+    FormError)
 
 from pontus.interfaces import IFormView
 from pontus.view import ElementaryView
@@ -173,3 +175,11 @@ class FormView(ElementaryView, SubstanceDFormView):
                         node.widget.readonly = True
                 else:
                     self._chmod(node.children[0], m[1])
+
+
+class FileUploadTempStore(FileUploadTempStoreOrigine):
+
+    def preview_url(self, uid):
+        root = self.request.virtual_root
+        return self.request.resource_url(
+            root, '@@preview_image_upload', uid)

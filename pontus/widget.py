@@ -232,6 +232,23 @@ class FileWidget(FileUploadWidget):
 
         FileUploadWidget.__init__(self, **kw)
 
+    def serialize(self, field, cstruct, **kw):
+        if cstruct in (null, None):
+            cstruct = {}
+
+        if cstruct:
+            uid = cstruct['uid']
+            if not uid in self.tmpstore:
+                if 'fp' in cstruct:
+                    cstruct['fp'].seek(0)
+
+                self.tmpstore[uid] = cstruct
+
+        readonly = kw.get('readonly', self.readonly)
+        template = readonly and self.readonly_template or self.template
+        values = self.get_template_values(field, cstruct, kw)
+        return field.renderer(template, **values)
+
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
         if data is null:
@@ -267,6 +284,20 @@ class ImageWidget(FileWidget):
             old_buf.seek(0)
 
         return buf
+
+    def preview_url(self):
+        img_src = "#"
+        if getattr(self, 'source', None):
+            # uid = self.source.uid
+            # if uid and not isinstance(self.tmpstore, MemoryTmpStore):
+            #     filedata = self.tmpstore.get(uid, {})
+            #     if 'fp' in filedata:
+            #         img_src = self.tmpstore.preview_url(uid)
+
+            if img_src == '#':
+                img_src = self.source.url(self.tmpstore.request)
+
+        return img_src
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)

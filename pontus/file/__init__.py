@@ -8,6 +8,7 @@ import colander
 import transaction
 from ZODB.blob import Blob
 from ZODB.interfaces import BlobError
+
 from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
 
@@ -124,7 +125,6 @@ class Object(colander.SchemaType):
             return cstruct
 
         return cstruct
-
 
 class ObjectData(colander.Mapping):
 
