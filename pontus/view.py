@@ -245,6 +245,10 @@ class ElementaryView(View):
                                        if not (behavior in specific_behaviors)])
 
         self._init_behaviors(specific_behaviors)
+        self.behaviors_instances = OrderedDict(
+                                    sorted(self.behaviors_instances.items(), 
+                                           key=lambda e: 
+                                         self.behaviors.index(e[1].__class__)))
 
     def validate(self):
         try:

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2015-01-12 10:00+0100\n"
+"POT-Creation-Date: 2015-02-17 12:37+0100\n"
 "PO-Revision-Date: 2015-01-02 15:08+0100\n"
 "Last-Translator: SOUISSI <amensouissi@ecreall.com>\n"
 "Language-Team: French\n"
@@ -41,10 +41,12 @@ msgstr "Description"
 
 #. Default: Reorder (via drag and drop)
 #: src/pontus/pontus/templates/table_item.pt:11
+#: src/pontus/pontus/templates/sequence_item.pt:20
 msgid "title"
 msgstr "titre"
 
 #: src/pontus/pontus/templates/table_item.pt:13
+#: src/pontus/pontus/templates/sequence_item.pt:22
 msgid "Remove"
 msgstr "Supprimer"
 
