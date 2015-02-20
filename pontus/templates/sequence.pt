@@ -34,7 +34,7 @@
   <div class="panel panel-default">
     <div class="panel-body">
 
-      <div class="deformSeqContainer"
+      <div class="deformSeqContainer ${getattr(field.widget, 'css_class', '')}"
            id="${oid}-orderable">
         <div tal:define="subfields [ x[1] for x in subfields ]"
              tal:repeat="subfield subfields"
