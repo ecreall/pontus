@@ -13,6 +13,7 @@
      ajax_selection_template getattr(field.widget, 'ajax_selection_template', 'default_selection_template');
      minimum_input_length getattr(field.widget, 'minimum_input_length', 1);
      page_limit getattr(field.widget, 'page_limit', 30);
+     add_clear  getattr(field.widget, 'add_clear', False);
      "
      tal:omit-tag="">
 
@@ -48,6 +49,25 @@
         top: -15px;
         width: 20px;
         height: 0;
+    }
+    
+    .select2-remove>span.glyphicon{
+        color: #ef405d;
+        font-size: 12px;
+
+    }
+    
+    .form-group .select2-container--default .select2-remove {
+      border-left: 1px solid #aaa;
+      border-radius: 0 2px 2px 0;
+      display: block;
+      float: right !important;
+      height: 0;
+      position: relative;
+      width: 20px;
+      left: 22px;
+      top: -25px;
+      cursor: pointer;
     }
 
     .form-control.select2-container.select2-dropdown-open {
@@ -143,6 +163,9 @@
        </div>
        $.extend(init_ops, ajax_options)
        $('#' + oid).select2(init_ops);
+      <div tal:omit-tag="" tal:condition="add_clear" >
+        add_clear_btn($('#' + oid))
+      </div>
      }
    );
   </script>
