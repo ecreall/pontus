@@ -3,7 +3,8 @@
                  formid field.get_root().formid;
                  oid oid|formid+'-'+field.oid;
                  name name|field.name;
-                 css_class getattr(field.widget, 'css_class', '')"
+                 css_class getattr(field.widget, 'css_class', '');
+                  inline getattr(field.widget, 'inline', False)"
     xmlns:i18n="http://xml.zope.org/namespaces/i18n" 
     i18n:domain="pontus"
     tal:omit-tag="">
@@ -35,6 +36,7 @@
           jqoid_preload.remove();
           tinyMCE.init({
             language: get_language(),
+            <tal:block condition="inline">inline: true,</tal:block>
             body_class: 'form-control',
             plugins: ["advlist autolink lists link image charmap print preview anchor",
                       "searchreplace visualblocks code fullscreen",
