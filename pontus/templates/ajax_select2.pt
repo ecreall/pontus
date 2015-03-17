@@ -15,6 +15,8 @@
      page_limit getattr(field.widget, 'page_limit', 30);
      add_clear  getattr(field.widget, 'add_clear', False);
      "
+    xmlns:i18n="http://xml.zope.org/namespaces/i18n" 
+    i18n:domain="pontus"
      tal:omit-tag="">
 
    <style>
@@ -114,10 +116,15 @@
     </tal:loop>
   </select>
 
+
+    
+    <script src="${field.widget.request.static_url('pontus:static/select2/dist/js/i18n/'+field.widget.request.locale_name+'.js')}"
+            type="text/javascript"></script>
   <script type="text/javascript">
    deform.addCallback(
      '${id}',
      function(oid) {
+        var language = '<tal:block i18n:translate="language-code">en</tal:block>';
         var ajax_options = {ajax: {
                                   url: "${ajax_url}",
                                   dataType: 'json',
@@ -156,10 +163,11 @@
        var init_ops = {tokenSeparators: [","], 
                        containerCssClass: 'form-control',
                        tags: true,
+                       language: language
                       };
        </div>
        <div tal:omit-tag="" tal:condition="not field.widget.create" >
-        var init_ops = {containerCssClass: 'form-control'};
+        var init_ops = {containerCssClass: 'form-control', language: language};
        </div>
        $.extend(init_ops, ajax_options)
        $('#' + oid).select2(init_ops);

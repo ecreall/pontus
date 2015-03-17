@@ -7,6 +7,7 @@
 import weakref
 import io
 import colander
+from pyramid.threadlocal import get_current_request
 from translationstring import TranslationString
 from PIL import Image
 from colander import (
@@ -417,6 +418,9 @@ class AjaxSelect2Widget(Select2Widget):
     template = 'pontus:templates/ajax_select2.pt'
     requirements = ( ('ajaxselect2', None),) 
 
+    @property
+    def request(self):
+        return get_current_request()
 
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
