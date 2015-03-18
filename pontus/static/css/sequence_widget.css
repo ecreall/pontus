@@ -1,18 +1,14 @@
 
 
-a.btn.deformSeqAdd{
-	border-radius: 50%;
-	font-size: 14px;
-	margin-right: 5px;
-	margin-top: -28px;
+a.deformSeqAdd{
+	color: #5cb85c;
+	font-size: 17px;
+	margin-top: -25px;
 	padding: 0 5px 1px;
-	width: 30px;
-	color: white;
 }
 
 .deformSeqItem a.deformClosebutton{
-	border-radius: 50%;
-	font-size: 14px;
-	padding: 0;
-	width: 24px;
+	color: #d9534f;
+	cursor: pointer;
+	font-size: 17px;
 }

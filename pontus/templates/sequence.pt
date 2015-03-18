@@ -52,7 +52,7 @@
 
     <div>
       <a href="#"
-         class="btn btn-success btn-sm deformSeqAdd pull-right"
+         class="deformSeqAdd pull-right"
          id="${field.oid}-seqAdd"
          onclick="javascript: return deform.appendSequenceItem(this);"
          title="${add_subitem_text}">

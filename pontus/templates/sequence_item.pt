@@ -25,7 +25,7 @@
           tal:condition="not hidden"
           title="Reorder (via drag and drop)"
           i18n:attributes="title title"></span>    
-    <a class="btn btn-danger btn-xs deformClosebutton"
+    <a class="deformClosebutton"
        id="${oid}-close"
        tal:condition="not field.widget.hidden"
        title="Remove"
