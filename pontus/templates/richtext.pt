@@ -43,7 +43,14 @@
                       "insertdatetime media table contextmenu paste textcolor"
                       ],
             <tal:block condition="tinymce_options">${tinymce_options},</tal:block>
-            elements: oid
+            elements: oid,
+            setup : function(ed) {
+                    ed.on('init', function(e) {
+                       var ed_init = jQuery.Event("ed_init");
+                       ed_init.ed = ed;
+                       $('#' + oid).trigger(ed_init);
+                    });
+                  }
           });
           jqoid_preload.unbind('click');
         });

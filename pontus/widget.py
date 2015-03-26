@@ -226,12 +226,17 @@ class MemoryTmpStore(dict):
 class FileWidget(FileUploadWidget):
 
     template = 'pontus:file/templates/file_upload.pt'
+    requirements = (('file_upload', None),)
 
     def __init__(self, **kw):
         if 'tmpstore' not in kw:
             kw['tmpstore'] = MemoryTmpStore()
 
         FileUploadWidget.__init__(self, **kw)
+
+    @property
+    def request(self):
+        return get_current_request()
 
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
@@ -562,6 +567,12 @@ default_resource_registry.set_css_resources('ajaxselect2', None,
 default_resource_registry.set_css_resources('sequence_pontus', None, 
               'pontus:static/css/sequence_widget.css')
 
+default_resource_registry.set_js_resources('file_upload', None, 
+               'pontus:static/js/file_upload.js',
+               'pontus:static/kartik-v-bootstrap-fileinput/js/fileinput.min.js' )
+
+default_resource_registry.set_css_resources('file_upload', None, 
+              'pontus:static/kartik-v-bootstrap-fileinput/css/fileinput.min.css')
 
 default_resource_registry.set_js_resources('img_upload', None, 
                'pontus:static/js/img_upload.js',
