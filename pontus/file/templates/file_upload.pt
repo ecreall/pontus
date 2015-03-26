@@ -33,6 +33,13 @@
   <script>
     $(document).ready(function(){
        init_input('${oid}');
+       $('form.deform').on('item_added', function(event){
+         var item_added = $(event.element);
+         var input = $(item_added.find('input[type="file"][id^=\"'+'${oid}'+'\"]').first());
+         if(input.length > 0){
+              init_input(input.attr('id'));
+         }
+      });
     })
   </script>
 </div>
