@@ -569,7 +569,7 @@ default_resource_registry.set_css_resources('sequence_pontus', None,
 
 default_resource_registry.set_js_resources('file_upload', None, 
                'pontus:static/js/file_upload.js',
-               'pontus:static/kartik-v-bootstrap-fileinput/js/fileinput.min.js' )
+               'pontus:static/kartik-v-bootstrap-fileinput/js/fileinput.js' )
 
 default_resource_registry.set_css_resources('file_upload', None, 
               'pontus:static/kartik-v-bootstrap-fileinput/css/fileinput.min.css')
