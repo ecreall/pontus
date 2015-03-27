@@ -1,9 +1,16 @@
 
 function init_input(oid){
-    $("#"+oid).fileinput({'showUpload': false,
-    	                  'previewFileType':'any',
-    	                  'previewClass': 'pontus-file-preview',
-    	                  'previewSettings': {image: {width: "auto", height: "90px"},
-											  html: {width: "auto", height: "90px"},
-											  flash: {width: "auto", height: "90px"}}});
+	var input = $("#"+oid);
+    var file_type = input.data('file_type');
+    if (file_type != 'any'){
+    	file_type = JSON.parse(file_type.replace(/'/g, "\""))
+    };
+    input.fileinput({'showUpload': false,
+	                  'allowedFileTypes': file_type,
+	                  'previewClass': 'pontus-file-preview',
+	                  'previewSettings': {image: {width: "auto", height: "90px"},
+										  html: {width: "auto", height: "90px"},
+										  flash: {width: "auto", height: "90px"},
+										  other: {width: "auto", height: "90px"},},
+					  });
 }
