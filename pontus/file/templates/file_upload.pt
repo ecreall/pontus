@@ -1,7 +1,8 @@
 <div class="deformFileupload"
      tal:define="oid oid|field.oid;
                  css_class css_class|field.widget.css_class;
-                 style style|field.widget.style;">
+                 style style|field.widget.style;
+                 file_type file_type|getattr(field.widget, 'file_type', 'any')">
 
   ${field.start_mapping()}
    <style>
@@ -26,7 +27,8 @@
   <input type="file" name="upload"
          tal:attributes="class css_class;
                          style style;"
-         id="${oid}"/>
+         id="${oid}"
+         data-file_type="${file_type}"/>
   ${field.end_mapping()}
   <script src="${field.widget.request.static_url('pontus:static/kartik-v-bootstrap-fileinput/js/fileinput_locale_'+field.widget.request.locale_name+'.js')}"
             type="text/javascript"></script>
