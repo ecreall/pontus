@@ -2,6 +2,10 @@
 function init_input(oid){
 	var input = $("#"+oid);
     var file_type = input.data('file_type');
+    if(typeof file_type === 'undefined'){
+       file_type = 'any'
+    };
+    
     if (file_type != 'any'){
     	file_type = JSON.parse(file_type.replace(/'/g, "\""))
     };
