@@ -2,7 +2,7 @@
      tal:define="oid oid|field.oid;
                  css_class css_class|field.widget.css_class;
                  style style|field.widget.style;
-                 file_type file_type|getattr(field.widget, 'file_type', 'any')">
+                 file_type file_type|getattr(field.widget, 'file_type', '')">
 
   ${field.start_mapping()}
    <style>

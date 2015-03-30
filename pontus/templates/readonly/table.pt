@@ -4,7 +4,7 @@
      name name|field.name;
      description description|field.description;
      title title|field.title;"
-     class="deformSeq"
+     class="deform-seq"
      id="${oid}">
 
 <div class="panel panel-default">

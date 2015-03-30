@@ -1,13 +1,13 @@
 
 
-a.deformSeqAdd{
+a.deform-seq-add{
 	color: #5cb85c;
 	font-size: 17px;
 	margin-top: -25px;
 	padding: 0 5px 1px;
 }
 
-.deformSeqItem a.deformClosebutton{
+.deform-seq-item a.deform-close-button{
 	color: #d9534f;
 	cursor: pointer;
 	font-size: 17px;

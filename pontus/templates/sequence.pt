@@ -24,7 +24,7 @@
       z-index: 2000;
     }
 
-    .deformSeqAdd > .glyphicon{
+    .deform-seq-add > .glyphicon{
       color: #5cb85c
     }
   </style>   
@@ -32,19 +32,19 @@
   <!-- sequence -->
   <input type="hidden" name="__start__"
          value="${field.name}:sequence"
-         class="deformProto"
+         class="deform-proto"
          tal:attributes="prototype prototype"/>
 
   <div class="panel panel-default">
     <div class="panel-body">
 
-      <div class="deformSeqContainer ${getattr(field.widget, 'css_class', '')}"
+      <div class="deform-seq-container ${getattr(field.widget, 'css_class', '')}"
            id="${oid}-orderable">
         <div tal:define="subfields [ x[1] for x in subfields ]"
              tal:repeat="subfield subfields"
              tal:replace="structure subfield.render_template(item_tmpl, 
                                                           parent=field)" />
-        <span class="deformInsertBefore"
+        <span class="deform-insert-before"
               tal:attributes="
                  min_len min_len;
                  max_len max_len;
@@ -56,7 +56,7 @@
 
     <div>
       <a href="#"
-         class="deformSeqAdd pull-right"
+         class="deform-seq-add pull-right"
          id="${field.oid}-seqAdd"
          onclick="javascript: return deform.appendSequenceItem(this);"
          title="${add_subitem_text}">
@@ -75,9 +75,9 @@
          )
          <tal:block condition="orderable">
              $( "#${oid}-orderable" ).sortable({
-               handle: ".deformOrderbutton, .panel-heading",
+               handle: ".deform-order-button, .panel-heading",
                containerSelector: "#${oid}-orderable",
-               itemSelector: ".deformSeqItem",
+               itemSelector: ".deform-seq-item",
                placeholder: '<span class="glyphicon glyphicon-arrow-right placeholder"></span>',
                onDragStart: function ($item, container, _super) {
                  var offset = $item.offset(),

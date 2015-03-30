@@ -24,7 +24,7 @@ var select2_ajac_templates = {
 function get_context_data(id){
 	 var contextData = {};
 	 var element = $(id);
-	 var form = $(element.parents('.deformSeqItem').first());
+	 var form = $(element.parents('.deform-seq-item').first());
 	 if (form == null){
 	 	form = $(element.parents('form').first());
 	 };

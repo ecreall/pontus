@@ -4,7 +4,7 @@
                  title title|field.title;
                  hastoken (field.children[0].name == '_csrf_token_');
                  oid oid|field.oid"
-     class="form-group row deformSeqItem"
+     class="form-group row deform-seq-item"
      title="${description}"
      i18n:domain="deform">
     <td tal:condition="not hastoken" />

@@ -12,7 +12,7 @@
                  line field.children[0];
                  title title|field.title;
                  description description|field.description"
-     class="deformSeq"
+     class="deform-seq"
      id="${oid}">
 
   <style>
@@ -30,7 +30,7 @@
   <!-- sequence -->
   <input type="hidden" name="__start__"
          value="${field.name}:sequence"
-         class="deformProto"
+         class="deform-proto"
          tal:attributes="prototype prototype"/>
 
 
@@ -68,7 +68,7 @@
             <div tal:define="subfields [ x[1] for x in subfields ]"
                tal:repeat="subfield subfields"
                tal:replace="structure subfield.render_template(item_tmpl,parent=field)" />
-            <tr class="deformInsertBefore"
+            <tr class="deform-insert-before"
               tal:attributes="
                  min_len min_len;
                  max_len max_len;
@@ -80,7 +80,7 @@
 
     <div class="panel-footer">
       <a href="#"
-         class="btn deformSeqAdd"
+         class="btn deform-seq-add"
          id="${field.oid}-seqAdd"
          onclick="javascript: return deform.appendSequenceItem(this);">
         <small id="${field.oid}-addtext">${add_subitem_text}</small>
@@ -99,9 +99,9 @@
 
          <tal:block condition="orderable">
              $( "#${oid}-orderable" ).sortable({
-               handle: ".deformOrderbutton, .panel-heading",
+               handle: ".deform-order-button, .panel-heading",
                containerSelector: "#${oid}-orderable",
-               itemSelector: ".deformSeqItem",
+               itemSelector: ".deform-seq-item",
                placeholder: '<span class="glyphicon glyphicon-arrow-right placeholder"></span>',
                onDragStart: function ($item, container, _super) {
                  var offset = $item.offset(),
