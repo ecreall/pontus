@@ -172,7 +172,7 @@ class ObjectData(colander.Mapping):
                 return result
         else:
             if cstruct is colander.null:
-                return  cstruct
+                return  colander.null
 
         if result is None:
             result = cstruct

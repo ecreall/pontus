@@ -7,6 +7,7 @@
 import weakref
 import io
 import colander
+from deform.widget import filedict
 from pyramid.threadlocal import get_current_request
 from translationstring import TranslationString
 from PIL import Image
@@ -244,11 +245,10 @@ class FileWidget(FileUploadWidget):
 
         if cstruct:
             uid = cstruct['uid']
-            if not uid in self.tmpstore:
-                if 'fp' in cstruct:
-                    cstruct['fp'].seek(0)
+            if 'fp' in cstruct:
+                cstruct['fp'].seek(0)
 
-                self.tmpstore[uid] = cstruct
+            self.tmpstore[uid] = cstruct
 
         readonly = kw.get('readonly', self.readonly)
         template = readonly and self.readonly_template or self.template
@@ -257,14 +257,14 @@ class FileWidget(FileUploadWidget):
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
-        if data is null:
+        if data is null or pstruct.get('_object_removed', ''):
             return null
 
         data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
         if 'fp' not in data and \
            OBJECT_OID in pstruct:
-            image = get_obj(int(pstruct[OBJECT_OID]))
-            data['fp'] = image.fp
+            file_obj = get_obj(int(pstruct[OBJECT_OID]))
+            data['fp'] = file_obj.fp
 
         return data
 
