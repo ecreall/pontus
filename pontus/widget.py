@@ -7,6 +7,7 @@
 import weakref
 import io
 import colander
+import os
 from deform.widget import filedict
 from pyramid.threadlocal import get_current_request
 from translationstring import TranslationString
@@ -283,7 +284,8 @@ class ImageWidget(FileWidget):
         img = Image.open(fp)
         img = img.rotate(deg).crop((left, upper, right, lower))
         buf = io.BytesIO()
-        img.save(buf, data['filename'].split('.')[1])
+        ext = os.path.splitext(data['filename'])[1].lower()
+        img.save(buf, Image.EXTENSION.get(ext, 'png'))
         buf.seek(0)
         old_buf = data.get('fp', None)
         if old_buf:
