@@ -2,7 +2,8 @@
      tal:define="oid oid|field.oid;
                  css_class css_class|field.widget.css_class;
                  style style|field.widget.style;
-                 file_type file_type|getattr(field.widget, 'file_type', '')">
+                 file_type file_type|getattr(field.widget, 'file_type', '');
+                 file_extensions file_extensions|getattr(field.widget, 'file_extensions', '')">
 
   ${field.start_mapping()}
    <style>
@@ -28,7 +29,8 @@
          tal:attributes="class css_class;
                          style style;"
          id="${oid}"
-         data-file_type="${file_type}"/>
+         data-file_type="${file_type}"
+         data-file_extensions="${file_extensions}"/>
   ${field.end_mapping()}
   <script src="${field.widget.request.static_url('pontus:static/kartik-v-bootstrap-fileinput/js/fileinput_locale_'+field.widget.request.locale_name+'.js')}"
             type="text/javascript"></script>
