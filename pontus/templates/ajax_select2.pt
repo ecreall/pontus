@@ -38,7 +38,8 @@
     .form-group .select2-container {
         height: auto !important;
         padding: 0px;
-        display: initial;
+        display: unset;
+        width: 100% !important;
     }
 
     .form-group .select2-container--default .select2-selection--single .select2-selection__arrow {
