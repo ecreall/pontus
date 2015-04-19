@@ -13,22 +13,36 @@ function init_input(oid){
           'initialCaption': init_caption,
 	    }
 	};
+	var file_constraints = {};
     var file_type = input.data('file_type');
+    var file_extensions = input.data('file_extensions');
+
     if(typeof file_type === 'undefined'){
        file_type = ''
     };
     
     if (file_type != ''){
-    	file_type = JSON.parse(file_type.replace(/'/g, "\""))
-    };
+    	file_type = JSON.parse(file_type.replace(/'/g, "\""));
+    	file_constraints = {'allowedFileTypes': file_type}
+    }else{
+	    if(typeof file_extensions === 'undefined'){
+	       file_extensions = ''
+	    };
+	    
+	    if (file_extensions != ''){
+	    	file_extensions = JSON.parse(file_extensions.replace(/'/g, "\""));
+	    	file_constraints = {'allowedFileExtensions': file_extensions}
+
+	    };
+	}
     var input_data = {'showUpload': false,
-	                  'allowedFileTypes': file_type,
 	                  'previewClass': 'pontus-file-preview',
 	                  'previewSettings': {image: {width: "auto", height: "90px"},
 										  html: {width: "auto", height: "90px"},
 										  flash: {width: "auto", height: "90px"},
 										  other: {width: "auto", height: "90px"},},
 					  };
+	$.extend(input_data, file_constraints);
     $.extend(input_data, initialPreviewData)
 	input.fileinput(input_data);
 	var file_removed = $("#"+oid+"-dataDel");
