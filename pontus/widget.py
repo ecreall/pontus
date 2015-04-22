@@ -275,24 +275,6 @@ class ImageWidget(FileWidget):
     template = 'pontus:file/templates/img_upload.pt'
     requirements = (('img_upload', None),)
 
-    def _transforme_image(self, fp, pstruct, data):
-        left = round(float(pstruct['x']))
-        upper = round(float(pstruct['y']))
-        right = round(left + float(pstruct['width']))
-        lower = round(upper + float(pstruct['height']))
-        deg = round(float(pstruct['r']))
-        img = Image.open(fp)
-        img = img.rotate(deg).crop((left, upper, right, lower))
-        buf = io.BytesIO()
-        ext = os.path.splitext(data['filename'])[1].lower()
-        img.save(buf, Image.EXTENSION.get(ext, 'png'))
-        buf.seek(0)
-        old_buf = data.get('fp', None)
-        if old_buf:
-            old_buf.seek(0)
-
-        return buf
-
     def preview_url(self):
         img_src = "#"
         if getattr(self, 'source', None):
@@ -308,24 +290,17 @@ class ImageWidget(FileWidget):
         return img_src
 
     def deserialize(self, field, pstruct):
-        data = super(FileWidget, self).deserialize(field, pstruct)
+        data = super(ImageWidget, self).deserialize(field, pstruct)
         if data is null:
             return null
 
-        data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
-        fp = None
-        if 'fp' in data:
-            fp = data['fp'].raw
-        elif OBJECT_OID in pstruct:
-            image = get_obj(int(pstruct[OBJECT_OID]))
-            fp = image.fp
+        if 'upload' in pstruct:
+            pstruct.pop('upload')
 
-        if fp is None:
-            return null
+        if OBJECT_OID in pstruct:
+            pstruct.pop(OBJECT_OID)
 
-        fp.seek(0)
-        buf = self._transforme_image(fp, pstruct, data)
-        data['fp'] = io.BufferedRandom(buf)
+        data.update(pstruct)
         self.tmpstore.clear()
         return data
 

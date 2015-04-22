@@ -44,6 +44,12 @@ function readImg(input_id){
       dataUID = $('#'+input_id+'-uid'),
       cropper;
 
+  var current_width = parseFloat(dataWidth.val()),
+      current_height = parseFloat(dataHeight.val()),
+      current_y = parseFloat(dataY.val()),
+      current_x = parseFloat(dataX.val()),
+      current_rotate = parseFloat(dataR.val())
+
   var options = {
     autoCropArea: 1,
     maxWidth: size.max_width == -1 && Infinity || size.max_width,
@@ -51,8 +57,11 @@ function readImg(input_id){
     maxHeight:size.max_height == -1 && Infinity || size.max_height,
     minHeight:size.min_height == -1 && 0 ||  size.min_height,
     data: {
-      width: size.max_width,
-      height: size.max_height
+      width: current_width,
+      height: current_height,
+      y: current_y,
+      x: current_x,
+      rotate: current_rotate
     },
     preview: '#'+input_id+'-preview .preview',
 
@@ -83,7 +92,6 @@ function readImg(input_id){
     },
   }
   image.cropper(options);
-
   cropper = image.data("cropper");
 
   $('#'+input_id+'-clear').click(function() {
@@ -112,12 +120,12 @@ function readImg(input_id){
 
   $('#'+input_id+'-rotateLeft').click(function() {
     image.cropper("rotate", -90);
-    dataR.val(parseInt(dataR.val())+90);
+    dataR.val(parseFloat(dataR.val())+90);
   });
 
   $('#'+input_id+'-rotateRight').click(function() {
     image.cropper("rotate", 90);
-    dataR.val(parseInt(dataR.val())-90);
+    dataR.val(parseFloat(dataR.val())-90);
   });
 
   $('#'+input_id+'-remove').click(function() {

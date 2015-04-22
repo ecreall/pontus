@@ -79,21 +79,21 @@
         <hr/>
         <div class="docs-data">
           <div class="input-group">
-            <input name="x" id="${oid}-dataX" type="hidden" placeholder="x">
+            <input name="x" id="${oid}-dataX" type="hidden" placeholder="x" value="${cstruct.get('x', 0)}">
           </div>
           <div class="input-group">
-            <input name="y" id="${oid}-dataY"  type="hidden" placeholder="y">
+            <input name="y" id="${oid}-dataY"  type="hidden" placeholder="y" value="${cstruct.get('y', 0)}">
           </div>
           <div class="input-group">
-            <input name="r" id="${oid}-dataR"  type="hidden">
+            <input name="r" id="${oid}-dataR"  type="hidden" value="${cstruct.get('r', 0)}">
           </div>
           <div class="input-group">
             <span class="input-group-addon">Width</span>
-            <input  name="width" id="${oid}-dataWidth" placeholder="width">
+            <input  name="area_width" id="${oid}-dataWidth" placeholder="Area of interest width" value="${cstruct.get('area_width', 100)}">
           </div>
           <div class="input-group">
             <span class="input-group-addon">Height</span>
-            <input  name="height" id="${oid}-dataHeight" placeholder="height">
+            <input  name="area_height" id="${oid}-dataHeight" placeholder="Area of interest height" value="${cstruct.get('area_height', 100)}">
           </div>
         </div>
       </div>

@@ -8,11 +8,12 @@ import colander
 import transaction
 from ZODB.blob import Blob
 from ZODB.interfaces import BlobError
+from PIL import Image as PILImage
 
 from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
 
-from substanced.file import File as OriginFile
+from substanced.file import File as OriginFile, USE_MAGIC
 from substanced.util import get_oid
 
 from dace.util import get_obj
@@ -25,8 +26,6 @@ OBJECT_OID = '__objectoid__'
 
 NO_VALUES = '_no_values'
 
-USE_MAGIC = object()
-
 MARKER = object()
 
 
@@ -38,8 +37,13 @@ class File(DaceObject, OriginFile):
             fp.seek(0)
         else:
             fp = None
-        mimetype = mimetype or USE_MAGIC
-        OriginFile.__init__(self, fp, mimetype, filename)
+
+        if not mimetype or mimetype == 'application/x-download':
+            hint = USE_MAGIC
+        else:
+            hint = mimetype
+
+        OriginFile.__init__(self, fp, hint, filename)
         self.uid = uid
 
     @property
@@ -67,22 +71,22 @@ class File(DaceObject, OriginFile):
             return OriginFile.get_size(self)
 
     def __setattr__(self, name, value):
-        if name == 'mimetype':
-            if value is USE_MAGIC:
-                super(File, self).__setattr__('mimetype',
-                              'application/octet-stream')
-            else:
-                val = value or 'application/octet-stream'
-                super(File, self).__setattr__('mimetype', val)
+        # if name == 'mimetype':
+        #     if value is USE_MAGIC:
+        #         super(File, self).__setattr__('mimetype',
+        #                       'application/octet-stream')
+        #     else:
+        #         val = value or 'application/octet-stream'
+        #         super(File, self).__setattr__('mimetype', val)
 
-        elif name == 'fp':
-            if self.mimetype is USE_MAGIC:
-                hint = USE_MAGIC
-            else:
-                hint = None
+        if name == 'fp':
+            # if self.mimetype is USE_MAGIC:
+            #     hint = USE_MAGIC
+            # else:
+            #     hint = None
 
             self.blob = Blob()
-            self.upload(value, mimetype_hint=hint)
+            self.upload(value, mimetype_hint=USE_MAGIC)
         elif name == 'filename':
             self.title = value
         else:
@@ -96,7 +100,25 @@ class File(DaceObject, OriginFile):
 
 
 class Image(File):
-    pass
+
+    def __init__(self, fp, mimetype, filename, uid, **kwargs):
+        super(Image, self).__init__(fp, mimetype, filename, uid, **kwargs)
+        self.set_data(kwargs)
+
+    def get_area_of_interest_dimension(self):
+        img = PILImage.open(self.fp)
+        result = {'x': float(getattr(self, 'x', 0)),
+                  'y': float(getattr(self, 'y', 0)),
+                  'r': float(getattr(self, 'r', 0)),
+                  'area_width': float(getattr(self, 'area_width', img.size[1])),
+                  'area_height': float(getattr(self, 'area_height', img.size[0]))}
+
+        return result
+
+    def get_data(self, node):
+        result = super(Image, self).get_data(node)
+        result.update(self.get_area_of_interest_dimension())
+        return result
 
 
 class Object(colander.SchemaType):
@@ -120,6 +142,7 @@ class Object(colander.SchemaType):
 
         return cstruct
 
+
 class ObjectData(colander.Mapping):
 
     _specialObjects = (File, Image)
@@ -128,8 +151,17 @@ class ObjectData(colander.Mapping):
         colander.Mapping.__init__(self, unknown)
         self.factory = factory
         self.editable = editable
-        if self.factory is not None and self.factory in self._specialObjects:
+        if self.factory is not None and self._is_special_object:
             self.editable = True
+
+    @property
+    def _is_special_object(self):
+        if self.factory:
+            for obj_type in self._specialObjects:
+                if obj_type in getattr(self.factory, '__mro__', []):
+                    return True
+
+        return False
 
     def serialize(self, node, appstruct):
         _object = None
@@ -141,7 +173,7 @@ class ObjectData(colander.Mapping):
             appstruct = _object.get_data(node)
 
         result = None
-        if not (self.factory in self._specialObjects):
+        if not self._is_special_object:
             result = colander.Mapping.serialize(self, node, appstruct)
             if not self.editable or result is colander.null:
                 return result
@@ -164,7 +196,7 @@ class ObjectData(colander.Mapping):
                 obj_oid = None
 
         result = None
-        if not (self.factory in self._specialObjects):
+        if not self._is_special_object:
             result = colander.Mapping.deserialize(self, node, cstruct)
             if not self.editable or \
                result is colander.null or \
@@ -172,7 +204,7 @@ class ObjectData(colander.Mapping):
                 return result
         else:
             if cstruct is colander.null:
-                return  colander.null
+                return colander.null
 
         if result is None:
             result = cstruct
@@ -254,7 +286,7 @@ class ObjectData(colander.Mapping):
 
     def cstruct_children(self, node, cstruct):
         result = []
-        if not (self.factory in self._specialObjects):
+        if not self._is_special_object:
             result = colander.Mapping.cstruct_children(self, node, cstruct)
             if result is colander.null or cstruct is colander.null:
                 return result
