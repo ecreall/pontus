@@ -5,14 +5,10 @@
 # author: Amen Souissi
 
 import weakref
-import io
 import colander
 import deform
-import os
-from deform.widget import filedict
 from pyramid.threadlocal import get_current_request
 from translationstring import TranslationString
-from PIL import Image
 from colander import (
     Invalid,
     null,
