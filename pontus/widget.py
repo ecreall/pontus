@@ -416,7 +416,7 @@ class AjaxSelect2Widget(Select2Widget):
         if cstruct:
             title_getter = getattr(self, 'title_getter', default_title_getter)
             dict_values = dict(self.values)
-            if isinstance(cstruct, (list, tuple)):
+            if isinstance(cstruct, (list, tuple, set)):
                 ignored_values = [c for c in cstruct if c not in dict_values]
                 if ignored_values:
                     self.values.extend([(val_id, title_getter(val_id)) \
