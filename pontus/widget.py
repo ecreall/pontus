@@ -7,6 +7,7 @@
 import weakref
 import colander
 import deform
+from persistent.list import PersistentList
 from pyramid.threadlocal import get_current_request
 from translationstring import TranslationString
 from colander import (
@@ -356,6 +357,7 @@ class SelectWidget(OriginSelectWidget):
         return field.renderer(template, **tmpl_values)
 
     def deserialize(self, field, pstruct):
+        pstruct = super(SelectWidget, self).deserialize(field, pstruct)
         if pstruct in (null, self.null_value):
             return null
 
@@ -407,6 +409,18 @@ class AjaxSelect2Widget(Select2Widget):
         return get_current_request()
 
     def serialize(self, field, cstruct, **kw):
+        if cstruct and getattr(self, 'multiple', False) and \
+           not isinstance(list(cstruct)[0], string_types):
+            try:
+                cstruct = [str(get_oid(value)) for value in cstruct]
+            except Exception:
+                pass
+        elif isinstance(cstruct, string_types):
+            try:
+                cstruct = str(get_oid(cstruct))
+            except Exception:
+                pass
+
         if cstruct in (null, None):
             if hasattr(self, 'pstruct'):
                 cstruct = self.pstruct
@@ -416,7 +430,7 @@ class AjaxSelect2Widget(Select2Widget):
         if cstruct:
             title_getter = getattr(self, 'title_getter', default_title_getter)
             dict_values = dict(self.values)
-            if isinstance(cstruct, (list, tuple, set)):
+            if isinstance(cstruct, (list, PersistentList, tuple, set)):
                 ignored_values = [c for c in cstruct if c not in dict_values]
                 if ignored_values:
                     self.values.extend([(val_id, title_getter(val_id)) \
@@ -425,30 +439,17 @@ class AjaxSelect2Widget(Select2Widget):
                 if cstruct not in dict_values:
                     self.values.append(
                          (cstruct, title_getter(cstruct)))
-
-        readonly = kw.get('readonly', self.readonly)
-        values = kw.get('values', self.values)
-        template = readonly and self.readonly_template or self.template
-        kw['values'] = _normalize_choices(values)
-        tmpl_values = self.get_template_values(field, cstruct, kw)
-        return field.renderer(template, **tmpl_values)
+        
+        return super(AjaxSelect2Widget, self).serialize(field, cstruct, **kw)
 
     def deserialize(self, field, pstruct):
+        pstruct = super(AjaxSelect2Widget, self).deserialize(field, pstruct)
         if pstruct in (null, self.null_value):
             return null
-        if self.multiple:
-            try:
-                deserialized_pstruct = deform.widget._sequence_of_strings.deserialize(pstruct)
-                self.pstruct = deserialized_pstruct
-                return deserialized_pstruct
-            except Invalid as exc:
-                raise Invalid(field.schema, "Invalid pstruct: %s" % exc)
-        else:
-            if not isinstance(pstruct, string_types):
-                raise Invalid(field.schema, "Pstruct is not a string")
+        
+        self.pstruct = pstruct
+        return pstruct
 
-            self.pstruct = pstruct
-            return pstruct
 
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
