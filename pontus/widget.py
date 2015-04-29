@@ -7,6 +7,7 @@
 import weakref
 import io
 import colander
+import deform
 import os
 from deform.widget import filedict
 from pyramid.threadlocal import get_current_request
@@ -250,6 +251,7 @@ class FileWidget(FileUploadWidget):
                 cstruct['fp'].seek(0)
 
             self.tmpstore[uid] = cstruct
+            self.uid = uid
 
         readonly = kw.get('readonly', self.readonly)
         template = readonly and self.readonly_template or self.template
@@ -266,7 +268,7 @@ class FileWidget(FileUploadWidget):
            OBJECT_OID in pstruct:
             file_obj = get_obj(int(pstruct[OBJECT_OID]))
             data['fp'] = file_obj.fp
-
+        
         return data
 
 
@@ -277,15 +279,15 @@ class ImageWidget(FileWidget):
 
     def preview_url(self):
         img_src = "#"
-        if getattr(self, 'source', None):
-            # uid = self.source.uid
-            # if uid and not isinstance(self.tmpstore, MemoryTmpStore):
-            #     filedata = self.tmpstore.get(uid, {})
-            #     if 'fp' in filedata:
-            #         img_src = self.tmpstore.preview_url(uid)
+        if hasattr(self, 'uid'):
+            uid = self.uid
+            if uid and not isinstance(self.tmpstore, MemoryTmpStore):
+                filedata = self.tmpstore.get(uid, {})
+                if 'fp' in filedata:
+                    img_src = self.tmpstore.preview_url(uid)
 
-            if img_src == '#':
-                img_src = self.source.url(self.tmpstore.request)
+        if img_src == '#' and getattr(self, 'source', None):
+            img_src = getattr(self, 'source').url(self.tmpstore.request)
 
         return img_src
 
@@ -396,6 +398,10 @@ class Select2Widget(SelectWidget):
     create = False
 
 
+def default_title_getter(id):
+    return id
+
+
 class AjaxSelect2Widget(Select2Widget):
     template = 'pontus:templates/ajax_select2.pt'
     requirements = ( ('ajaxselect2', None),) 
@@ -403,6 +409,50 @@ class AjaxSelect2Widget(Select2Widget):
     @property
     def request(self):
         return get_current_request()
+
+    def serialize(self, field, cstruct, **kw):
+        if cstruct in (null, None):
+            if hasattr(self, 'pstruct'):
+                cstruct = self.pstruct
+            else:    
+                cstruct = self.null_value
+        
+        if cstruct:
+            title_getter = getattr(self, 'title_getter', default_title_getter)
+            dict_values = dict(self.values)
+            if isinstance(cstruct, (list, tuple)):
+                ignored_values = [c for c in cstruct if c not in dict_values]
+                if ignored_values:
+                    self.values.extend([(val_id, title_getter(val_id)) \
+                                            for val_id in ignored_values])
+            else:
+                if cstruct not in dict_values:
+                    self.values.append(
+                         (cstruct, title_getter(cstruct)))
+
+        readonly = kw.get('readonly', self.readonly)
+        values = kw.get('values', self.values)
+        template = readonly and self.readonly_template or self.template
+        kw['values'] = _normalize_choices(values)
+        tmpl_values = self.get_template_values(field, cstruct, kw)
+        return field.renderer(template, **tmpl_values)
+
+    def deserialize(self, field, pstruct):
+        if pstruct in (null, self.null_value):
+            return null
+        if self.multiple:
+            try:
+                deserialized_pstruct = deform.widget._sequence_of_strings.deserialize(pstruct)
+                self.pstruct = deserialized_pstruct
+                return deserialized_pstruct
+            except Invalid as exc:
+                raise Invalid(field.schema, "Invalid pstruct: %s" % exc)
+        else:
+            if not isinstance(pstruct, string_types):
+                raise Invalid(field.schema, "Pstruct is not a string")
+
+            self.pstruct = pstruct
+            return pstruct
 
 class RadioChoiceWidget(SelectWidget):
     template = 'deform:templates/radio_choice.pt'
