@@ -335,7 +335,10 @@ class SelectWidget(OriginSelectWidget):
 
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
-            cstruct = self.null_value
+            if hasattr(self, 'pstruct'):
+                cstruct = self.pstruct
+            else:    
+                cstruct = self.null_value
 
         if cstruct and getattr(self, 'multiple', False) and \
            not isinstance(list(cstruct)[0], string_types):
@@ -348,6 +351,19 @@ class SelectWidget(OriginSelectWidget):
                 cstruct = str(get_oid(cstruct))
             except Exception:
                 pass
+
+        if cstruct:
+            title_getter = getattr(self, 'title_getter', default_title_getter)
+            dict_values = dict(self.values)
+            if isinstance(cstruct, (list, PersistentList, tuple, set)):
+                ignored_values = [c for c in cstruct if c not in dict_values]
+                if ignored_values:
+                    self.values.extend([(val_id, title_getter(val_id)) \
+                                            for val_id in ignored_values])
+            else:
+                if cstruct not in dict_values:
+                    self.values.append(
+                         (cstruct, title_getter(cstruct)))
 
         readonly = kw.get('readonly', self.readonly)
         values = kw.get('values', self.values)
@@ -370,6 +386,7 @@ class SelectWidget(OriginSelectWidget):
                 else:
                     return ob
             except ValueError:
+                self.pstruct = pstruct
                 return pstruct
         else:
             result = []
@@ -387,6 +404,7 @@ class SelectWidget(OriginSelectWidget):
             if not result:
                 return null
 
+            self.pstruct = result
             return result
 
 
@@ -407,48 +425,6 @@ class AjaxSelect2Widget(Select2Widget):
     @property
     def request(self):
         return get_current_request()
-
-    def serialize(self, field, cstruct, **kw):
-        if cstruct and getattr(self, 'multiple', False) and \
-           not isinstance(list(cstruct)[0], string_types):
-            try:
-                cstruct = [str(get_oid(value)) for value in cstruct]
-            except Exception:
-                pass
-        elif isinstance(cstruct, string_types):
-            try:
-                cstruct = str(get_oid(cstruct))
-            except Exception:
-                pass
-
-        if cstruct in (null, None):
-            if hasattr(self, 'pstruct'):
-                cstruct = self.pstruct
-            else:    
-                cstruct = self.null_value
-        
-        if cstruct:
-            title_getter = getattr(self, 'title_getter', default_title_getter)
-            dict_values = dict(self.values)
-            if isinstance(cstruct, (list, PersistentList, tuple, set)):
-                ignored_values = [c for c in cstruct if c not in dict_values]
-                if ignored_values:
-                    self.values.extend([(val_id, title_getter(val_id)) \
-                                            for val_id in ignored_values])
-            else:
-                if cstruct not in dict_values:
-                    self.values.append(
-                         (cstruct, title_getter(cstruct)))
-        
-        return super(AjaxSelect2Widget, self).serialize(field, cstruct, **kw)
-
-    def deserialize(self, field, pstruct):
-        pstruct = super(AjaxSelect2Widget, self).deserialize(field, pstruct)
-        if pstruct in (null, self.null_value):
-            return null
-        
-        self.pstruct = pstruct
-        return pstruct
 
 
 class RadioChoiceWidget(SelectWidget):
