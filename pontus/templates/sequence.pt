@@ -27,6 +27,14 @@
     .deform-seq-add > .glyphicon{
       color: #5cb85c
     }
+    .deform-seq-body{
+        padding-top: 6px; 
+        padding-left: 6px
+    }
+
+    .form-group.deform-seq-item{
+        margin-bottom: 0px !important
+    }
   </style>   
 
   <!-- sequence -->
@@ -36,7 +44,7 @@
          tal:attributes="prototype prototype"/>
 
   <div class="panel panel-default">
-    <div class="panel-body">
+    <div class="panel-body deform-seq-body">
 
       <div class="deform-seq-container ${getattr(field.widget, 'css_class', '')}"
            id="${oid}-orderable">
