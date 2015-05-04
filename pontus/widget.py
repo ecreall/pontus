@@ -242,7 +242,7 @@ class FileWidget(FileUploadWidget):
         if cstruct in (null, None):
             cstruct = {}
 
-        if cstruct:
+        if cstruct and 'uid' in cstruct:
             uid = cstruct['uid']
             if 'fp' in cstruct:
                 cstruct['fp'].seek(0)
