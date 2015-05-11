@@ -15,7 +15,7 @@ function default_selection_template(item){
 }
 
 
-var select2_ajacx_templates = {
+var select2_ajax_templates = {
                  'default_item_template': default_item_template,
                  'default_selection_template': default_selection_template,
            }
