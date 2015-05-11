@@ -157,8 +157,8 @@
                                   cache: true
                               },
                               minimumInputLength: ${minimum_input_length},
-                              templateResult: select2_ajac_templates['${ajax_item_template}'] || select2_ajac_templates.default_item_template,
-                              templateSelection: select2_ajac_templates['${ajax_selection_template}'] || select2_ajac_templates.default_select_template,
+                              templateResult: select2_ajax_templates['${ajax_item_template}'] || select2_ajax_templates.default_item_template,
+                              templateSelection: select2_ajax_templates['${ajax_selection_template}'] || select2_ajax_templates.default_select_template,
                         };
        <div tal:omit-tag="" tal:condition="field.widget.create" >
        var init_ops = {tokenSeparators: [","], 
