@@ -6,9 +6,29 @@
 
 from zope.interface import Interface
 
+from substanced.interfaces import IFile as SourceIFile
+
+from dace.interfaces import Attribute
+
 
 class IVisualisableElement(Interface):
-    pass
+
+    title = Attribute('title')
+
+    label = Attribute('label')
+
+    description = Attribute('description')
+
+
+class IFile(SourceIFile):
+
+    filename = Attribute('filename')
+
+    mimetype = Attribute('mimetype')
+
+    size = Attribute('size')
+
+    url = Attribute('url')
 
 
 class IView(Interface):

@@ -9,6 +9,7 @@ import colander
 import deform
 from zope.interface import implementer
 from pyramid import renderers
+from pyramid.threadlocal import get_current_request
 from pyramid_layout.layout import Structure
 
 from .interfaces import IVisualisableElement
@@ -84,11 +85,10 @@ class VisualisableElement(object):
         if 'title' in kwargs:
             self.title = kwargs.get('title')
 
-    def url(self, request, view=None, args=None):
-        if view is None:
-            return request.resource_url(self, '@@index')
-        else:
-            return request.resource_url(self, '@@'+view)
+    @property
+    def url(self,):
+        request = get_current_request()
+        return request.resource_url(self, '@@index')
 
     def get_view(self, request, template=None):
         if template is None:

@@ -6,9 +6,12 @@
 
 import colander
 import transaction
+from zope.interface import implementer
 from ZODB.blob import Blob
 from ZODB.interfaces import BlobError
 from PIL import Image as PILImage
+
+from pyramid.threadlocal import get_current_request
 
 from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
@@ -18,6 +21,8 @@ from substanced.util import get_oid
 
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
+
+from pontus.interfaces import IFile
 
 
 OBJECT_DATA = '_object_data'
@@ -29,6 +34,7 @@ NO_VALUES = '_no_values'
 MARKER = object()
 
 
+@implementer(IFile)
 class File(DaceObject, OriginFile):
 
     def __init__(self, fp, mimetype, filename, uid, **kwargs):
@@ -92,11 +98,10 @@ class File(DaceObject, OriginFile):
         else:
             super(File, self).__setattr__(name, value)
 
-    def url(self, request, view=None, args=None):
-        if view is None:
-            return request.resource_url(self)
-        else:
-            return request.resource_url(self, '@@'+view)
+    @property
+    def url(self):
+        request = get_current_request()
+        return request.resource_url(self)
 
 
 class Image(File):
@@ -291,7 +296,6 @@ class ObjectData(colander.Mapping):
             if result is colander.null or cstruct is colander.null:
                 return result
         return result
-
 
 
 default_widget_makers[ObjectData] = MappingWidget
