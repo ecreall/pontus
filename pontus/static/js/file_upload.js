@@ -48,7 +48,10 @@ function init_input(oid){
 	var file_removed = $("#"+oid+"-dataDel");
 	if(file_removed.length>0){
 		input.on('filedeleted, fileclear', function(event, key) {
-	        file_removed.val('true')
+	        file_removed.val(true)
+	    });
+	    input.on('fileloaded', function(event, key) {
+	        file_removed.val(false)
 	    });
     }
 

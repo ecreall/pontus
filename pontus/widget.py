@@ -257,7 +257,7 @@ class FileWidget(FileUploadWidget):
 
     def deserialize(self, field, pstruct):
         data = super(FileWidget, self).deserialize(field, pstruct)
-        if data is null or pstruct.get('_object_removed', ''):
+        if data is null or pstruct.get('_object_removed', 'false') == 'true':
             return null
 
         data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
