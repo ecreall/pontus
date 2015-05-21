@@ -275,7 +275,7 @@ class ImageWidget(FileWidget):
     requirements = (('img_upload', None),)
 
     def preview_url(self):
-        img_src = "#"
+        img_src = None
         if hasattr(self, 'uid'):
             uid = self.uid
             if uid and not isinstance(self.tmpstore, MemoryTmpStore):
@@ -283,8 +283,8 @@ class ImageWidget(FileWidget):
                 if 'fp' in filedata:
                     img_src = self.tmpstore.preview_url(uid)
 
-        if img_src == '#' and getattr(self, 'source', None):
-            img_src = getattr(self, 'source').url(self.tmpstore.request)
+        if img_src is None and getattr(self, 'source', None):
+            img_src = getattr(self, 'source').url
 
         return img_src
 
