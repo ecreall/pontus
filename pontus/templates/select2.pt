@@ -27,7 +27,6 @@
 
     .form-group .select2-container {
         height: auto !important;
-        display: unset;
         width: 100% !important;
     }
 

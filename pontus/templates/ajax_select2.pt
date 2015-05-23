@@ -38,7 +38,6 @@
     .form-group .select2-container {
         height: auto !important;
         padding: 0px;
-        display: unset;
         width: 100% !important;
     }
 
