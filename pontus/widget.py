@@ -245,7 +245,10 @@ class FileWidget(FileUploadWidget):
         if cstruct and 'uid' in cstruct:
             uid = cstruct['uid']
             if 'fp' in cstruct:
-                cstruct['fp'].seek(0)
+                try:
+                    cstruct['fp'].seek(0)
+                except Exception:
+                    pass
 
             self.tmpstore[uid] = cstruct
             self.uid = uid
@@ -276,8 +279,8 @@ class ImageWidget(FileWidget):
 
     def preview_url(self):
         img_src = None
-        if hasattr(self, 'uid'):
-            uid = self.uid
+        uid = getattr(self, 'uid', None)
+        if uid:
             if uid and not isinstance(self.tmpstore, MemoryTmpStore):
                 filedata = self.tmpstore.get(uid, {})
                 if 'fp' in filedata:

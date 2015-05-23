@@ -7,7 +7,7 @@
   
     <div class="${field.widget.css_class or ''}">
       <div tal:condition="errormsg" 
-           class="clearfix alert alert-message error">
+           class="clearfix alert alert-danger alert-message error">
         <p i18n:translate="">
            There was a problem with this section
         </p>

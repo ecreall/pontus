@@ -31,6 +31,10 @@ class IFile(SourceIFile):
     url = Attribute('url')
 
 
+class IImage(IFile):
+    pass
+
+
 class IView(Interface):
     pass
 

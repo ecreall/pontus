@@ -10,8 +10,9 @@ from zope.interface import implementer
 from ZODB.blob import Blob
 from ZODB.interfaces import BlobError
 from PIL import Image as PILImage
-
 from pyramid.threadlocal import get_current_request
+
+from substanced.content import content
 
 from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
@@ -22,7 +23,7 @@ from substanced.util import get_oid
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
 
-from pontus.interfaces import IFile
+from pontus.interfaces import IFile, IImage
 
 
 OBJECT_DATA = '_object_data'
@@ -34,10 +35,18 @@ NO_VALUES = '_no_values'
 MARKER = object()
 
 
+
+@content(
+    'pontus_file',
+    icon='glyphicon glyphicon-file',
+    )
 @implementer(IFile)
 class File(DaceObject, OriginFile):
 
-    def __init__(self, fp, mimetype, filename, uid, **kwargs):
+    def __init__(self, fp, mimetype=None, filename=None, **kwargs):
+        if not filename:
+            filename = self.title
+
         DaceObject.__init__(self, **kwargs)
         if fp:
             fp.seek(0)
@@ -50,7 +59,8 @@ class File(DaceObject, OriginFile):
             hint = mimetype
 
         OriginFile.__init__(self, fp, hint, filename)
-        self.uid = uid
+
+        self.uid = kwargs.get('uid', None)
 
     @property
     def fp(self):
@@ -63,7 +73,7 @@ class File(DaceObject, OriginFile):
     def get_data(self, node):
         result = {}
         result['filename'] = self.title
-        result['uid'] = self.uid
+        result['uid'] = getattr(self, 'uid', None)
         result['mimetype'] = self.mimetype
         result['size'] = self.get_size()
         result['fp'] = self.blob.open('r')
@@ -77,20 +87,7 @@ class File(DaceObject, OriginFile):
             return OriginFile.get_size(self)
 
     def __setattr__(self, name, value):
-        # if name == 'mimetype':
-        #     if value is USE_MAGIC:
-        #         super(File, self).__setattr__('mimetype',
-        #                       'application/octet-stream')
-        #     else:
-        #         val = value or 'application/octet-stream'
-        #         super(File, self).__setattr__('mimetype', val)
-
         if name == 'fp':
-            # if self.mimetype is USE_MAGIC:
-            #     hint = USE_MAGIC
-            # else:
-            #     hint = None
-
             self.blob = Blob()
             self.upload(value, mimetype_hint=USE_MAGIC)
         elif name == 'filename':
@@ -104,10 +101,15 @@ class File(DaceObject, OriginFile):
         return request.resource_url(self)
 
 
+@content(
+    'pontus_image',
+    icon='glyphicon glyphicon-picture',
+    )
+@implementer(IImage)
 class Image(File):
 
-    def __init__(self, fp, mimetype, filename, uid, **kwargs):
-        super(Image, self).__init__(fp, mimetype, filename, uid, **kwargs)
+    def __init__(self, fp, mimetype=None, filename=None, **kwargs):
+        super(Image, self).__init__(fp, mimetype, filename, **kwargs)
         self.set_data(kwargs)
 
     def get_area_of_interest_dimension(self):
