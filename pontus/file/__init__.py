@@ -113,12 +113,16 @@ class Image(File):
         self.set_data(kwargs)
 
     def get_area_of_interest_dimension(self):
-        img = PILImage.open(self.fp)
         result = {'x': float(getattr(self, 'x', 0)),
                   'y': float(getattr(self, 'y', 0)),
-                  'r': float(getattr(self, 'r', 0)),
-                  'area_width': float(getattr(self, 'area_width', img.size[1])),
-                  'area_height': float(getattr(self, 'area_height', img.size[0]))}
+                  'r': float(getattr(self, 'r', 0))}
+        try:
+            img = PILImage.open(self.fp)
+            result['area_width'] = float(getattr(self, 'area_width', img.size[1]))
+            result['area_height'] = float(getattr(self, 'area_height', img.size[0]))
+        except OSError:
+            result['area_width'] = float(getattr(self, 'area_width', 0))
+            result['area_height'] = float(getattr(self, 'area_height', 0))
 
         return result
 
