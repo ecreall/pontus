@@ -6,6 +6,7 @@
 
 import colander
 import transaction
+from persistent.dict import PersistentDict
 from zope.interface import implementer
 from ZODB.blob import Blob
 from ZODB.interfaces import BlobError
@@ -113,16 +114,12 @@ class Image(File):
         self.set_data(kwargs)
 
     def get_area_of_interest_dimension(self):
+        img = PILImage.open(self.fp)
         result = {'x': float(getattr(self, 'x', 0)),
                   'y': float(getattr(self, 'y', 0)),
-                  'r': float(getattr(self, 'r', 0))}
-        try:
-            img = PILImage.open(self.fp)
-            result['area_width'] = float(getattr(self, 'area_width', img.size[1]))
-            result['area_height'] = float(getattr(self, 'area_height', img.size[0]))
-        except OSError:
-            result['area_width'] = float(getattr(self, 'area_width', 0))
-            result['area_height'] = float(getattr(self, 'area_height', 0))
+                  'r': float(getattr(self, 'r', 0)),
+                  'area_width': float(getattr(self, 'area_width', img.size[1])),
+                  'area_height': float(getattr(self, 'area_height', img.size[0]))}
 
         return result
 
@@ -179,7 +176,8 @@ class ObjectData(colander.Mapping):
         if appstruct is None:
             appstruct = colander.null
 
-        if  appstruct is not colander.null and not isinstance(appstruct, dict):
+        if  appstruct is not colander.null and \
+            not isinstance(appstruct, (dict, PersistentDict)):
             _object = appstruct
             appstruct = _object.get_data(node)
 
@@ -229,7 +227,7 @@ class ObjectData(colander.Mapping):
 
         appstruct = {}
         has_values = False
-        if isinstance(result, dict):
+        if isinstance(result, (dict, PersistentDict)):
             result_copy = dict(result)
             for key, value in result_copy.items():
                 subnode = node.get(key)
@@ -246,7 +244,7 @@ class ObjectData(colander.Mapping):
                     result.pop(key) 
                     # don't set data if omitted
 
-        if isinstance(result, dict):
+        if isinstance(result, (dict, PersistentDict)):
             result_copy = dict(result)
             to_result = {}
             for key, value in result_copy.items():
@@ -257,7 +255,8 @@ class ObjectData(colander.Mapping):
                     is_multiple_cardinality = False
                
                 for item in list(value):
-                    if isinstance(item, dict) and OBJECT_DATA in item:
+                    if isinstance(item, (dict, PersistentDict)) \
+                       and OBJECT_DATA in item:
                         is_object_type = True
                         subobject = item.pop(OBJECT_DATA)
                         #to_result.update({key: subobject})
