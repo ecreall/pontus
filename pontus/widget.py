@@ -466,7 +466,7 @@ class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
             cstruct = ()
 
         is_multiple = getattr(self, 'multiple', False)
-        if is_multiple and not isinstance(cstruct, (list, tuple)):
+        if is_multiple and not isinstance(cstruct, (list, tuple, set)):
             cstruct = [cstruct]
 
         if cstruct and is_multiple and \
