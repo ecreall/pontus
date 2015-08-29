@@ -338,18 +338,21 @@ class SelectWidget(OriginSelectWidget):
 
     def serialize(self, field, cstruct, **kw):
         if cstruct in (null, None):
-            if hasattr(self, 'pstruct'):
-                cstruct = self.pstruct
+            if hasattr(self, 'pstruct') and field in self.pstruct:
+                cstruct = self.pstruct[field]
             else:    
                 cstruct = self.null_value
 
-        if cstruct and getattr(self, 'multiple', False) and \
-           not isinstance(list(cstruct)[0], string_types):
-            try:
-                cstruct = [str(get_oid(value)) for value in cstruct]
-            except Exception:
-                pass
-        elif isinstance(cstruct, string_types):
+        if cstruct and getattr(self, 'multiple', False):
+            result = []
+            for value in list(cstruct):
+                try:
+                    result.append(str(get_oid(value)))
+                except Exception:
+                    result.append(value)
+
+            cstruct = result
+        elif not isinstance(cstruct, string_types):
             try:
                 cstruct = str(get_oid(cstruct))
             except Exception:
@@ -382,6 +385,8 @@ class SelectWidget(OriginSelectWidget):
 
         if isinstance(pstruct, string_types):
             ob = None
+            self.pstruct = {}
+            self.pstruct[field] = pstruct
             try:
                 ob = get_obj(int(pstruct))
                 if ob is None:
@@ -389,7 +394,6 @@ class SelectWidget(OriginSelectWidget):
                 else:
                     return ob
             except ValueError:
-                self.pstruct = pstruct
                 return pstruct
         else:
             result = []
@@ -407,7 +411,8 @@ class SelectWidget(OriginSelectWidget):
             if not result:
                 return null
 
-            self.pstruct = result
+            self.pstruct = {}
+            self.pstruct[field] = result
             return result
 
 

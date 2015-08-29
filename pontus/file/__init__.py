@@ -197,38 +197,11 @@ class ObjectData(colander.Mapping):
 
         return result
 
-    def deserialize(self, node, cstruct):
-        obj_oid = None
-        if self.editable and cstruct and OBJECT_OID in cstruct:
-            obj_oid = cstruct.get(OBJECT_OID, None)
-            if not obj_oid or obj_oid == 'None':
-                obj_oid = None
-
-        result = None
-        if not self._is_special_object:
-            result = colander.Mapping.deserialize(self, node, cstruct)
-            if not self.editable or \
-               result is colander.null or \
-               cstruct is colander.null:
-                return result
-        else:
-            if cstruct is colander.null:
-                return colander.null
-
-        if result is None:
-            result = cstruct
-
-        obj = None
-        if obj_oid is not None:
-            obj = get_obj(int(obj_oid))
-
-        if self.factory is None and obj is None:
-            return result
-
+    def clean_cstruct(self, node, cstruct):
         appstruct = {}
         has_values = False
-        if isinstance(result, (dict, PersistentDict)):
-            result_copy = dict(result)
+        if isinstance(cstruct, (dict, PersistentDict)):
+            result_copy = dict(cstruct)
             for key, value in result_copy.items():
                 subnode = node.get(key)
                 missing = getattr(subnode, 'missing', MARKER)
@@ -241,11 +214,11 @@ class ObjectData(colander.Mapping):
                         appstruct[key] = value 
                         # private is omited and not returned to the user
 
-                    result.pop(key) 
+                    cstruct.pop(key) 
                     # don't set data if omitted
 
-        if isinstance(result, (dict, PersistentDict)):
-            result_copy = dict(result)
+        if isinstance(cstruct, (dict, PersistentDict)):
+            result_copy = dict(cstruct)
             to_result = {}
             for key, value in result_copy.items():
                 is_multiple_cardinality = True
@@ -277,10 +250,41 @@ class ObjectData(colander.Mapping):
                         appstruct[key] = value[0]
 
                     if is_multiple_cardinality and key in to_result:
-                        result[key] = to_result[key]
+                        cstruct[key] = to_result[key]
                     elif key in to_result:
-                        result[key] = to_result[key][0]
+                        cstruct[key] = to_result[key][0]
 
+        return cstruct, appstruct, has_values
+
+    def deserialize(self, node, cstruct):
+        obj_oid = None
+        if self.editable and cstruct and OBJECT_OID in cstruct:
+            obj_oid = cstruct.get(OBJECT_OID, None)
+            if not obj_oid or obj_oid == 'None':
+                obj_oid = None
+
+        result = None
+        if not self._is_special_object:
+            result = colander.Mapping.deserialize(self, node, cstruct)
+            if not self.editable or \
+               result is colander.null or \
+               cstruct is colander.null:
+                return result
+        else:
+            if cstruct is colander.null:
+                return colander.null
+
+        if result is None:
+            result = cstruct
+
+        obj = None
+        if obj_oid is not None:
+            obj = get_obj(int(obj_oid))
+
+        if self.factory is None and obj is None:
+            return result
+
+        result, appstruct, has_values = self.clean_cstruct(node, result)
         if obj is None and self.factory is not None:
             # add form
             obj = self.factory(**result)

@@ -28,6 +28,13 @@ except NameError:
     basestring = str
 
 
+def set_oid(children, formid):
+    for child in children:
+        child.oid = child.oid + formid
+        if hasattr(child, 'children'):
+            set_oid(child.children, formid)
+
+
 @implementer(IFormView)
 class FormView(ElementaryView, SubstanceDFormView):
 
@@ -72,9 +79,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         self.init_stepid(self.schema)
         form, reqts = self._build_form()
         form.formid = self.viewid + '_' + form.formid
-        for c in form.children:
-            c.oid = c.oid + form.formid
-
+        set_oid(form.children, form.formid)
         item = None
         result = {}
         posted_formid = None

@@ -41,10 +41,11 @@ class Schema(OriginSchema):
     title = ''
     label = ''
     description = ''
+    typ_factory = ObjectData
 
     def __init__(self, factory=None, editable=False, omit=(),**kwargs):
         OriginSchema.__init__(self,**kwargs)
-        self.typ = ObjectData(factory, editable)
+        self.typ = self.typ_factory(factory, editable)
         if editable or factory is not None:
             self._omit_nodes(omit)
 
