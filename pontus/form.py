@@ -5,6 +5,7 @@
 # licence: AGPL
 # author: Amen Souissi
 
+import os
 from zope.interface import implementer
 import deform.exception
 import deform.widget
@@ -188,3 +189,18 @@ class FileUploadTempStore(FileUploadTempStoreOrigine):
         root = self.request.virtual_root
         return self.request.resource_url(
             root, '@@preview_image_upload', uid)
+
+    def clear_item(self, uid):
+        data = self.session.get('substanced.tempstore', {})
+        value = data.pop(uid, None)
+        if value:
+            if 'randid' in value:
+                randid = value['randid']
+                fn = os.path.join(self.tempdir, randid)
+                try:
+                    os.remove(fn)
+                except OSError:
+                    pass
+
+            if not data:
+                self.session.pop('substanced.tempstore', {})

@@ -13,6 +13,7 @@ from ZODB.interfaces import BlobError
 from PIL import Image as PILImage
 from pyramid.threadlocal import get_current_request
 
+from substanced.util import get_oid
 from substanced.content import content
 
 from deform.schema import default_widget_makers
@@ -61,8 +62,6 @@ class File(DaceObject, OriginFile):
 
         OriginFile.__init__(self, fp, hint, filename)
 
-        self.uid = kwargs.get('uid', None)
-
     @property
     def fp(self):
         return self.blob.open('r')
@@ -70,6 +69,10 @@ class File(DaceObject, OriginFile):
     @property
     def filename(self):
         return self.title
+
+    @property
+    def uid(self):
+        return str(get_oid(self, None))
 
     def get_data(self, node):
         result = {}
@@ -93,6 +96,8 @@ class File(DaceObject, OriginFile):
             self.upload(value, mimetype_hint=USE_MAGIC)
         elif name == 'filename':
             self.title = value
+        elif name == 'uid':
+            pass
         else:
             super(File, self).__setattr__(name, value)
 
@@ -114,14 +119,20 @@ class Image(File):
         self.set_data(kwargs)
 
     def get_area_of_interest_dimension(self):
-        img = PILImage.open(self.fp)
         result = {'x': float(getattr(self, 'x', 0)),
                   'y': float(getattr(self, 'y', 0)),
-                  'r': float(getattr(self, 'r', 0)),
+                  'r': float(getattr(self, 'r', 0))}
+        try:
+            img = PILImage.open(self.fp)
+            result.update({
                   'area_width': float(getattr(self, 'area_width', img.size[1])),
-                  'area_height': float(getattr(self, 'area_height', img.size[0]))}
-
-        return result
+                  'area_height': float(getattr(self, 'area_height', img.size[0]))})
+            return result
+        except:
+            result.update({
+                  'area_width': float(getattr(self, 'area_width', 0)),
+                  'area_height': float(getattr(self, 'area_height', 0))})
+            return result
 
     def get_data(self, node):
         result = super(Image, self).get_data(node)
@@ -188,7 +199,7 @@ class ObjectData(colander.Mapping):
                 return result
         else:
             if appstruct is colander.null:
-                return  appstruct
+                return appstruct
 
             result = appstruct
 

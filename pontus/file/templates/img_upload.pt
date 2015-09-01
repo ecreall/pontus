@@ -8,7 +8,7 @@
                  min_height  getattr(field.widget, 'min_height', -1);
                  max_width  getattr(field.widget, 'max_width', -1);
                  max_height  getattr(field.widget, 'max_height', -1);
-                 img_src field.widget.preview_url();
+                 img_src field.widget.preview_url(field);
                  selection_message getattr(field.widget, 'selection_message', '- Select -');">
 
   ${field.start_mapping()}

@@ -251,7 +251,10 @@ class FileWidget(FileUploadWidget):
                     pass
 
             self.tmpstore[uid] = cstruct
-            self.uid = uid
+            if not hasattr(self, 'uids'):
+                self.uids = {}
+
+            self.uids[field] = uid
 
         readonly = kw.get('readonly', self.readonly)
         template = readonly and self.readonly_template or self.template
@@ -268,18 +271,29 @@ class FileWidget(FileUploadWidget):
            OBJECT_OID in pstruct:
             file_obj = get_obj(int(pstruct[OBJECT_OID]))
             data['fp'] = file_obj.fp
-        
+
+        try:
+            data['fp'].seek(0)
+        except Exception:
+            pass
+
+        uid = data.get('uid', None)
+        if hasattr(self.tmpstore, 'clear_item') and uid:
+            self.tmpstore.clear_item(uid)
+        else:
+            self.tmpstore.clear()
+
         return data
 
 
 class ImageWidget(FileWidget):
-    
+
     template = 'pontus:file/templates/img_upload.pt'
     requirements = (('img_upload', None),)
 
-    def preview_url(self):
+    def preview_url(self, field):
         img_src = None
-        uid = getattr(self, 'uid', None)
+        uid = getattr(self, 'uids', {}).get(field, None)
         if uid:
             if uid and not isinstance(self.tmpstore, MemoryTmpStore):
                 filedata = self.tmpstore.get(uid, {})
@@ -303,7 +317,6 @@ class ImageWidget(FileWidget):
             pstruct.pop(OBJECT_OID)
 
         data.update(pstruct)
-        self.tmpstore.clear()
         return data
 
 
