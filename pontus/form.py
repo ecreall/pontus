@@ -76,6 +76,10 @@ class FormView(ElementaryView, SubstanceDFormView):
         formid = self.viewid + '_' + self.formid
         return formid == id
 
+    def remove_tmp_stores(self, form):
+        for store in getattr(form, 'stores', []):
+            store.clear()
+
     def update(self,):
         self.init_stepid(self.schema)
         form, reqts = self._build_form()
@@ -98,11 +102,11 @@ class FormView(ElementaryView, SubstanceDFormView):
                             # bypass form validation for Cancel behavior
                             cancel_beh = self.behaviors_instances[button.name]
                             behaviors = self.behaviors_instances.values()
+                            self.remove_tmp_stores(form)
                             cancel_beh.execute(self.context,
                                     self.request, {'behaviors': behaviors})
                             validated = {}
-
-                        else :
+                        else:
                             controls = self.request.POST.items()
                             validated = form.validate(controls)
 
@@ -126,6 +130,7 @@ class FormView(ElementaryView, SubstanceDFormView):
                                                    form.formid)
                             error = True
 
+                    self.remove_tmp_stores(form)
                     break
 
         if item is None:

@@ -250,9 +250,11 @@ class FileWidget(FileUploadWidget):
                 except Exception:
                     pass
 
-            self.tmpstore[uid] = cstruct
             if not hasattr(self, 'uids'):
                 self.uids = {}
+
+            if uid not in self.tmpstore:
+                self.tmpstore[uid] = cstruct
 
             self.uids[field] = uid
 
@@ -262,6 +264,9 @@ class FileWidget(FileUploadWidget):
         return field.renderer(template, **values)
 
     def deserialize(self, field, pstruct):
+        form = field.get_root()
+        form.stores = getattr(form, 'stores', [])
+        form.stores.append(self.tmpstore)
         data = super(FileWidget, self).deserialize(field, pstruct)
         if data is null or pstruct.get('_object_removed', 'false') == 'true':
             return null
@@ -276,12 +281,6 @@ class FileWidget(FileUploadWidget):
             data['fp'].seek(0)
         except Exception:
             pass
-
-        uid = data.get('uid', None)
-        if hasattr(self.tmpstore, 'clear_item') and uid:
-            self.tmpstore.clear_item(uid)
-        else:
-            self.tmpstore.clear()
 
         return data
 
