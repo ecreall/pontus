@@ -197,12 +197,12 @@ class MultipleView(MultipleViewsOperation):
     include_failed_views = False
     template = 'templates/views_templates/multipleview.pt'
 
-    def __init__(self, 
-                 context, 
-                 request, 
-                 parent=None, 
-                 wizard=None, 
-                 stepid=None, 
+    def __init__(self,
+                 context,
+                 request,
+                 parent=None,
+                 wizard=None,
+                 stepid=None,
                  **kwargs):
         super(MultipleView, self).__init__(context, request, parent,
                                             wizard, stepid, **kwargs)
@@ -211,6 +211,7 @@ class MultipleView(MultipleViewsOperation):
             self._init_views(self.views, **kwargs)
 
     def _init_views(self, views, **kwargs):
+        self.validated_children = []
         self.builder(views, **kwargs)
         self.define_executable()
 
