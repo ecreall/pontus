@@ -128,7 +128,7 @@
         var ajax_options = {ajax: {
                                   url: "${ajax_url}",
                                   dataType: 'json',
-                                  delay: 250,
+                                  delay: 400,
                                   data: function (params) {
                                         var contextData = get_context_data('#'+oid);
                                         var data = {
