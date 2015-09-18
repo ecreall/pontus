@@ -41,24 +41,50 @@ class FormView(ElementaryView, SubstanceDFormView):
 
     title = 'Form View'
     chmod = []
-    schema = Schema() 
+    schema = Schema()
 
-    def __init__(self, 
-                 context, 
-                 request, 
-                 parent=None, 
-                 wizard=None, 
-                 stepid=None, 
+    def __init__(self,
+                 context,
+                 request,
+                 parent=None,
+                 wizard=None,
+                 stepid=None,
                  **kwargs):
         self.schema = self.schema.clone()
         SubstanceDFormView.__init__(self, context, request)
         ElementaryView.__init__(self, context, request, parent,
                                 wizard, stepid, **kwargs)
-        self.buttons = [Button(title=getattr(behavior, 
-                                            'submission_title', 
+        self.buttons = [Button(title=getattr(behavior,
+                                            'submission_title',
                                             behavior.title),
-                               name=behavior.title) \
+                               name=behavior.title)
                         for behavior in self.behaviors_instances.values()]
+
+    def _build_form(self):
+        use_ajax = getattr(self, 'use_ajax', False)
+        ajax_options = getattr(self, 'ajax_options', '{}')
+        action = getattr(self, 'action', '')
+        method = getattr(self, 'method', 'POST')
+        formid = getattr(self, 'formid', 'deform')
+        autocomplete = getattr(self, 'autocomplete', None)
+        request = self.request
+        bindings = self.bind()
+        bindings.update({
+            'request': request,
+            'context': self.context,
+            # see substanced.schema.CSRFToken
+            '_csrf_token_': request.session.get_csrf_token()
+            })
+        self.schema = self.schema.bind(**bindings)
+        form = self.form_class(self.schema, action=action, method=method,
+                               buttons=self.buttons, formid=formid,
+                               use_ajax=use_ajax, ajax_options=ajax_options,
+                               autocomplete=autocomplete)
+        # XXX override autocomplete; should be part of deform
+        #form.widget.template = 'substanced:widget/templates/form.pt' 
+        self.before(form)
+        reqts = form.get_widget_resources()
+        return form, reqts
 
     def setviewid(self, viewid):
         ElementaryView.setviewid(self, viewid)
@@ -149,6 +175,9 @@ class FormView(ElementaryView, SubstanceDFormView):
             result = item
 
         return result
+
+    def bind(self):
+        return {}
 
     def before(self, form):
         if self.chmod:
