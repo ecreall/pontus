@@ -140,7 +140,7 @@ class TestPontusView(FunctionalTests):
         self.assertIn(ViewA.coordinates, result['coordinates'])
         self.assertEqual(len(result['coordinates'][ViewA.coordinates]), 1)
 
-        items_body = [item['body'] for item in  result['coordinates'][FormViewA.coordinates]]
+        items_body = [item['body'] for item in result['coordinates'][FormViewA.coordinates]]
         self.assertEqual(len(items_body), 1)
         self.assertTrue(items_body[0].find("title") > -1)
         self.assertTrue(items_body[0].find("Hello_"+ViewB.title+"\n") > -1)
@@ -156,9 +156,9 @@ class TestPontusView(FunctionalTests):
         self.assertIn(ViewB.coordinates, result['coordinates'])
         self.assertEqual(len(result['coordinates'][ViewB.coordinates]),1)
 
-        items_body = [item['body'] for item in  result['coordinates'][ViewB.coordinates]]
+        items_body = [item['body'] for item in result['coordinates'][ViewB.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("title")>-1), False )
+        self.assertEqual((items_body[0].find("Title")>-1), False )
         self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), True )
         self.assertEqual(len(self.request.viewexecuted), 1)
         self.assertIn('behaviorB',self.request.viewexecuted)
