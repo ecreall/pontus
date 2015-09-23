@@ -12,5 +12,4 @@ _ = TranslationStringFactory('pontus')
 def includeme(config): # pragma: no cover
     config.include('.')
     config.scan('.')
-    YEAR = 86400 * 365
-    config.add_static_view('pontusstatic', 'pontus:static', cache_max_age=YEAR)
+    config.add_static_view('pontusstatic', 'pontus:static', cache_max_age=86400)
