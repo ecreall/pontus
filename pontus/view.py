@@ -55,6 +55,7 @@ class View(Step):
     template = None
     requirements = None
     css_class = "pontus-main-view"
+    container_css_class = ""
 
     def render_item(self, item, coordinates, parent):
         body = renderers.render(self.wrapper_template,
