@@ -9,8 +9,9 @@ from pyramid.config import Configurator
 from pyramid.testing import DummyRequest
 from pyramid import testing
 
-
 from substanced.db import root_factory
+
+from dace.subscribers import stop_ioloop
 
 
 def main(global_config, **settings):
@@ -54,20 +55,7 @@ class FunctionalTests(unittest.TestCase):
         import time; time.sleep(2)
 
     def tearDown(self):
-        from dace.processinstance import event
-        with event.callbacks_lock:
-            for dc_or_stream in event.callbacks.values():
-                if hasattr(dc_or_stream, 'close'):
-                    dc_or_stream.close()
-                else:
-                    dc_or_stream.stop()
-
-            event.callbacks = {}
-
-        from dace.objectofcollaboration.system import CRAWLERS
-        for crawler in CRAWLERS:
-            crawler.stop()
-
+        stop_ioloop()
         import shutil
         testing.tearDown()
         self.db.close()
