@@ -35,6 +35,7 @@
           jqoid.show();
           jqoid_preload.remove();
           tinyMCE.init({
+            invalid_elements : "style,script",
             language: get_language(),
             <tal:block condition="inline">inline: true,</tal:block>
             body_class: 'form-control',
