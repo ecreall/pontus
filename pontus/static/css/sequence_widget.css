@@ -3,8 +3,12 @@
 a.deform-seq-add{
 	color: #5cb85c;
 	font-size: 17px;
-	margin-top: -25px;
+	margin-top: -23px;
 	padding: 0 5px 1px;
+}
+
+a.deform-seq-add .add-seq-item-text{
+	font-size: 13px;
 }
 
 .deform-seq-item a.deform-close-button{

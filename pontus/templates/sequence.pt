@@ -66,9 +66,8 @@
       <a href="#"
          class="deform-seq-add pull-right"
          id="${field.oid}-seqAdd"
-         onclick="javascript: return deform.appendSequenceItem(this);"
-         title="${add_subitem_text}">
-        <small id="${field.oid}-addtext" class="glyphicon glyphicon-plus"></small>
+         onclick="javascript: return deform.appendSequenceItem(this);">
+        <small id="${field.oid}-addtext" class="glyphicon glyphicon-plus"></small> <span class="add-seq-item-text">${add_subitem_text}</span>
       </a>
 
       <script type="text/javascript">
