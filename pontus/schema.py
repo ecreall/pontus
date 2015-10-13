@@ -148,7 +148,10 @@ def omit(schema, mask, isinternal=False):
                 new_schema.children.remove(node)
         else:
             node = new_schema.get(m[0])
+            if type(node) == colander.SchemaNode:
+                node = node.children[0]
+
             if node is not None:
-                omit(node.children[0], m[1], True)
+                omit(node, m[1], True)
 
     return new_schema
