@@ -20,7 +20,6 @@ from deform.schema import default_widget_makers
 from deform.widget import MappingWidget
 
 from substanced.file import File as OriginFile, USE_MAGIC
-from substanced.util import get_oid
 
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
