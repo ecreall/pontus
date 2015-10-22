@@ -82,6 +82,7 @@ function readImg(input_id){
     // minHeight: 90,
 
     done: function(data) {
+      data = this.data
       dataHeight.val(data.height);
       dataWidth.val(data.width);
       dataX.val(data.x);
@@ -91,6 +92,7 @@ function readImg(input_id){
       };
     },
   }
+
   image.cropper(options);
   cropper = image.data("cropper");
 

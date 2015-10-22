@@ -148,6 +148,7 @@ class FormView(ElementaryView, SubstanceDFormView):
                             item = behavior.execute(self.context,
                                     self.request, validated)
                             self.finished_successfully = True
+                            self.remove_tmp_stores(form)
                         except FormError as e:
                             snippet = '<div class="error">Failed: %s</div>' % e
                             self.request.sdiapi.flash(snippet, 'danger',
@@ -156,7 +157,6 @@ class FormView(ElementaryView, SubstanceDFormView):
                                                    form.formid)
                             error = True
 
-                    self.remove_tmp_stores(form)
                     break
 
         if item is None:

@@ -316,6 +316,11 @@ class ImageWidget(FileWidget):
             pstruct.pop(OBJECT_OID)
 
         data.update(pstruct)
+        data['x'] = float(data['x']) if 'x' in data else 10.0
+        data['y'] = float(data['y']) if 'y' in data else 10.0
+        data['y'] = float(data['y']) if 'y' in data else 0.0
+        data['area_height'] = float(data['area_height']) if 'area_height' in data else 100.0
+        data['area_width'] = float(data['area_width']) if 'area_width' in data else 100.0
         return data
 
 

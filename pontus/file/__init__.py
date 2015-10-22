@@ -118,8 +118,8 @@ class Image(File):
         self.set_data(kwargs)
 
     def get_area_of_interest_dimension(self):
-        result = {'x': float(getattr(self, 'x', 0)),
-                  'y': float(getattr(self, 'y', 0)),
+        result = {'x': float(getattr(self, 'x', 0)) or 100.0,
+                  'y': float(getattr(self, 'y', 0)) or 100.0,
                   'r': float(getattr(self, 'r', 0))}
         try:
             img = PILImage.open(self.fp)
@@ -129,8 +129,8 @@ class Image(File):
             return result
         except:
             result.update({
-                  'area_width': float(getattr(self, 'area_width', 0)),
-                  'area_height': float(getattr(self, 'area_height', 0))})
+                  'area_width': float(getattr(self, 'area_width', 100.0)),
+                  'area_height': float(getattr(self, 'area_height', 100.0))})
             return result
 
     def get_data(self, node):
