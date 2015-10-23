@@ -85,6 +85,14 @@
         border: 0 !important;
         border-radius: 3px;
     }
+    #select2-${id}-results>.select2-results__option .option-container .create-message-container:first-child{
+         display: none;
+     }
+   <div tal:omit-tag="" tal:condition="getattr(field.widget, 'create', False)">
+     #select2-${id}-results>.select2-results__option:first-child .option-container .create-message-container:first-child{
+         display: block !important;
+     }
+   </div>
    </style>
   <input type="hidden" name="__start__" value="${name}:sequence"
          tal:condition="multiple" />
