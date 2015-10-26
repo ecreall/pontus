@@ -354,7 +354,7 @@ class MultipleView(MultipleViewsOperation):
             values = {'coordinates': coordinate, 
                       'subitem': _item, 
                       'parent': self}
-            body = self.content(result=values, template=self.template)['body']
+            body = self.content(args=values, template=self.template)['body']
             item = self.adapt_item(body, self.viewid)
             item['isactive'] = isactive
             result['coordinates'][coordinate] = [item]
@@ -668,7 +668,7 @@ class CallView(MultipleContextsOperation):
 
         for coordinate, items in result.items():
             values = {'items': items, 'id':self.viewid+coordinate }
-            body = self.content(result=values, template=self.template)['body']
+            body = self.content(args=values, template=self.template)['body']
             item = self.adapt_item(body, self.viewid)
             global_result['coordinates'][coordinate] = [item]
 
@@ -1033,7 +1033,7 @@ class Wizard(MultipleViewsOperation):
                   'current': covered, 
                   'title': currentstep.title, 
                   'pourcentage':pourcentage}
-        body = self.content(result=values, 
+        body = self.content(args=values, 
                             template=self.informations_template)['body']
         result = {'body':body, 'js_links':[], 'css_links':[]}
         if self.informations_requirements is not None:

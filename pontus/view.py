@@ -125,21 +125,22 @@ class View(Step):
             return self.request.params
 
         islist = False
-        if (key+'[]') in self.request.params:
+        list_key = key + '[]'
+        if list_key in self.request.params:
             islist = True
 
-        if key in self.request.params or (key+'[]') in self.request.params:
+        if key in self.request.params or list_key in self.request.params:
             dict_copy = self.request.params.copy()
-            dict_copy = MultiDict([(k.replace('[]', ''), value) \
+            dict_copy = MultiDict([(k.replace('[]', ''), value)
                                    for (k, value) in dict_copy.items()])
-            try:
-                while True:
-                    result.append(dict_copy.pop(key))
-            except Exception:
-                if len(result) == 1 and not islist:
-                    return result[0]
-                elif len(result) > 1 or islist:
-                    return result
+            while key in dict_copy:
+                result.append(dict_copy.pop(key))
+
+            len_result = len(result)
+            if not islist and len_result == 1:
+                return result[0]
+            elif islist or len_result > 1:
+                return result
 
         return None
 
@@ -163,28 +164,27 @@ class View(Step):
             return self.failure(error)
 
         if isinstance(result, dict):
-            if not ('js_links' in result):
+            if 'js_links' not in result:
                 result['js_links'] = []
 
-            if not ('css_links' in result):
+            if 'css_links' not in result:
                 result['css_links'] = []
 
         return result
 
-    def content(self, result, template=None, main_template=None):
+    def content(self, args, template=None, main_template=None):
         if template is None:
             template = self.template
 
         if main_template is None:
             main_template = get_renderer(EMPTY_TEMPLATE).implementation()
 
-        if isinstance(result, dict):
-            result['main_template'] = main_template
+        if isinstance(args, dict):
+            args['main_template'] = main_template
 
-        body = renderers.render(template, result, self.request)
-        return {'body':body,
-                'args':result,
-               }
+        body = renderers.render(template, args, self.request)
+        return {'body': body,
+                'args': args}
 
     def adapt_item(self, render, id, isactive=True):
         if self.parent is not None:
@@ -201,11 +201,11 @@ class View(Step):
     def setviewid(self, viewid):
         self.viewid = viewid
 
-    def failure(self, e, subject=None):
-        error_body = e.render_message(self.request, subject)
+    def failure(self, error, subject=None):
+        error_body = error.render_message(self.request, subject)
         item = self.adapt_item('', self.viewid, True)
-        item['messages'] = {e.type: [error_body]}
-        result = {'js_links': [], 
+        item['messages'] = {error.type: [error_body]}
+        result = {'js_links': [],
                   'css_links': [],
                   'coordinates': {self.coordinates: [item]}}
         return result
@@ -220,14 +220,14 @@ class ElementaryView(View):
     behaviors = []
     validate_behaviors = True
 
-    def __init__(self, 
-                 context, 
-                 request, 
-                 parent=None, 
-                 wizard=None, 
-                 stepid=None, 
+    def __init__(self,
+                 context,
+                 request,
+                 parent=None,
+                 wizard=None,
+                 stepid=None,
                  **kwargs):
-        super(ElementaryView, self).__init__(context, request, parent, 
+        super(ElementaryView, self).__init__(context, request, parent,
                                              wizard, stepid, **kwargs)
         self._all_validators = list(self.validators)
         self.specific_behaviors_instances = []
@@ -235,21 +235,21 @@ class ElementaryView(View):
         self.errors = []
         if 'behaviors' in kwargs:
             bis = kwargs['behaviors']
-            self.specific_behaviors_instances = [bi for bi in bis \
-                                           if bi._class_ in self.behaviors]
+            self.specific_behaviors_instances = [bi for bi in bis
+                                                 if bi._class_ in self.behaviors]
 
-        specific_behaviors = [b._class_ for b in \
+        specific_behaviors = [b._class_ for b in
                               self.specific_behaviors_instances]
         if self.validate_behaviors:
-            self._all_validators.extend([behavior.get_validator() \
-                                       for behavior in self.behaviors \
-                                       if not (behavior in specific_behaviors)])
+            self._all_validators.extend([behavior.get_validator()
+                                         for behavior in self.behaviors
+                                         if behavior not in specific_behaviors])
 
         self._init_behaviors(specific_behaviors)
         self.behaviors_instances = OrderedDict(
-                                    sorted(self.behaviors_instances.items(), 
-                                           key=lambda e: 
-                                         self.behaviors.index(e[1].__class__)))
+            sorted(self.behaviors_instances.items(),
+                   key=lambda e:
+                   self.behaviors.index(e[1].__class__)))
 
     def validate(self):
         try:
@@ -280,16 +280,16 @@ class ElementaryView(View):
             pass
 
     def _init_behaviors(self, specific_behaviors):
-        behaviors = [behavior for behavior in self.behaviors \
-                     if not (behavior in specific_behaviors)]
+        behaviors = [behavior for behavior in self.behaviors
+                     if behavior not in specific_behaviors]
         for behavior in behaviors:
             try:
                 wizard_behavior = None
                 if self.wizard:
                     wizard_behavior = self.wizard.behaviorinstance
 
-                behaviorinstance = behavior.get_instance(self.context, 
-                                                         self.request, 
+                behaviorinstance = behavior.get_instance(self.context,
+                                                         self.request,
                                                          wizard=wizard_behavior)
                 if behaviorinstance:
                     self._add_behaviorinstance(behaviorinstance)
@@ -307,7 +307,7 @@ class ElementaryView(View):
         results = []
         for behavior in self.behaviors_instances.values():
             results.append(behavior.execute(
-                     self.context, self.request, appstruct))
+                self.context, self.request, appstruct))
 
         return results
 
@@ -320,14 +320,14 @@ class BasicView(ElementaryView):
 
     isexecutable = False
 
-    def __init__(self, 
-                 context, 
-                 request, 
-                 parent=None, 
-                 wizard=None, 
-                 stepid=None, 
+    def __init__(self,
+                 context,
+                 request,
+                 parent=None,
+                 wizard=None,
+                 stepid=None,
                  **kwargs):
-        super(BasicView, self).__init__(context, request, parent, 
+        super(BasicView, self).__init__(context, request, parent,
                                         wizard, stepid, **kwargs)
         self.finished_successfully = True
 
