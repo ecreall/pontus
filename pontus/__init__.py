@@ -3,8 +3,11 @@
 
 # licence: AGPL
 # author: Amen Souissi
+import logging
 
 from pyramid.i18n import TranslationStringFactory
+
+log = logging.getLogger('pontus')
 
 _ = TranslationStringFactory('pontus')
 

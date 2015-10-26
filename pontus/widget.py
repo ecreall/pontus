@@ -6,7 +6,6 @@
 
 import weakref
 import colander
-import deform
 from persistent.list import PersistentList
 from pyramid.threadlocal import get_current_request
 from translationstring import TranslationString
@@ -20,7 +19,7 @@ from deform.widget import (
     MappingWidget as OriginMappingWidget,
     RichTextWidget,
     FileUploadWidget,
-    TextInputWidget as OriginTextInputWidget, 
+    TextInputWidget as OriginTextInputWidget,
     OptGroup,
     FormWidget as OriginFormWidget,
     SelectWidget as OriginSelectWidget,
@@ -37,7 +36,7 @@ from substanced.util import get_oid
 from dace.util import get_obj
 
 from pontus.file import OBJECT_OID
-
+from pontus import log
 
 
 class TextInputWidget(OriginTextInputWidget):
@@ -273,12 +272,13 @@ class FileWidget(FileUploadWidget):
 
         data[OBJECT_OID] = pstruct.get(OBJECT_OID, 'None')
         if 'fp' not in data and \
-           OBJECT_OID in pstruct:
+           data[OBJECT_OID] != 'None':
             file_obj = get_obj(int(pstruct[OBJECT_OID]))
             data['fp'] = file_obj.fp
 
         try:
-            data['fp'].seek(0)
+            if 'fp' in data:
+                data['fp'].seek(0)
         except Exception:
             pass
 
@@ -316,11 +316,36 @@ class ImageWidget(FileWidget):
             pstruct.pop(OBJECT_OID)
 
         data.update(pstruct)
-        data['x'] = float(data['x']) if 'x' in data else 10.0
-        data['y'] = float(data['y']) if 'y' in data else 10.0
-        data['y'] = float(data['y']) if 'y' in data else 0.0
-        data['area_height'] = float(data['area_height']) if 'area_height' in data else 100.0
-        data['area_width'] = float(data['area_width']) if 'area_width' in data else 100.0
+        try:
+            data['x'] = float(data['x']) if 'x' in data else 10.0
+        except ValueError as error:
+            log.warning(error)
+            data['x'] = 10.0
+
+        try:
+            data['y'] = float(data['y']) if 'y' in data else 10.0
+        except ValueError as error:
+            log.warning(error)
+            data['y'] = 10.0
+
+        try:
+            data['r'] = float(data['r']) if 'r' in data else 0.0
+        except ValueError as error:
+            log.warning(error)
+            data['r'] = 0.0
+
+        try:
+            data['area_height'] = float(data['area_height']) if 'area_height' in data else 100.0
+        except ValueError as error:
+            log.warning(error)
+            data['area_height'] = 100.0
+
+        try:
+            data['area_width'] = float(data['area_width']) if 'area_width' in data else 100.0
+        except ValueError as error:
+            log.warning(error)
+            data['area_width'] = 100.0
+
         return data
 
 
