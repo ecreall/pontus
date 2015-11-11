@@ -25,6 +25,7 @@ from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
 
 from pontus.interfaces import IFile, IImage
+from pontus import log
 
 
 OBJECT_DATA = '_object_data'
@@ -34,7 +35,6 @@ OBJECT_OID = '__objectoid__'
 NO_VALUES = '_no_values'
 
 MARKER = object()
-
 
 
 @content(
@@ -281,6 +281,7 @@ class ObjectData(colander.Mapping):
                cstruct is colander.null:
                 return result
         else:
+            log.warning(cstruct)
             if cstruct is colander.null:
                 return colander.null
 
