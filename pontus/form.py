@@ -134,8 +134,8 @@ class FormView(ElementaryView, SubstanceDFormView):
                                     self.request, {'behaviors': behaviors})
                             validated = {}
                         else:
+                            log.warning(self.request.POST)
                             controls = self.request.POST.items()
-                            log.warning(controls)
                             validated = form.validate(controls)
 
                     except deform.exception.ValidationFailure as e:
