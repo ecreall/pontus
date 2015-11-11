@@ -268,7 +268,7 @@ class FileWidget(FileUploadWidget):
         form.stores.append(self.tmpstore)
         data = super(FileWidget, self).deserialize(field, pstruct)
         file_oid = pstruct.get(OBJECT_OID, 'None')
-        file_oid = file_oid if file_oid is 'None' else None
+        file_oid = file_oid if file_oid != 'None' else None
         if pstruct.get('_object_removed', 'false') == 'true':
             return null
 
@@ -279,7 +279,7 @@ class FileWidget(FileUploadWidget):
 
         data[OBJECT_OID] = file_oid
         if 'fp' not in data:
-            file_obj = get_obj(int(pstruct[OBJECT_OID]))
+            file_obj = get_obj(int(file_oid))
             data['fp'] = file_obj.fp
 
         try:
