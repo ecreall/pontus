@@ -21,7 +21,6 @@ from pontus.view import ElementaryView
 from pontus.util import merge_dicts
 from pontus.default_behavior import Cancel
 from pontus.schema import Schema
-from pontus import log
 
 
 try:
@@ -134,7 +133,6 @@ class FormView(ElementaryView, SubstanceDFormView):
                                     self.request, {'behaviors': behaviors})
                             validated = {}
                         else:
-                            log.warning(self.request.POST)
                             controls = self.request.POST.items()
                             validated = form.validate(controls)
 
@@ -147,7 +145,6 @@ class FormView(ElementaryView, SubstanceDFormView):
                     else:
                         try:
                             behavior = self.behaviors_instances[button.name]
-                            log.warning(validated)
                             item = behavior.execute(self.context,
                                     self.request, validated)
                             self.finished_successfully = True
