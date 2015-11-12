@@ -277,10 +277,11 @@ class FileWidget(FileUploadWidget):
         elif data is null:
             data = {}
 
-        data[OBJECT_OID] = file_oid
-        if 'fp' not in data:
-            file_obj = get_obj(int(file_oid))
-            data['fp'] = file_obj.fp
+        if file_oid:
+            data[OBJECT_OID] = file_oid
+            if 'fp' not in data:
+                file_obj = get_obj(int(file_oid))
+                data['fp'] = file_obj.fp
 
         try:
             if 'fp' in data:
