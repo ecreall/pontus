@@ -33,7 +33,8 @@ def preview_image_upload(request):
     filename = ''
     if fp is not None:
         fp.seek(0)
-        filename = filedata['filename']
+        filename = filedata.get('filename', 'Image')
+
     mimetype = mimetypes.guess_type(filename, strict=False)[0]
     if not mimetype or not mimetype.startswith('image/'):
         mimetype = 'image/gif'
