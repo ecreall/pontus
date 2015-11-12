@@ -272,22 +272,28 @@ class FileWidget(FileUploadWidget):
         if pstruct.get('_object_removed', 'false') == 'true':
             return null
 
-        if data is null and file_oid:
+        if data is null and not file_oid:
             return null
         elif data is null:
             data = {}
 
         if file_oid:
-            data[OBJECT_OID] = file_oid
-            if 'fp' not in data:
-                file_obj = get_obj(int(file_oid))
-                data['fp'] = file_obj.fp
+            try:
+                data[OBJECT_OID] = file_oid
+                if 'fp' not in data:
+                    file_obj = get_obj(int(file_oid))
+                    data['fp'] = file_obj.fp
+            except Exception:
+                pass
 
         try:
             if 'fp' in data:
                 data['fp'].seek(0)
         except Exception:
             pass
+
+        if not data:
+            return null
 
         return data
 
