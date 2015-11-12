@@ -272,7 +272,7 @@ class FileWidget(FileUploadWidget):
         if pstruct.get('_object_removed', 'false') == 'true':
             return null
 
-        if data is null and file_oid is None:
+        if data is null and file_oid:
             return null
         elif data is null:
             data = {}
