@@ -145,7 +145,7 @@ class Object(colander.SchemaType):
             appstruct = colander.null
 
         if appstruct is not colander.null:
-            oid = get_oid(appstruct)
+            oid = get_oid(appstruct, None)
             if oid is None:
                 return colander.null
             else:
@@ -154,10 +154,28 @@ class Object(colander.SchemaType):
         return appstruct
 
     def deserialize(self, node, cstruct):
-        if cstruct is colander.null:
-            return cstruct
-
         return cstruct
+
+
+class SetObject(Object):
+
+    def serialize(self, node, appstruct):
+        if not appstruct:
+            appstruct = colander.null
+
+        if appstruct is not colander.null:
+            result = []
+            for item in appstruct:
+                oid = get_oid(item, None)
+                if oid:
+                    result.append(str(oid))
+
+            if result:
+                return result
+
+            return colander.null
+
+        return appstruct
 
 
 class ObjectData(colander.Mapping):
@@ -185,7 +203,7 @@ class ObjectData(colander.Mapping):
         if appstruct is None:
             appstruct = colander.null
 
-        if  appstruct is not colander.null and \
+        if appstruct is not colander.null and \
             not isinstance(appstruct, (dict, PersistentDict)):
             _object = appstruct
             appstruct = _object.get_data(node)
@@ -220,10 +238,10 @@ class ObjectData(colander.Mapping):
 
                 if getattr(subnode, 'to_omit', False):
                     if not getattr(subnode, 'private', False):
-                        appstruct[key] = value 
+                        appstruct[key] = value
                         # private is omited and not returned to the user
 
-                    cstruct.pop(key) 
+                    cstruct.pop(key)
                     # don't set data if omitted
 
         if isinstance(cstruct, (dict, PersistentDict)):
@@ -235,7 +253,7 @@ class ObjectData(colander.Mapping):
                 if not isinstance(value, (list, tuple, set)):
                     value = [value]
                     is_multiple_cardinality = False
-               
+
                 for item in list(value):
                     if isinstance(item, (dict, PersistentDict)) \
                        and OBJECT_DATA in item:
