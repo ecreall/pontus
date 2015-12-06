@@ -32,8 +32,11 @@ def omit_nodes(schemanode, omit):
                 schemanode.children.remove(node)
         else:
             node = schemanode.get(o[0])
+            if type(node) == colander.SchemaNode:
+                node = node.children[0]
+
             if node is not None:
-                omit_nodes(node.children[0], o[1])
+                omit_nodes(node, o[1])
 
 
 class Schema(OriginSchema):
