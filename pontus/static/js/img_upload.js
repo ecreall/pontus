@@ -19,6 +19,8 @@ function init_reader(input_id, image){
         fileReader.readAsDataURL(file);
         fileReader.onload = function () {
           image.cropper("reset", true).cropper("replace", this.result);
+          var file_removed = $("#"+input_id+"-dataDel");
+          file_removed.val(false)
         };
       } else {
         showMessage("Please choose an image file.");
@@ -142,6 +144,8 @@ function readImg(input_id){
       dataHeight.val('');
       image.cropper(options);
       init_reader(input_id, image);
+      var file_removed = $("#"+input_id+"-dataDel");
+      file_removed.val(true)
   });
   
     init_reader(input_id, image);

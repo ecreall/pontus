@@ -17,6 +17,9 @@
            id="${oid}-uid"/>
     <input tal:condition="'__objectoid__' in cstruct" type="hidden" name="__objectoid__" value="${cstruct['__objectoid__']}" id="${oid}-__objectoid__"/>
   </div>
+  <div class="input-group">
+    <input name="_object_removed" id="${oid}-dataDel"  type="hidden">
+  </div>
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-9">
