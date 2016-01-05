@@ -105,8 +105,8 @@ def select(schema, mask):
             node = schema.get(m[0])
             if node is not None:
                 if type(node) == colander.SchemaNode:
-                    node = node.children[0]
                     sequencenode = node.clone()
+                    node = node.children[0]
                     sequencenode.children = []
                     sequencenode.add(select(node, m[1]))
                     new_schema.add(sequencenode)
