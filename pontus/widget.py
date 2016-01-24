@@ -250,9 +250,10 @@ class FileWidget(FileUploadWidget):
                     pass
 
             if not hasattr(self, 'uids'):
-                self.uids = {}
+                setattr(self, 'uids', {})
 
-            if uid not in self.tmpstore:
+            if uid not in self.tmpstore or \
+               not self.tmpstore.get(uid, {}).get('fp', None):
                 self.tmpstore[uid] = cstruct
 
             self.uids[field] = uid
