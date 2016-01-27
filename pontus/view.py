@@ -8,20 +8,21 @@ import re
 from collections import OrderedDict
 from webob.multidict import MultiDict
 
+import pyramid.httpexceptions as exc
 from pyramid import renderers
 from pyramid.renderers import get_renderer
 from pyramid_layout.layout import Structure
 from substanced.util import get_oid
 from zope.interface import implementer
 
-from dace.processinstance.core import  Error, ValidationError
+from dace.processinstance.core import Error, ValidationError
 
 from pontus.interfaces import IView
 from pontus.core import Step
 from pontus.util import copy_dict
 from pontus.resources import (
-                BehaviorViewErrorPrincipalmessage,
-                BehaviorViewErrorSolutions)
+    BehaviorViewErrorPrincipalmessage,
+    BehaviorViewErrorSolutions)
 from pontus import _
 
 
@@ -33,8 +34,9 @@ class ViewError(Error):
     template = 'pontus:templates/views_templates/alert_message.pt'
 
     def render_message(self, request, subject=None):
-        content_message = renderers.render(self.template,
-                {'error': self, 'subject': subject}, request)
+        content_message = renderers.render(
+            self.template,
+            {'error': self, 'subject': subject}, request)
         return content_message
 
 
@@ -49,7 +51,7 @@ class View(Step):
     title = _('View')
     description = ""
     name = 'view'
-    coordinates = 'main' # default value
+    coordinates = 'main'# default value
     validators = []
     wrapper_template = 'templates/views_templates/view_wrapper.pt'
     template = None
@@ -58,18 +60,19 @@ class View(Step):
     container_css_class = ""
 
     def render_item(self, item, coordinates, parent):
-        body = renderers.render(self.wrapper_template,
-                {'coordinates': coordinates,
-                 'subitem': item,
-                 'parent': parent}, self.request)
+        body = renderers.render(
+            self.wrapper_template,
+            {'coordinates': coordinates,
+             'subitem': item,
+             'parent': parent}, self.request)
         return Structure(body)
 
-    def __init__(self, 
-                 context, 
-                 request, 
-                 parent=None, 
-                 wizard=None, 
-                 stepid=None, 
+    def __init__(self,
+                 context,
+                 request,
+                 parent=None,
+                 wizard=None,
+                 stepid=None,
                  **kwargs):
         super(View, self).__init__(wizard, stepid)
         self.context = context
@@ -82,7 +85,7 @@ class View(Step):
             self.viewid = self.parent.viewid + '_' + self.viewid
 
         if self.context is not None:
-            self.viewid = self.viewid + '_' + str(get_oid(self.context))
+            self.viewid = self.viewid + '_' + str(get_oid(self.context, ''))
 
         self._request_configuration()
 
@@ -162,6 +165,8 @@ class View(Step):
             self.after_update()
         except ViewError as error:
             return self.failure(error)
+        except Exception:
+            raise exc.HTTPInternalServerError()
 
         if isinstance(result, dict):
             if 'js_links' not in result:
