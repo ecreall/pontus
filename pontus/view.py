@@ -23,7 +23,7 @@ from pontus.util import copy_dict
 from pontus.resources import (
     BehaviorViewErrorPrincipalmessage,
     BehaviorViewErrorSolutions)
-from pontus import _
+from pontus import _, log
 
 
 class ViewError(Error):
@@ -165,7 +165,8 @@ class View(Step):
             self.after_update()
         except ViewError as error:
             return self.failure(error)
-        except Exception:
+        except Exception as http_error:
+            log.exception(http_error)
             raise exc.HTTPInternalServerError()
 
         if isinstance(result, dict):
