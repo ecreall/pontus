@@ -166,7 +166,7 @@ class View(Step):
             result = self.update()
             self.after_update()
         except ViewError as error:
-            log.exception(error)
+            log.warning(error)
             raise error
         except Exception as http_error:
             log.exception(http_error)
