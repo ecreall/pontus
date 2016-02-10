@@ -7,13 +7,15 @@
 import re
 from collections import OrderedDict
 from webob.multidict import MultiDict
+from zope.interface import implementer
 
+from pyramid.view import view_config
 import pyramid.httpexceptions as exc
 from pyramid import renderers
 from pyramid.renderers import get_renderer
 from pyramid_layout.layout import Structure
+
 from substanced.util import get_oid
-from zope.interface import implementer
 
 from dace.processinstance.core import Error, ValidationError
 
@@ -164,7 +166,8 @@ class View(Step):
             result = self.update()
             self.after_update()
         except ViewError as error:
-            return self.failure(error)
+            log.exception(error)
+            raise error
         except Exception as http_error:
             log.exception(http_error)
             raise exc.HTTPInternalServerError()
@@ -339,3 +342,22 @@ class BasicView(ElementaryView):
 
     def update(self):
         return {}
+
+
+@view_config(
+    context=ViewError,
+    renderer='pontus:templates/views_templates/grid.pt',
+    )
+class ViewErrorView(BasicView):
+    title = _('An error has occurred!')
+    name = 'viewerrorview'
+    template = 'pontus:templates/views_templates/alert_message.pt'
+
+    def update(self):
+        self.title = self.request.localizer.translate(self.title)
+        result = {}
+        body = self.content(
+            args={'error': self.context}, template=self.template)['body']
+        item = self.adapt_item(body, self.viewid)
+        result['coordinates'] = {self.coordinates: [item]}
+        return result

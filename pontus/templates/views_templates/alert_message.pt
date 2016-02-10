@@ -1,9 +1,11 @@
-<dl class="dl-horizontal"  i18n:domain="pontus">
-  <dt>Message</dt><dd>${error.principalmessage}</dd>
-  <dt tal:condition="error.causes">Possible causes</dt>
-  <dd tal:condition="error.causes">
-    <ul>
-        <li tal:repeat="message error.causes"> ${message}</li>
-    </ul>
-  </dd>
-</dl>
+<div class="alert alert-${getattr(error, 'type', 'info')}">
+	<dl class="dl-horizontal"  i18n:domain="pontus">
+	  <dt>Message</dt><dd>${error.principalmessage}</dd>
+	  <dt tal:condition="error.causes">Possible causes</dt>
+	  <dd tal:condition="error.causes">
+	    <ul>
+	        <li tal:repeat="message error.causes"> ${message}</li>
+	    </ul>
+	  </dd>
+	</dl>
+</div>

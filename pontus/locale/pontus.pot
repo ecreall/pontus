@@ -1,12 +1,12 @@
-# 
+#
 # SOME DESCRIPTIVE TITLE
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2015-03-17 15:26+0100\n"
+"POT-Creation-Date: 2016-02-10 17:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,56 +14,62 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: \n"
+"Generated-By: Lingua 3.11\n"
 
 #: ./src/pontus/pontus/default_behavior.py:17
 msgid "Cancel"
 msgstr ""
 
-#: ./src/pontus/pontus/index.py:25
+#: ./src/pontus/pontus/index.py:26
 msgid "Index"
 msgstr ""
 
-#: ./src/pontus/pontus/view.py:49
+#: ./src/pontus/pontus/view.py:53
 msgid "View"
 msgstr ""
 
-#: ./src/pontus/pontus/core.py:52
+#: ./src/pontus/pontus/view.py:352
+msgid "An error has occurred!"
+msgstr ""
+
+#: ./src/pontus/pontus/core.py:53
 msgid "Title"
 msgstr ""
 
-#: ./src/pontus/pontus/core.py:58
+#: ./src/pontus/pontus/core.py:59
 msgid "Label"
 msgstr ""
 
-#: ./src/pontus/pontus/core.py:64
+#: ./src/pontus/pontus/core.py:65
 msgid "Description"
 msgstr ""
 
 #. Default: Reorder (via drag and drop)
-#: ./src/pontus/pontus/templates/table_item.pt:11
-#: ./src/pontus/pontus/templates/sequence_item.pt:20
+#: ./src/pontus/pontus/templates/table_item.pt:18
+#: ./src/pontus/pontus/templates/sequence_item.pt:36
 msgid "title"
 msgstr ""
 
-#: ./src/pontus/pontus/templates/table_item.pt:13
-#: ./src/pontus/pontus/templates/sequence_item.pt:22
+#: ./src/pontus/pontus/templates/table_item.pt:23
+#: ./src/pontus/pontus/templates/sequence_item.pt:41
 msgid "Remove"
 msgstr ""
 
-#: ./src/pontus/pontus/templates/simple_mapping.pt:8
-#: ./src/pontus/pontus/templates/mapping.pt:14
+#: ./src/pontus/pontus/templates/simple_mapping.pt:11
+#: ./src/pontus/pontus/templates/mapping.pt:13
 msgid "There was a problem with this section"
 msgstr ""
 
 #. Default: en
-#: ./src/pontus/pontus/templates/richtext.pt:20
+#: ./src/pontus/pontus/templates/richtext.pt:25
+#: ./src/pontus/pontus/templates/ajax_select2.pt:135
 msgid "language-code"
 msgstr ""
 
-#: ./src/pontus/pontus/templates/panels/usermenu.pt:18
+#: ./src/pontus/pontus/templates/panels/usermenu.pt:16
 msgid "${icon} Account"
 msgstr ""
 
-#: ./src/pontus/pontus/templates/panels/usermenu.pt:27
+#: ./src/pontus/pontus/templates/panels/usermenu.pt:20
 msgid "${icon} Log Out"
 msgstr ""
