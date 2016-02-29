@@ -21,7 +21,7 @@ from dace.processinstance.core import Error, ValidationError
 
 from pontus.interfaces import IView
 from pontus.core import Step
-from pontus.util import copy_dict
+from pontus.util import copy_dict, update_resources
 from pontus.resources import (
     BehaviorViewErrorPrincipalmessage,
     BehaviorViewErrorSolutions)
@@ -178,6 +178,8 @@ class View(Step):
 
             if 'css_links' not in result:
                 result['css_links'] = []
+
+            update_resources(self.request, result)
 
         return result
 
