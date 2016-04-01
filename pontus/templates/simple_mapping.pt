@@ -2,10 +2,12 @@
                      oid oid|field.oid;
                      description description|field.description;
                      errormsg errormsg|field.errormsg;
-                     item_template item_template|field.widget.item_template"
+                     item_template item_template|field.widget.item_template;
+                     mapping_title mapping_title|getattr(field.widget, 'mapping_title', '')"
          i18n:domain="pontus">
   
     <div class="${field.widget.css_class or ''}">
+      <div tal:condition="mapping_title" class="simple-mapping-title">${mapping_title}</div>
       <div tal:condition="errormsg" 
            class="clearfix alert alert-danger alert-message error">
         <p i18n:translate="">

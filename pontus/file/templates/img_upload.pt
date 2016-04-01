@@ -22,7 +22,7 @@
   </div>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-9">
+      <div class="col-md-12">
        <div class="img-container">
           <img class="cropper"
                id="${oid}-img"
@@ -50,9 +50,6 @@
               <button id="${oid}-move" type="button" data-option="move" data-method="setDragMode" class="btn btn-primary">
                   <span class="glyphicon glyphicon-move"></span>
               </button>
-              <button id="${oid}-crop" type="button" data-option="crop" data-method="setDragMode" class="btn btn-primary">
-                 <span class="glyphicon glyphicon-plus"></span>
-              </button>
               <button id="${oid}-clear" type="button" data-method="clear" class="btn btn-primary">
                   <span class="glyphicon glyphicon-remove"></span>
               </button>
@@ -70,7 +67,7 @@
             </div>
         </div>
       </div>
-      <div class="col-md-3 img-data">
+      <div style="display: none" class="img-data">
         <div  id="${oid}-preview" class="row preview-container">
           <div class="col-md-9 preview-item-md">
             <div class="preview preview-sm"></div>
