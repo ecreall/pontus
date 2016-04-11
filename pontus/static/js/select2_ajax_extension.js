@@ -1,7 +1,9 @@
 
-remove_btn_template = "<span role=\"presentation\" class=\"select2-remove\">"+
-                      "<span title=\"Clear\" class=\"glyphicon glyphicon-remove\">"+
+function remove_btn_template(clear_title){
+    return  "<span role=\"presentation\" class=\"select2-remove\">"+
+                      "<span title=\"" + clear_title + "\" class=\"glyphicon glyphicon-remove\">"+
                       "</span></span>"
+}
 
 
 function default_item_template(item){
@@ -41,9 +43,13 @@ function get_context_data(id){
 }
 
 
-function add_clear_btn(select_field){
+function add_clear_btn(select_field, clear_title){
+    if (! clear_title){
+      clear_title = "Clear"
+    }
+
     var btn_container = $($(select_field.parents('div').first()).find('.select2.select2-container.select2-container--default').first());
-    btn_container.append(remove_btn_template);
+    btn_container.append(remove_btn_template(clear_title));
     var btn = $(btn_container.find('.select2-remove').first());
     btn.on('click', function(){
       var event = jQuery.Event("change");
