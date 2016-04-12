@@ -96,6 +96,7 @@
        <div tal:omit-tag="" tal:condition="not field.widget.create" >
          $('#' + oid).select2({containerCssClass: 'form-control'});
        </div>
+       $('#' + oid).trigger('select2-started')
      }
    );
   </script>

@@ -179,6 +179,7 @@
        </div>
        $.extend(init_ops, ajax_options)
        $('#' + oid).select2(init_ops);
+       $('#' + oid).trigger('select2-started')
       <div tal:omit-tag="" tal:condition="add_clear" >
         add_clear_btn($('#' + oid), "${getattr(field.widget, 'clear_title', "Clear")}")
       </div>
