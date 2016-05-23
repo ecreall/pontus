@@ -40,7 +40,7 @@
        tal:condition="not field.widget.hidden"
        title="Remove"
        i18n:attributes="title"
-       onclick="javascript:deform.removeSequenceItem(this);"><span class="glyphicon glyphicon-minus"></span></a>
+       onclick="javascript:deform.removeSequenceItem(this);"><span class="glyphicon glyphicon-minus-sign"></span></a>
   </div>
   <!-- /sequence_item -->
 </div>

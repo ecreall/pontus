@@ -25,7 +25,7 @@
     }
 
     .deform-seq-add > .glyphicon{
-      color: #5cb85c
+      color: #419641
     }
     .deform-seq-body{
         padding-top: 6px; 
@@ -67,7 +67,7 @@
          class="deform-seq-add pull-right"
          id="${field.oid}-seqAdd"
          onclick="javascript: return deform.appendSequenceItem(this);">
-        <small id="${field.oid}-addtext" class="glyphicon glyphicon-plus"></small> <span class="add-seq-item-text">${add_subitem_text}</span>
+        <small id="${field.oid}-addtext" class="glyphicon glyphicon-plus-sign"></small> <span tal:condition="add_subitem_text" class="add-seq-item-text">${add_subitem_text}</span>
       </a>
 
       <script type="text/javascript">
