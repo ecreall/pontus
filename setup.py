@@ -13,12 +13,13 @@ requires = [
     'pillow'
     ]
 
-setup(name='pontus',
-      version='0.0',
+setup(name='ecreall_pontus',
+      version='1.0.dev0',
       description='Data-centric engine',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "Programming Language :: Python",
+        "Programming Language :: Python :: 3.4",
         "Framework :: Pylons",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
