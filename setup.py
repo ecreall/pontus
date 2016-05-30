@@ -7,7 +7,7 @@ README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 requires = [
-    'dace',
+    'ecreall_dace',
     'pyramid_layout',
     'substanced',
     'pillow'
