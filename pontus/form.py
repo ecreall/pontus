@@ -91,7 +91,13 @@ class FormView(ElementaryView, SubstanceDFormView):
         self.formid = viewid
 
     def get_view_requirements(self):
-        form, reqts = self._build_form()
+        bindings = self.bind()
+        bindings.update({
+            'request': self.request,
+            'context': self.context,
+            })
+        schema = self.schema.bind(**bindings)
+        reqts = self.form_class(schema).get_widget_resources()
         result = {}
         result['js_links'] = list(reqts['js'])
         result['css_links'] = list(reqts['css'])
