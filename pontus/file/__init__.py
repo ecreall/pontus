@@ -104,6 +104,11 @@ class File(DaceObject, OriginFile):
         request = get_current_request()
         return request.resource_url(self)
 
+    def copy(self):
+        data = self.get_data(None)
+        data.pop('uid')
+        return self.__class__(**data)
+
 
 @content(
     'pontus_image',
