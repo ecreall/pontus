@@ -6,7 +6,9 @@
   <div tal:omit-tag="" tal:condition="items and itemslen > 1">
       <ul tal:attributes="id (subitem['view'].viewid+'_multipleform_'+coordinates)" class="nav nav-tabs">
           <li tal:repeat="item items" tal:attributes="class item['isactive'] and 'active' or ''">
-             <a data-toggle="tab" tal:attributes="href '#'+item['id']+coordinates">${item['view'].title}</a>
+             <a data-toggle="tab" tal:attributes="href '#'+item['id']+coordinates"
+                tal:define="icon getattr(item['view'], 'view_icon', None)">
+              <span tal:condition="icon" class="${icon}"></span> ${item['view'].title}</a>
           </li>
       </ul>
       <div tal:attributes="id (subitem['id']+'_multipleform'+coordinates)" class="tab-content">

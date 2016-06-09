@@ -54,6 +54,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         SubstanceDFormView.__init__(self, context, request)
         ElementaryView.__init__(self, context, request, parent,
                                 wizard, stepid, **kwargs)
+        self.formid = kwargs.get('formid', getattr(self, 'formid', 'deform'))
         self.buttons = [Button(title=getattr(behavior,
                                             'submission_title',
                                             behavior.title),
