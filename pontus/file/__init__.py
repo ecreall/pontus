@@ -122,8 +122,8 @@ class Image(File):
         self.set_data(kwargs)
 
     def get_area_of_interest_dimension(self):
-        result = {'x': float(getattr(self, 'x', 0)) or 100.0,
-                  'y': float(getattr(self, 'y', 0)) or 100.0,
+        result = {'x': float(getattr(self, 'x', 0)),
+                  'y': float(getattr(self, 'y', 0)),
                   'r': float(getattr(self, 'r', 0))}
         try:
             img = PILImage.open(self.fp)
