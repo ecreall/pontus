@@ -1,0 +1,26 @@
+include *.rst
+include LICENSE
+recursive-include pontus *.bat
+recursive-include pontus *.css
+recursive-include pontus *.csslintrc
+recursive-include pontus *.editorconfig
+recursive-include pontus *.eot
+recursive-include pontus *.gif
+recursive-include pontus *.html
+recursive-include pontus *.jpg
+recursive-include pontus *.js
+recursive-include pontus *.jscsrc
+recursive-include pontus *.jshintignore
+recursive-include pontus *.jshintrc
+recursive-include pontus *.json
+recursive-include pontus *.md
+recursive-include pontus *.nuspec
+recursive-include pontus *.otf
+recursive-include pontus *.php
+recursive-include pontus *.po
+recursive-include pontus *.pot
+recursive-include pontus *.pt
+recursive-include pontus *.scss
+recursive-include pontus *.svg
+recursive-include pontus *.ttf
+recursive-include pontus *.woff
