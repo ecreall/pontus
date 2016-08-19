@@ -14,6 +14,7 @@ recursive-include pontus *.jshintignore
 recursive-include pontus *.jshintrc
 recursive-include pontus *.json
 recursive-include pontus *.md
+recursive-include pontus *.mo
 recursive-include pontus *.nuspec
 recursive-include pontus *.otf
 recursive-include pontus *.php
