@@ -1,4 +1,11 @@
+.deform-seq-item-btns{
+    width: 3.333% !important
+}
 
+.deform-seq-item-container{
+	width: 96.667% !important;
+	padding: 6px
+}
 
 a.deform-seq-add{
 	color: #5cb85c;

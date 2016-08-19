@@ -5,18 +5,8 @@
                  title title|field.title;
                  oid oid|field.oid"
      title="${description}"
-     class="form-group deform-seq-item ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
+     class="form-group deform-seq-item ${cstruct and 'uploaded' or ''} ${field.error and error_class or ''} ${field.widget.item_css_class or ''}"
      i18n:domain="deform">
-  <style>  
-    .deform-seq-item-btns{
-       width: 3.333% !important
-    }
-
-    .deform-seq-item-container{
-        width: 96.667% !important;
-       padding: 6px
-    }
-  </style>
   <div class="col-xs-11 deform-seq-item-container">
     <span tal:replace="structure field.serialize(cstruct)"/>
     <tal:errors condition="field.error and not hidden"
