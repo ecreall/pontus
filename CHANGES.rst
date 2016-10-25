@@ -4,7 +4,7 @@ Changelog
 1.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- add url getter
 
 
 1.0.2 (2016-09-15)
