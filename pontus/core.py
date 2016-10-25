@@ -90,9 +90,12 @@ class VisualisableElement(object):
         request = get_current_request()
         return request.resource_url(self, '@@index')
 
+    def get_url(self, request):
+        return request.resource_url(self, '@@index')
+
     def get_view(self, request, template=None):
         if template is None:
             template = self.template
-        body = renderers.render(template, {'object':self}, request)
+        body = renderers.render(template, {'object': self}, request)
 
         return Structure(body)
