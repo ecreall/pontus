@@ -4,6 +4,12 @@
 # licence: AGPL
 # author: Amen Souissi
 
+from zope.interface import providedBy
+
+from pyramid.interfaces import IViewClassifier, IView
+from pyramid.threadlocal import get_current_registry
+from pyramid.compat import map_
+
 
 def get_copy_fn(obj):
     def default(obj):
@@ -64,6 +70,20 @@ def update_resources(request, resources={'js_links': [], 'css_links': []}):
     old_resources['js_links'].extend(resources.get('js_links', []))
     old_resources['css_links'].extend(resources.get('css_links', []))
     request.resources = old_resources
+
+
+def get_view(context, request, view_name):
+    provides = [IViewClassifier] + map_(providedBy, (request, context))
+    try:
+        reg = request.registry
+    except AttributeError:
+        reg = get_current_registry()
+
+    view = reg.adapters.lookup(provides, IView, name=view_name)
+    if view is None:
+        return None
+
+    return view
 
 
 merge_rules = {

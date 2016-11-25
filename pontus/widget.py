@@ -79,7 +79,6 @@ class SequenceWidget(OriginSequenceWidget):
 
     def serialize(self, field, cstruct, **kw):
         # XXX make it possible to override min_len in kw
-
         if cstruct in (null, None):
             if self.min_len is not None:
                 cstruct = [null] * self.min_len
