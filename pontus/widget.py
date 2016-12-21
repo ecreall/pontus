@@ -200,6 +200,7 @@ class AccordionWidget(SequenceWidget):
 
 
 class RichTextWidget(RichTextWidget):
+    requirements = (('tinymce', None), )
     default_options = (('height', 240),
                        ('width', 0),
                        ('skin', 'lightgray'),
@@ -609,6 +610,10 @@ class Length(object):
                               self.max_message.format(max=self.max))
                 raise Invalid(node, max_err)
 
+
+default_resource_registry.set_js_resources('tinymce', None, 
+               'deform:static/tinymce/tinymce.min.js',
+               'pontus:static/js/preventdelete.js' )
 
 default_resource_registry.set_js_resources('select2creation', None, 
                'pontus:static/select2/dist/js/select2.js' )
