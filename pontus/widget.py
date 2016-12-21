@@ -611,9 +611,10 @@ class Length(object):
                 raise Invalid(node, max_err)
 
 
-default_resource_registry.set_js_resources('tinymce', None, 
-               'deform:static/tinymce/tinymce.min.js',
-               'pontus:static/js/preventdelete.js' )
+default_resource_registry.set_js_resources(
+    'tinymce', None,
+    'deform:static/tinymce/tinymce.min.js',
+    'pontus:static/js/preventdelete/preventdelete.js')
 
 default_resource_registry.set_js_resources('select2creation', None, 
                'pontus:static/select2/dist/js/select2.js' )
