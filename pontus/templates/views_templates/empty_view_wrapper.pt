@@ -1,0 +1,5 @@
+<div tal:omit-tag="" tal:condition="subitem|nothing">
+  <div class="${getattr(subitem['view'], 'css_class', '')}">
+    <div tal:replace="structure subitem['body']" />
+  </div>
+</div>

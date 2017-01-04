@@ -150,7 +150,7 @@ class View(Step):
         return None
 
     def before_update(self):
-        pass
+        self.bind()
 
     def update(self):
         pass
@@ -223,6 +223,20 @@ class View(Step):
 
     def success(self, validated=None):
         pass
+
+    def bind(self):
+        setattr(self, '_bindings', {})
+
+    @property
+    def bindings(self):
+        bindings = getattr(self, '_bindings', {}).copy()
+        if self.parent:
+            bindings.update(self.parent.bindings)
+
+        return bindings
+
+    def get_binding(self, key):
+        return self.bindings.get(key, None)
 
 
 class ElementaryView(View):
@@ -311,6 +325,7 @@ class ElementaryView(View):
             self._add_behaviorinstance(behaviorinstance)
 
     def before_update(self):
+        self.bind()
         for behavior in self.behaviors_instances.values():
             behavior.before_execution(self.context, self.request)
 

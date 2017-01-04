@@ -1,0 +1,14 @@
+<div tal:omit-tag="" tal:define="item subitem|nothing">
+  <div tal:condition="item" class="${getattr(item['view'], 'css_class', '')} views-container">
+      <div  tal:condition="'messages' in item" id="messages" class="ajax-replace">
+        <div tal:omit-tag="" tal:define="allmessages item['messages']" tal:repeat="queue allmessages.keys()">
+          <div tal:define="messagesr allmessages[queue]"
+               tal:condition="messagesr"
+               tal:repeat="message messagesr">
+            ${structure:message}
+          </div>
+        </div>
+      </div>
+      <div tal:replace="structure item['body']" />
+  </div>
+</div>

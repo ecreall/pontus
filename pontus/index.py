@@ -46,6 +46,9 @@ class Index(View):
         if views:
             indexmultiview = MultipleView(
                 self.context, self.request, self.parent)
+            indexmultiview.wrapper_template = 'templates/views_templates/empty_view_wrapper.pt'
+            indexmultiview.template = 'templates/views_templates/simple_multipleview.pt'
+            indexmultiview.css_class = 'index-view'
             indexmultiview.coordinates = self.coordinates
             indexmultiview._init_views(views)
             indexmultiview.before_update()

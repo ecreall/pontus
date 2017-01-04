@@ -242,6 +242,7 @@ class MultipleView(MultipleViewsOperation):
                 self._activate(item['items'])
 
     def before_update(self):
+        self.bind()
         for view in self.validated_children:
             view.before_update()
 
@@ -450,6 +451,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
 
     def before_update(self):
+        self.bind()
         for view in self.all_children:
             view.before_update()
 
@@ -615,6 +617,7 @@ class CallView(MultipleContextsOperation):
         return self.isexecutable
 
     def before_update(self):
+        self.bind()
         for view in self.validated_children:
             view.before_update()
 

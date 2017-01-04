@@ -1,0 +1,8 @@
+<div tal:condition="subitem|nothing" tal:omit-tag=""  tal:define="
+      items subitem['items'];
+      itemslen len(items)|0;
+      subitem_view  subitem['view'] if itemslen > 1 else None">
+  <div tal:condition="items" tal:repeat="item items">
+      <div tal:replace="item['view'].render_item(item, coordinates, subitem_view)" />   
+  </div>
+</div>

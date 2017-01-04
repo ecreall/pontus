@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2016-02-10 17:24+0100\n"
-"PO-Revision-Date: 2016-02-10 17:28+0100\n"
+"POT-Creation-Date: 2016-06-23 14:42+0200\n"
+"PO-Revision-Date: 2016-08-18 15:12+0100\n"
 "Last-Translator: SOUISSI <amensouissi@ecreall.com>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -16,62 +16,62 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#: src/pontus/pontus/default_behavior.py:17
+#: src/ecreall_pontus/pontus/default_behavior.py:17
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/pontus/pontus/index.py:26
+#: src/ecreall_pontus/pontus/index.py:26
 msgid "Index"
 msgstr "Index"
 
-#: src/pontus/pontus/view.py:53
+#: src/ecreall_pontus/pontus/view.py:53
 msgid "View"
 msgstr "Vue"
 
-#: src/pontus/pontus/view.py:352
+#: src/ecreall_pontus/pontus/view.py:354
 msgid "An error has occurred!"
 msgstr "Une erreur est survenue!"
 
-#: src/pontus/pontus/core.py:53
+#: src/ecreall_pontus/pontus/core.py:53
 msgid "Title"
 msgstr "Titre"
 
-#: src/pontus/pontus/core.py:59
+#: src/ecreall_pontus/pontus/core.py:59
 msgid "Label"
 msgstr ""
 
-#: src/pontus/pontus/core.py:65
+#: src/ecreall_pontus/pontus/core.py:65
 msgid "Description"
 msgstr "Description"
 
 #. Default: Reorder (via drag and drop)
-#: src/pontus/pontus/templates/table_item.pt:18
-#: src/pontus/pontus/templates/sequence_item.pt:36
+#: src/ecreall_pontus/pontus/templates/table_item.pt:18
+#: src/ecreall_pontus/pontus/templates/sequence_item.pt:36
 msgid "title"
 msgstr "titre"
 
-#: src/pontus/pontus/templates/table_item.pt:23
-#: src/pontus/pontus/templates/sequence_item.pt:41
+#: src/ecreall_pontus/pontus/templates/table_item.pt:23
+#: src/ecreall_pontus/pontus/templates/sequence_item.pt:41
 msgid "Remove"
 msgstr "Supprimer"
 
-#: src/pontus/pontus/templates/simple_mapping.pt:11
-#: src/pontus/pontus/templates/mapping.pt:13
+#: src/ecreall_pontus/pontus/templates/simple_mapping.pt:13
+#: src/ecreall_pontus/pontus/templates/mapping.pt:13
 msgid "There was a problem with this section"
 msgstr ""
 "Un problème a été rencontré avec cette section. Merci de vérifier les "
 "informations saisies."
 
 #. Default: en
-#: src/pontus/pontus/templates/richtext.pt:25
-#: src/pontus/pontus/templates/ajax_select2.pt:135
+#: src/ecreall_pontus/pontus/templates/richtext.pt:25
+#: src/ecreall_pontus/pontus/templates/ajax_select2.pt:135
 msgid "language-code"
 msgstr "fr"
 
-#: src/pontus/pontus/templates/panels/usermenu.pt:16
+#: src/ecreall_pontus/pontus/templates/panels/usermenu.pt:16
 msgid "${icon} Account"
 msgstr "${icon} Mon profil"
 
-#: src/pontus/pontus/templates/panels/usermenu.pt:20
+#: src/ecreall_pontus/pontus/templates/panels/usermenu.pt:20
 msgid "${icon} Log Out"
 msgstr "${icon} Se déconnecter"
