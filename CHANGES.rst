@@ -1,8 +1,10 @@
 Changelog
 =========
 
-1.0.3 (unreleased)
+1.0.3 (2017-01-06)
 ------------------
+
+- add preventdelete tinycemce plugin
 
 - add url getter
 
