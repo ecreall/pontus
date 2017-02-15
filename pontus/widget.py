@@ -616,12 +616,13 @@ default_resource_registry.set_js_resources(
     'deform:static/tinymce/tinymce.min.js',
     'pontus:static/js/preventdelete/preventdelete.js')
 
-default_resource_registry.set_js_resources('select2creation', None, 
-               'pontus:static/select2/dist/js/select2.js' )
+default_resource_registry.set_js_resources('select2creation', None,
+               'pontus:static/select2/dist/js/select2.js')
 
 
-default_resource_registry.set_css_resources('select2creation', None, 
-               'pontus:static/select2/dist/css/select2.min.css' )
+default_resource_registry.set_css_resources('select2creation', None,
+               'pontus:static/select2/dist/css/select2.min.css',
+               'pontus:static/css/select2.css')
 
 
 default_resource_registry.set_js_resources('ajaxselect2', None, 
@@ -630,7 +631,8 @@ default_resource_registry.set_js_resources('ajaxselect2', None,
 
 
 default_resource_registry.set_css_resources('ajaxselect2', None, 
-              'pontus:static/select2/dist/css/select2.min.css')
+              'pontus:static/select2/dist/css/select2.min.css',
+              'pontus:static/css/select2_ajax_extension.css')
 
 
 default_resource_registry.set_css_resources('sequence_pontus', None, 

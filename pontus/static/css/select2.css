@@ -1,0 +1,45 @@
+.form-control .select2-choice {
+    border: 0;
+    border-radius: 2px;
+}
+
+.form-control .select2-choice .select2-arrow {
+    border-radius: 0 2px 2px 0;   
+}
+
+select.form-control {
+    height: auto !important;
+    padding: 0px;
+    display: initial;
+}
+
+.form-group .select2-container {
+    height: auto !important;
+    width: 100% !important;
+}
+
+.form-group .select2-container--default .select2-selection--single .select2-selection__arrow {
+    border-left: 1px solid #aaa;
+    border-radius: 0 2px 2px 0;
+    display: block;
+    float: right !important;
+    left: 0;
+    position: relative;
+    top: -15px;
+    width: 20px;
+    height: 0;
+}
+
+.form-control.select2-container.select2-dropdown-open {
+    border-color: #5897FB;
+    border-radius: 3px 3px 0 0;
+}
+
+.form-control .select2-container.select2-dropdown-open .select2-choices {
+    border-radius: 3px 3px 0 0;
+}
+
+.form-control.select2-container .select2-choices {
+    border: 0 !important;
+    border-radius: 3px;
+}
