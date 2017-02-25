@@ -1,10 +1,10 @@
 Changelog
 =========
 
-1.0.4 (unreleased)
+1.1.0 (2017-02-25)
 ------------------
 
-- Nothing changed yet.
+- Refactoring of the select2 widget.
 
 
 1.0.3 (2017-01-06)
