@@ -1,10 +1,11 @@
-# Copyright (c) 2014 by Ecreall under licence AGPL terms 
-# avalaible on http://www.gnu.org/licenses/agpl.html 
+# Copyright (c) 2014 by Ecreall under licence AGPL terms
+# avalaible on http://www.gnu.org/licenses/agpl.html
 
 # licence: AGPL
 # author: Amen Souissi
-from pontus.testing import FunctionalTests
 
+from pontus.testing import FunctionalTests
+from pontus.view import ViewError
 from pontus.tests.example.app import (
     ViewA, MultipleViewA, ViewB,
     MultipleFromViewA, FormViewA, objectA, objectB)
@@ -43,35 +44,23 @@ class TestPontusView(FunctionalTests):
         self.assertEqual(item['view'], view)
         self.assertEqual(item['id'], view.viewid)
         self.assertEqual(item['isactive'], True)
-        self.assertIn('behaviorA',self.request.viewexecuted)
+        self.assertIn('behaviorA', self.request.viewexecuted)
 
         self.request.validationA = False
         self.request.viewexecuted = []
         view = ViewA(None, self.request)
-        result = view()
-        self.assertEqual(isinstance(result, dict), True)
-        self.assertIn('coordinates', result)
-        self.assertIn(view.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][view.coordinates]), 1)
+        error = False
+        try:
+            result = view()
+        except ViewError:
+            error = True
 
-        item = result['coordinates'][view.coordinates][0]
-        self.assertIn('messages', item)
-        self.assertEqual(len(item['messages']), 1)
-        self.assertIn('body', item)
-        self.assertIn('view', item)
-        self.assertIn('id', item)
-        self.assertIn('isactive', item)
-        self.assertEqual(item['body'], "")
-        self.assertEqual(item['view'], view)
-        self.assertEqual(item['id'], view.viewid)
-        self.assertEqual(item['isactive'], True)
+        self.assertTrue(error)
         self.assertEqual(len(self.request.viewexecuted), 0)
-        self.assertIn('danger', item['messages'])
 
     #def test_boucle_simple(self): # Moyenne de 0,18 ms par calcule de vue
     #    for x in range(100000):
     #        self.test_BasicView()
-
 
     def test_MultipleView(self):
         self.request.validationA = True
@@ -82,15 +71,18 @@ class TestPontusView(FunctionalTests):
         self.assertEqual(isinstance(result, dict), True)
         self.assertIn('coordinates', result)
         self.assertIn(ViewA.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][ViewA.coordinates]),1)
+        self.assertEqual(len(result['coordinates'][ViewA.coordinates]), 1)
 
-        items_body = [item['body'] for item in  result['coordinates'][ViewA.coordinates]]
+        items_body = [item['body'] for item in
+                      result['coordinates'][ViewA.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("Hello_"+ViewA.title+"\n")>-1), True )
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), True )
+        self.assertEqual(
+            (items_body[0].find("Hello_"+ViewA.title+"\n") > -1), True)
+        self.assertEqual(
+            (items_body[0].find("Hello_"+ViewB.title+"\n") > -1), True)
         self.assertEqual(len(self.request.viewexecuted), 2)
-        self.assertIn('behaviorA',self.request.viewexecuted)
-        self.assertIn('behaviorB',self.request.viewexecuted)
+        self.assertIn('behaviorA', self.request.viewexecuted)
+        self.assertIn('behaviorB', self.request.viewexecuted)
 
         self.request.validationA = False
         self.request.viewexecuted = []
@@ -101,11 +93,13 @@ class TestPontusView(FunctionalTests):
         self.assertIn(ViewA.coordinates, result['coordinates'])
         self.assertEqual(len(result['coordinates'][ViewA.coordinates]), 1)
 
-        items_body = [item['body']
-                for item in result['coordinates'][ViewA.coordinates]]
+        items_body = [item['body'] for item in
+                      result['coordinates'][ViewA.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("Hello_"+ViewA.title+"\n") > -1), False)
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n") > -1), True)
+        self.assertEqual(
+            (items_body[0].find("Hello_"+ViewA.title+"\n") > -1), False)
+        self.assertEqual(
+            (items_body[0].find("Hello_"+ViewB.title+"\n") > -1), True)
         self.assertEqual(len(self.request.viewexecuted), 1)
         self.assertIn('behaviorB', self.request.viewexecuted)
 
@@ -113,19 +107,13 @@ class TestPontusView(FunctionalTests):
         self.request.validationB = False
         self.request.viewexecuted = []
         view = MultipleViewA(None, self.request)
-        result = view()
-        self.assertEqual(isinstance(result, dict), True)
-        self.assertIn('coordinates', result)
-        self.assertIn(view.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][view.coordinates]), 1)
-        item = result['coordinates'][view.coordinates][0]
-        self.assertIn('messages', item)
-        self.assertEqual(len(item['messages']), 1)
+        error = False
+        try:
+            result = view()
+        except ViewError:
+            error = True
 
-        items_body = [item['body'] for item in  result['coordinates'][view.coordinates]]
-        self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("Hello_"+ViewA.title+"\n") > -1), False)
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n") > -1), False)
+        self.assertTrue(error)
         self.assertEqual(len(self.request.viewexecuted), 0)
 
     def test_MultipleFormView(self, log=0):
@@ -154,37 +142,35 @@ class TestPontusView(FunctionalTests):
         self.assertEqual(isinstance(result, dict), True)
         self.assertIn('coordinates', result)
         self.assertIn(ViewB.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][ViewB.coordinates]),1)
+        self.assertEqual(
+            len(result['coordinates'][ViewB.coordinates]), 1)
 
-        items_body = [item['body'] for item in result['coordinates'][ViewB.coordinates]]
+        items_body = [item['body'] for item in
+                      result['coordinates'][ViewB.coordinates]]
         self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("Title")>-1), False )
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), True )
+        self.assertEqual((items_body[0].find("Title") > -1), False)
+        self.assertEqual(
+            (items_body[0].find("Hello_"+ViewB.title+"\n") > -1), True)
         self.assertEqual(len(self.request.viewexecuted), 1)
-        self.assertIn('behaviorB',self.request.viewexecuted)
+        self.assertIn('behaviorB', self.request.viewexecuted)
 
         self.request.validationA = False
         self.request.validationB = False
         self.request.viewexecuted = []
         view = MultipleFromViewA(None, self.request)
-        result = view()
-        self.assertEqual(isinstance(result, dict), True)
-        self.assertIn('coordinates', result)
-        self.assertIn(view.coordinates, result['coordinates'])
-        self.assertEqual(len(result['coordinates'][view.coordinates]),1)
-        item = result['coordinates'][view.coordinates][0]
-        self.assertIn('messages', item)
-        self.assertEqual(len(item['messages']), 1)
+        error = False
+        try:
+            result = view()
+        except ViewError:
+            error = True
 
-        items_body = [item['body'] for item in  result['coordinates'][view.coordinates]]
-        self.assertEqual(len(items_body), 1)
-        self.assertEqual((items_body[0].find("title")>-1), False)
-        self.assertEqual((items_body[0].find("Hello_"+ViewB.title+"\n")>-1), False )
+        self.assertTrue(error)
         self.assertEqual(len(self.request.viewexecuted), 0)
 
         runtime = self.app['runtime']
-        if log==0:
+        if log == 0:
             self.test_login()
+
         self.assertEqual(runtime.title, 'Runtime')
         res = self.testapp.get('/runtime/@@multipleformviewa')
         self.assertEqual((str(res.html).find("title") > -1), True)

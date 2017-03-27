@@ -73,17 +73,9 @@ class VisualisableElement(object):
 
     def __init__(self, **kwargs):
         super(VisualisableElement, self).__init__(**kwargs)
-        self.title = ''
-        self.label = ''
-        self.description = ''
-        if 'description' in kwargs:
-            self.description = kwargs.get('description')
-
-        if 'label' in kwargs:
-            self.label = kwargs.get('label')
-
-        if 'title' in kwargs:
-            self.title = kwargs.get('title')
+        self.title = kwargs.get('title', '')
+        self.label = kwargs.get('label', '')
+        self.description = kwargs.get('description', '')
 
     @property
     def url(self,):
