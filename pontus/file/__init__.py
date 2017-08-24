@@ -23,8 +23,11 @@ from substanced.file import File as OriginFile, USE_MAGIC
 
 from dace.util import get_obj
 from dace.objectofcollaboration.object import Object as DaceObject
+from dace.descriptors import CompositeMultipleProperty
 
 from pontus.interfaces import IFile, IImage
+from pontus import log
+from .util import AVAILABLE_FORMATS, generate_images
 
 
 OBJECT_DATA = '_object_data'
@@ -43,6 +46,8 @@ MARKER = object()
 @implementer(IFile)
 class File(DaceObject, OriginFile):
 
+    variants = CompositeMultipleProperty('variants')
+
     def __init__(self, fp, mimetype=None, filename=None, **kwargs):
         if not filename:
             filename = self.title
@@ -59,6 +64,8 @@ class File(DaceObject, OriginFile):
             hint = mimetype
 
         OriginFile.__init__(self, fp, hint, filename)
+        self.set_data(kwargs)
+
 
     @property
     def fp(self):
@@ -71,6 +78,47 @@ class File(DaceObject, OriginFile):
     @property
     def uid(self):
         return str(get_oid(self, None))
+
+    @property
+    def is_image(self):
+        return self.mimetype.startswith('image')
+
+    @property
+    def url(self):
+        request = get_current_request()
+        return request.resource_url(self)
+
+    def set_data(self, appstruct, omit=('_csrf_token_', '__objectoid__')):
+        super(File, self).set_data(appstruct, omit)
+        if not appstruct.get('elementary', False):
+            try:
+                self.generate_variants()
+            except Exception as e:
+                log.warning(e)
+
+    def generate_variants(self):
+        if self.is_image:
+            results = generate_images(self.fp, self.filename)
+            self.setproperty('variants', [])
+            for img in results:
+                img_val = Image(img['fp'], self.mimetype,
+                                self.filename, elementary=True)
+                img_val.__name__ = img['id']
+                self.addtoproperty('variants', img_val)
+                try:
+                    delattr(self, img_val.__name__)
+                except AttributeError:
+                    pass
+
+    def __getattr__(self, name):
+        if name in AVAILABLE_FORMATS:
+            attr = self.get(name)
+            if attr is None:
+                raise AttributeError(name)
+
+            return attr
+        else:
+            return super(File, self).__getattr__(name)
 
     def get_data(self, node):
         result = {}
@@ -99,11 +147,6 @@ class File(DaceObject, OriginFile):
         else:
             super(File, self).__setattr__(name, value)
 
-    @property
-    def url(self):
-        request = get_current_request()
-        return request.resource_url(self)
-
     def copy(self):
         data = self.get_data(None)
         data.pop('uid')
@@ -119,7 +162,6 @@ class Image(File):
 
     def __init__(self, fp, mimetype=None, filename=None, **kwargs):
         super(Image, self).__init__(fp, mimetype, filename, **kwargs)
-        self.set_data(kwargs)
 
     def get_area_of_interest_dimension(self):
         result = {'x': float(getattr(self, 'x', 0)),
