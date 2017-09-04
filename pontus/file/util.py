@@ -32,9 +32,9 @@ def generate_images(fp, filename):
         img.thumbnail(size, Image.ANTIALIAS)
         buf = io.BytesIO()
         ext = os.path.splitext(filename)[1].lower()
-        img.save(buf, Image.EXTENSION.get(ext, 'jpeg'))
-        buf.seek(0)
         try:
+            img.save(buf, Image.EXTENSION.get(ext, 'jpeg'))
+            buf.seek(0)
             img_data = img_format.copy()
             img_data['fp'] = buf
             result.append(img_data)
