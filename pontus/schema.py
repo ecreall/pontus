@@ -91,7 +91,7 @@ def select(schema, mask):
     """Return a new schema with only fields included in mask.
     """
     for n in schema.children:
-        if getattr(n, 'private', False):
+        if getattr(n, 'private', False) and not n.name in mask:
             mask.insert(0, n.name)
 
     new_schema = schema.clone()
