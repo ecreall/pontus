@@ -315,7 +315,8 @@ class ElementaryView(View):
 
                 behaviorinstance = behavior.get_instance(self.context,
                                                          self.request,
-                                                         wizard=wizard_behavior)
+                                                         wizard=wizard_behavior,
+                                                         validate=False)
                 if behaviorinstance:
                     self._add_behaviorinstance(behaviorinstance)
             except ValidationError as error:
