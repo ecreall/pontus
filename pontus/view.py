@@ -271,10 +271,6 @@ class ElementaryView(View):
                                          if behavior not in specific_behaviors])
 
         self._init_behaviors(specific_behaviors)
-        self.behaviors_instances = OrderedDict(
-            sorted(self.behaviors_instances.items(),
-                   key=lambda e:
-                   self.behaviors.index(e[1].__class__)))
 
     def validate(self):
         try:
@@ -324,6 +320,11 @@ class ElementaryView(View):
 
         for behaviorinstance in self.specific_behaviors_instances:
             self._add_behaviorinstance(behaviorinstance)
+
+        self.behaviors_instances = OrderedDict(
+            sorted(self.behaviors_instances.items(),
+                   key=lambda e:
+                   self.behaviors.index(e[1].__class__)))
 
     def before_update(self):
         self.bind()

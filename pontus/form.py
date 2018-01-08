@@ -55,6 +55,9 @@ class FormView(ElementaryView, SubstanceDFormView):
         ElementaryView.__init__(self, context, request, parent,
                                 wizard, stepid, **kwargs)
         self.formid = kwargs.get('formid', getattr(self, 'formid', 'deform'))
+
+    def _init_behaviors(self, specific_behaviors):
+        super(FormView, self)._init_behaviors(specific_behaviors)
         self.buttons = [Button(title=getattr(behavior,
                                             'submission_title',
                                             behavior.title),
