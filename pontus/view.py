@@ -88,7 +88,8 @@ class View(Step):
 
         if self.context is not None:
             self.viewid = self.viewid + '_' + str(get_oid(self.context, ''))
-
+        
+        self._original_view_id = self.viewid
         self._request_configuration()
 
     def _request_configuration(self):
@@ -211,6 +212,7 @@ class View(Step):
 
     def setviewid(self, viewid):
         self.viewid = viewid
+        self._original_view_id = viewid
 
     def failure(self, error, subject=None):
         error_body = error.render_message(self.request, subject)
@@ -301,8 +303,11 @@ class ElementaryView(View):
             pass
 
     def _init_behaviors(self, specific_behaviors):
+        self.viewid = self._original_view_id
+        self.behaviors_instances = OrderedDict()
         behaviors = [behavior for behavior in self.behaviors
                      if behavior not in specific_behaviors]
+        behaviors_instances = []
         for behavior in behaviors:
             try:
                 wizard_behavior = None
@@ -314,17 +319,21 @@ class ElementaryView(View):
                                                          wizard=wizard_behavior,
                                                          validate=False)
                 if behaviorinstance:
-                    self._add_behaviorinstance(behaviorinstance)
+                    behaviors_instances.append(behaviorinstance)
+
             except ValidationError as error:
                 self.errors.append(error)
 
         for behaviorinstance in self.specific_behaviors_instances:
-            self._add_behaviorinstance(behaviorinstance)
+            behaviors_instances.append(behaviorinstance)
 
-        self.behaviors_instances = OrderedDict(
-            sorted(self.behaviors_instances.items(),
-                   key=lambda e:
-                   self.behaviors.index(e[1].__class__)))
+        behaviors_instances = sorted(
+            behaviors_instances,
+            key=lambda e:
+            self.behaviors.index(e.__class__))
+
+        for behaviorinstance in behaviors_instances:
+            self._add_behaviorinstance(behaviorinstance)
 
     def before_update(self):
         self.bind()
