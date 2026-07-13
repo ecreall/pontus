@@ -1,0 +1,595 @@
+diff --git a/.github/workflows/tests.yml b/.github/workflows/tests.yml
+new file mode 100644
+index 0000000..fdb639a
+--- /dev/null
++++ b/.github/workflows/tests.yml
+@@ -0,0 +1,27 @@
++name: tests-legacy
++
++# Best-effort CI for the legacy code base (Python 3.6 era).
++# Runs the historical test suite inside a python:3.6 container,
++# with the known-good dependency pins from constraints-legacy.txt
++# and ecreall_dace installed from its maintained fork.
++# To be stabilised during Phase 1 of the modernisation roadmap
++# (reproducible legacy build / "golden master") — see README.md.
++
++on:
++  push:
++  pull_request:
++  workflow_dispatch:
++
++jobs:
++  legacy-tests:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - name: Run test suite in a Python 3.6 container
++        run: |
++          docker run --rm -v "$PWD":/src -w /src python:3.6-buster bash -ec "
++            pip install --no-cache-dir --upgrade 'pip<22' &&
++            pip install --no-cache-dir -c constraints-legacy.txt 'git+https://github.com/michaellaunay/dace.git#egg=ecreall_dace' &&
++            pip install --no-cache-dir -c constraints-legacy.txt -e '.[test]' &&
++            python setup.py test
++          "
+diff --git a/CHANGES.md b/CHANGES.md
+new file mode 100644
+index 0000000..2bc3610
+--- /dev/null
++++ b/CHANGES.md
+@@ -0,0 +1,42 @@
++# Changelog
++
++## Unreleased
++
++### Fork maintenance — 2026-07-13 (`michaellaunay/pontus`)
++
++- Repository forked from `ecreall/pontus`; maintenance resumed by Michaël Launay (Logikascium). Ecréall's intellectual property was acquired by Logikascium in 2024; license unchanged (AGPL v3+).
++- `README.rst` and `CHANGES.rst` converted to Markdown (`README.md`, `CHANGES.md`); README rewritten with the repository status, legacy requirements and the modernisation roadmap.
++- Build metadata updated: fork URLs, maintainer field, Markdown `long_description`, Python 3.6 classifier; minimal `pyproject.toml` added (PEP 518 `[build-system]` only — metadata stays in `setup.py` until the Phase 3 packaging migration); `MANIFEST.in` updated for Markdown files.
++- Added `constraints-legacy.txt` (known-good 2017 dependency pins extracted from nova-ideo's `versions.cfg`) and a best-effort GitHub Actions workflow running the test suite in a `python:3.6-buster` container, with `ecreall_dace` installed from its maintained fork (to be stabilised in Phase 1).
++- Bilingual documentation structure added (`docs/en/`, `docs/fr/`), including the worklog / fil de l'eau and the documentation policy (`docs/README.md`).
++
++### Planned (modernisation roadmap → 2.0.0)
++
++- Phase 1: reproducible legacy build + green CI (golden master).
++- Phase 2: exhaustive documentation (docstrings, view/behaviour protocol shared with DaCE).
++- Phase 3, after DaCE 2.0: Python 3.12, Pyramid 2.x; deform 2.0.15 / colander 2 (retire the historical deform fork); maintained substanced fork; pytest + WebTest; PEP 621 packaging with `uv`; ruff; gradual typing. Module dotted names frozen to preserve ZODB pickles.
++
++### Inherited unreleased changes (upstream `1.1.1.dev`, 2017–2018)
++
++- No entries were recorded upstream for this version; the repository nevertheless contains fixes committed until 2018-01-15 (last upstream commit: "fix behaviors order and viewid").
++
++## 1.1.0 — 2017-02-25
++
++- Refactoring of the select2 widget.
++
++## 1.0.3 — 2017-01-06
++
++- Add preventdelete tinymce plugin.
++- Add url getter.
++
++## 1.0.2 — 2016-09-15
++
++- Fix style and translations.
++
++## 1.0.1 — 2016-08-18
++
++- Include mo files in the release.
++
++## 1.0 — 2016-06-28
++
++- Initial version.
+diff --git a/CHANGES.rst b/CHANGES.rst
+deleted file mode 100644
+index bedc791..0000000
+--- a/CHANGES.rst
++++ /dev/null
+@@ -1,39 +0,0 @@
+-Changelog
+-=========
+-
+-1.1.1 (unreleased)
+-------------------
+-
+-- Nothing changed yet.
+-
+-
+-1.1.0 (2017-02-25)
+-------------------
+-
+-- Refactoring of the select2 widget.
+-
+-
+-1.0.3 (2017-01-06)
+-------------------
+-
+-- add preventdelete tinycemce plugin
+-
+-- add url getter
+-
+-
+-1.0.2 (2016-09-15)
+-------------------
+-
+-- Fix style and translations
+-
+-
+-1.0.1 (2016-08-18)
+-------------------
+-
+-- Include mo files in the release.
+-
+-
+-1.0 (2016-06-28)
+-----------------
+-
+--  Initial version
+diff --git a/MANIFEST.in b/MANIFEST.in
+index 80ef4c6..983dbb4 100644
+--- a/MANIFEST.in
++++ b/MANIFEST.in
+@@ -1,5 +1,6 @@
+-include *.rst
++include *.md
+ include LICENSE
++include constraints-legacy.txt
+ recursive-include pontus LICENSE
+ recursive-include pontus *.bat
+ recursive-include pontus *.css
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..3ef15ab
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,90 @@
++# Pontus (`ecreall_pontus`)
++
++Pontus is an application programming interface built upon the [Pyramid](https://trypyramid.com) web framework and the [substanced](https://github.com/Pylons/substanced) application. It provides libraries which make it easy to manage complex and imbricated views; for that purpose, Pontus introduces the concept of operations on views. It is the view and form layer used on top of the [DaCE](https://github.com/michaellaunay/dace) workflow engine.
++
++## Repository status
++
++This repository is a **maintained fork** of [`ecreall/pontus`](https://github.com/ecreall/pontus) (original development by Ecréall, 2014–2018), forked in July 2026 and maintained by Michaël Launay ([Logikascium](https://github.com/michaellaunay)). Ecréall's intellectual property was acquired by Logikascium in 2024; the license is unchanged: **AGPL v3+**.
++
++This fork is part of the modernisation effort of the [Nova-Ideo](https://github.com/ecreall/nova-ideo) / [KuneAgi](https://github.com/ecreall/KuneAgi) participatory-innovation platform. The `master` branch currently reflects the **legacy state** of the library (Python 3.6-era stack); see the [roadmap](#roadmap--planned-updates) below and `CHANGES.md`.
++
++## Features
++
++- Operations on views, to compose complex and nested ("imbricated") views
++- Form views and widgets built on deform (select2 widget, TinyMCE integration, …)
++- Designed to render and execute the behaviours/actions of the [DaCE](https://github.com/michaellaunay/dace) workflow engine
++
++## Current requirements (legacy)
++
++- Python 3.6 — the modernisation targets Python 3.12
++- `ecreall_dace` (use the maintained fork: [`michaellaunay/dace`](https://github.com/michaellaunay/dace)), `pyramid_layout`, substanced 1.0a1, Pillow
++- Known-good dependency pins are provided in [`constraints-legacy.txt`](constraints-legacy.txt), extracted from the historical nova-ideo `versions.cfg` (the last environment in which the whole stack was known to work together)
++
++## Installation
++
++Add `ecreall_pontus` to `install_requires` in your `setup.py`, then edit `production.ini` in your Pyramid application:
++
++```ini
++pyramid.includes =
++    ...
++    pontus
++```
++
++For an isolated legacy development environment:
++
++```bash
++python3.6 -m pip install -c constraints-legacy.txt \
++    "git+https://github.com/michaellaunay/dace.git#egg=ecreall_dace" \
++    -e ".[test]"
++```
++
++## Running the tests
++
++```bash
++python setup.py test
++```
++
++A best-effort GitHub Actions workflow ([`.github/workflows/tests.yml`](.github/workflows/tests.yml)) runs the suite inside a `python:3.6-buster` container, installing `ecreall_dace` from its maintained fork. It will be stabilised during Phase 1 of the roadmap (reproducible legacy build).
++
++## Documentation
++
++Documentation lives in [`docs/`](docs/):
++
++- [`docs/en/`](docs/en/) — primary documentation, in English
++- [`docs/fr/`](docs/fr/) — documentation in French
++
++Audits, design documents and the worklog are maintained in both languages. See [`docs/README.md`](docs/README.md) for the documentation policy.
++
++## Used by
++
++- [nova-ideo](https://github.com/ecreall/nova-ideo) and its variant [KuneAgi](https://github.com/ecreall/KuneAgi)
++- [l'agenda commun](https://github.com/ecreall/lagendacommun)
++
++## Roadmap — planned updates
++
++The plan follows the Nova-Ideo modernisation audit (Logikascium, July 2026):
++
++1. **Phase 1 — Reproducible legacy build ("golden master").** Frozen environment and green CI replaying the existing test suite: the non-regression baseline for everything below.
++2. **Phase 2 — Exhaustive documentation.** Docstring pass over the whole package, documentation of the view/behaviour protocol shared with DaCE, glossary of the view-operation concepts.
++3. **Phase 3 — Modernisation (target: version 2.0.0).** Ported **after** DaCE 2.0 (bottom-up dependency order):
++   - Port to Python 3.12; Pyramid 2.x
++   - deform 2.0.15 / colander 2 — goal: retire the historical deform fork
++   - Move from the abandoned substanced 1.0a1 to the maintained, trimmed-down fork
++   - Migrate tests to pytest (+ WebTest); packaging to PEP 621 (`pyproject.toml`) with `uv`; ruff linting; gradual typing
++   - Python module names (dotted paths) are **frozen** to preserve existing ZODB pickles
++
++Versioning: `1.1.x` = legacy maintenance on this fork; `2.0.0` = the modernised library.
++
++## Translations
++
++This product has been translated into: French.
++
++## Contribute
++
++- Issue tracker: <https://github.com/michaellaunay/pontus/issues>
++- Source code: <https://github.com/michaellaunay/pontus>
++- Historical upstream: <https://github.com/ecreall/pontus>
++
++## License
++
++The project is licensed under the AGPL v3 or later (AGPLv3+). See [`LICENSE`](LICENSE).
+diff --git a/README.rst b/README.rst
+deleted file mode 100644
+index 7a5b314..0000000
+--- a/README.rst
++++ /dev/null
+@@ -1,55 +0,0 @@
+-.. This README is meant for consumption by humans and pypi. Pypi can render rst files so please do not use Sphinx features.
+-   If you want to learn more about writing documentation, please check out: http://docs.plone.org/about/documentation_styleguide_addons.html
+-   This text does not appear on pypi or github. It is a comment.
+-
+-==============
+-ecreall_pontus
+-==============
+-
+-An application programming interface built upon the Pyramid web framework and substanced application. It provides libraries which make it easy to manage complex and imbricated views. For that purpose, Pontus introduces the concept of operations on views.
+-
+-Examples
+---------
+-
+-This package is used in the following projects:
+-
+-- `nova-ideo <https://github.com/ecreall/nova-ideo>`__
+-- `l'agenda commun <https://github.com/ecreall/lagendacommun>`__
+-
+-
+-Documentation
+--------------
+-
+-TODO
+-
+-
+-Translations
+-------------
+-
+-This product has been translated into
+-
+-- French
+-
+-
+-Installation
+-------------
+-
+-Add `ecreall_pontus` in `install_requires` in your `setup.py`.
+-and edit `production.ini` in your Pyramid application to add::
+-
+-    pyramid.includes =
+-        ...
+-        pontus
+-
+-
+-Contribute
+-----------
+-
+-- Issue Tracker: https://github.com/ecreall/pontus/issues
+-- Source Code: https://github.com/ecreall/pontus
+-
+-
+-License
+--------
+-
+-The project is licensed under the AGPLv3+.
+diff --git a/constraints-legacy.txt b/constraints-legacy.txt
+new file mode 100644
+index 0000000..308c4a6
+--- /dev/null
++++ b/constraints-legacy.txt
+@@ -0,0 +1,156 @@
++# Known-good dependency pins for the LEGACY DaCE environment (Python 3.6).
++# Extracted from the historical nova-ideo versions.cfg (buildout) — the last
++# environment in which the whole stack was known to work together.
++# Usage: pip install -c constraints-legacy.txt -e .
++# To be revisited entirely in Phase 3 of the modernisation roadmap.
++
++anykeystore==0.2
++argparse==1.4.0
++Babel==2.3.4
++beautifulsoup4==4.5.3
++BTrees==4.4.1
++Chameleon==3.1
++colander==1.0
++collective.recipe.omelette==0.16
++coverage==3.7.1
++decorator==4.0.11
++deform==2.0a2
++defusedxml==0.5.0
++diff-match-patch==20121119
++docutils==0.13.1
++dogpile.cache==0.6.2
++Genshi==0.7
++graphene==1.4
++graphql-core==1.1
++graphql-relay==0.4.5
++gunicorn==19.7.1
++html2text==2016.9.19
++html5lib==0.999999999
++hupper==0.4.4
++hypatia==0.3
++iso8601==0.1.11
++keas.kmi==3.2.0
++lingua==4.13
++lxml==3.7.3
++Mako==1.0.6
++manuel==1.8.0
++MarkupSafe==1.0
++metadata-parser==0.6.17
++metadata_parser==0.6.17
++mock==2.0.0
++nose==1.3.7
++oauthlib==2.0.6
++ovh==0.4.8
++PasteDeploy==1.5.2
++pbkdf2==1.3
++pbp.recipe.noserunner==0.2.6
++pbr==2.0.0
++peppercorn==0.5
++persistent==4.2.4
++Pillow==3.4.2
++plaster-pastedeploy==0.4.2
++plaster==1.0
++plone.event==1.3.3
++polib==1.0.8
++profilehooks==1.9.0
++promise==2.0.2
++pycrypto==2.6.1
++Pygments==2.2.0
++pyramid-chameleon==0.3
++pyramid-debugtoolbar==4.3
++pyramid-layout==1.0
++pyramid-mailer==0.15
++pyramid-mako==1.0.2
++pyramid-retry==0.5
++pyramid-robot==1.1
++pyramid-sms==0.1.3
++pyramid-tm==2.2
++pyramid-zcml==1.1.0
++pyramid-zodbconn==0.8.1
++pyramid==1.9.1
++python-dateutil==2.6.0
++python-magic==0.4.13
++python3-openid==3.1.0
++pytz==2016.10
++PyYAML==3.12
++pyzmq==14.4.1
++randomcolor==0.4.4.4
++repoze.lru==0.6
++repoze.sendmail==4.3
++requests-oauthlib==0.8.0
++requests==2.13.0
++robotframework-debuglibrary==0.4
++robotframework-python3==2.8.7
++robotframework-selenium2screenshots==0.6.0
++robotsuite==1.7.0
++rwproperty==1.0
++selenium==2.47.1
++six==1.10.0
++statsd==3.2.1
++substanced==1.0a1
++tornado==3.2.2
++transaction==2.1.2
++translationstring==1.3
++typing==3.6.1
++Unidecode==0.4.20
++venusian==1.1.0
++waitress==1.1.0
++walkabout==0.10
++webencodings==0.5.1
++WebOb==1.7.4
++WebTest==2.0.27
++WSGIProxy2==0.4.3
++wsgiref==0.1.2
++xlrd==1.0.0
++yampy2==2.4.0
++z3c.checkversions==0.5
++z3c.coverage==2.0.3
++zc.lockfile==1.2.1
++zc.recipe.testrunner==2.0.0
++zc.relation==1.0
++ZConfig==3.1.0
++zdaemon==4.2.0
++ZEO==5.1.1
++ZODB3==3.11.0
++ZODB==5.3.0
++zodbpickle==0.7.0
++zodburi==2.3.0
++zope.annotation==4.4.1
++zope.app.appsetup==4.0.0
++zope.app.debug==4.0.0
++zope.app.dependable==4.0.0
++zope.app.publication==4.2.1
++zope.app.testing==3.10.0
++zope.authentication==4.3
++zope.browser==2.1.0
++zope.cachedescriptors==4.2.0
++zope.component==4.3.0
++zope.configuration==4.1.0
++zope.container==4.1.0
++zope.contenttype==4.2.0
++zope.copy==4.0.3
++zope.deprecation==4.2.0
++zope.dottedname==4.2
++zope.error==4.3.0
++zope.event==4.2.0
++zope.exceptions==4.0.8
++zope.filerepresentation==4.1.0
++zope.i18n==4.1.0
++zope.i18nmessageid==4.1.0
++zope.interface==4.3.3
++zope.lifecycleevent==4.1.0
++zope.location==4.0.3
++zope.minmax==2.1.0
++zope.password==4.2.0
++zope.processlifetime==2.1.0
++zope.proxy==4.2.1
++zope.publisher==4.3.1
++zope.schema==4.4.2
++zope.security==4.1.0
++zope.session==4.1.0
++zope.site==4.0.0
++zope.size==4.1.0
++zope.testbrowser==5.2
++zope.testing==4.6.1
++zope.testrunner==4.6.0
++zope.traversing==4.1.0
+diff --git a/docs/README.md b/docs/README.md
+new file mode 100644
+index 0000000..3fdcef3
+--- /dev/null
++++ b/docs/README.md
+@@ -0,0 +1,21 @@
++# Documentation
++
++Documentation policy for this repository (and, by extension, for the other
++repositories of the Nova-Ideo modernisation effort):
++
++- **Code, comments, commit messages and repository files** are written in
++  **English** by default.
++- [`en/`](en/) holds the **primary documentation, in English**.
++- [`fr/`](fr/) holds the **French documentation**.
++- **Audits, design documents and the worklog** are maintained **in both
++  languages**, under the same relative path and filename in `en/` and `fr/`
++  (e.g. `en/worklog.md` ↔ `fr/worklog.md`), so that each document can link to
++  its counterpart.
++- Whenever practical, translations are updated in the same change set as the
++  original.
++
++## Current contents
++
++| Document | English | French |
++|---|---|---|
++| Worklog / Fil de l'eau | [`en/worklog.md`](en/worklog.md) | [`fr/worklog.md`](fr/worklog.md) |
+diff --git a/docs/en/worklog.md b/docs/en/worklog.md
+new file mode 100644
+index 0000000..3d976dc
+--- /dev/null
++++ b/docs/en/worklog.md
+@@ -0,0 +1,19 @@
++# Worklog
++
++Running log of the work on this repository, newest first.
++Version française : [`../fr/worklog.md`](../fr/worklog.md).
++
++## 2026-07-13
++
++- Forked `ecreall/pontus` to `michaellaunay/pontus`; maintenance resumed by
++  Michaël Launay (Logikascium).
++- Converted `README.rst` and `CHANGES.rst` to Markdown; rewrote the README
++  with the repository status and the modernisation roadmap.
++- Updated build metadata (`setup.py`: fork URLs, maintainer field, Markdown
++  long description, Python 3.6 classifier); added a minimal PEP 518
++  `pyproject.toml`; updated `MANIFEST.in`.
++- Added `constraints-legacy.txt` (known-good 2017 dependency pins) and a
++  best-effort legacy CI workflow (`python:3.6-buster`, `ecreall_dace`
++  installed from its maintained fork).
++- Established the bilingual documentation structure (`docs/en`, `docs/fr`)
++  and this worklog.
+diff --git a/docs/fr/worklog.md b/docs/fr/worklog.md
+new file mode 100644
+index 0000000..abed84d
+--- /dev/null
++++ b/docs/fr/worklog.md
+@@ -0,0 +1,19 @@
++# Fil de l'eau
++
++Journal au fil de l'eau des travaux sur ce dépôt, du plus récent au plus ancien.
++English version: [`../en/worklog.md`](../en/worklog.md).
++
++## 2026-07-13
++
++- Fork de `ecreall/pontus` vers `michaellaunay/pontus` ; reprise de la
++  maintenance par Michaël Launay (Logikascium).
++- Conversion de `README.rst` et `CHANGES.rst` en Markdown ; README réécrit avec
++  le statut du dépôt et la feuille de route de modernisation.
++- Mise à jour des métadonnées de build (`setup.py` : URLs du fork, champ
++  mainteneur, description longue en Markdown, classifieur Python 3.6) ; ajout
++  d'un `pyproject.toml` minimal (PEP 518) ; mise à jour du `MANIFEST.in`.
++- Ajout de `constraints-legacy.txt` (épinglages de dépendances 2017 connus pour
++  fonctionner) et d'un workflow de CI legacy best-effort (`python:3.6-buster`,
++  `ecreall_dace` installé depuis son fork maintenu).
++- Mise en place de la structure de documentation bilingue (`docs/en`,
++  `docs/fr`) et de ce fil de l'eau.
+diff --git a/pyproject.toml b/pyproject.toml
+new file mode 100644
+index 0000000..8839318
+--- /dev/null
++++ b/pyproject.toml
+@@ -0,0 +1,11 @@
++# Minimal build configuration for the michaellaunay/dace fork.
++#
++# Deliberately limited to the PEP 518 [build-system] table so that the
++# legacy toolchain (Python 3.6, zc.buildout, older pip) keeps working:
++# package metadata stays in setup.py until Phase 3 of the modernisation
++# roadmap (see README.md), when it will migrate here as a full PEP 621
++# [project] table managed with uv.
++
++[build-system]
++requires = ["setuptools>=40.8.0", "wheel"]
++build-backend = "setuptools.build_meta"
+diff --git a/setup.py b/setup.py
+index 6e9c09b..2d2a993 100644
+--- a/setup.py
++++ b/setup.py
+@@ -3,8 +3,8 @@ import os
+ from setuptools import setup, find_packages
+ 
+ here = os.path.abspath(os.path.dirname(__file__))
+-README = open(os.path.join(here, 'README.rst')).read()
+-CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
++README = open(os.path.join(here, 'README.md')).read()
++CHANGES = open(os.path.join(here, 'CHANGES.md')).read()
+ 
+ requires = [
+     'ecreall_dace',
+@@ -17,9 +17,10 @@ setup(name='ecreall_pontus',
+       version='1.1.1.dev0',
+       description='An application programming interface built upon the Pyramid web framework and substanced application. It provides libraries which make it easy to manage complex and imbricated views. For that purpose, Pontus introduces the concept of operations on views.',
+       long_description=README + '\n\n' +  CHANGES,
++      long_description_content_type='text/markdown',
+       classifiers=[
+         "Programming Language :: Python",
+-        "Programming Language :: Python :: 3.4",
++        "Programming Language :: Python :: 3.6",
+         "Framework :: Pyramid",
+         "Topic :: Internet :: WWW/HTTP",
+         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+@@ -27,8 +28,14 @@ setup(name='ecreall_pontus',
+         ],
+       author='Amen Souissi',
+       author_email='amensouissi@ecreall.com',
+-      url='https://github.com/ecreall/pontus/',
+-      keywords='process',
++      maintainer='Michaël Launay (Logikascium)',
++      url='https://github.com/michaellaunay/pontus/',
++      project_urls={
++          'Source': 'https://github.com/michaellaunay/pontus',
++          'Tracker': 'https://github.com/michaellaunay/pontus/issues',
++          'Historical upstream': 'https://github.com/ecreall/pontus',
++      },
++      keywords='pyramid views forms deform substanced',
+       license="AGPLv3+",
+       packages=find_packages(),
+       include_package_data=True,
