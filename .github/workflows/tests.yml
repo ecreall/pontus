@@ -6,6 +6,19 @@ name: tests-legacy
 # and ecreall_dace installed from its maintained fork.
 # To be stabilised during Phase 1 of the modernisation roadmap
 # (reproducible legacy build / "golden master") — see README.md.
+#
+# Era-compatibility notes (inherited from dace's first CI runs, 2026-07-13):
+# - setuptools < 46: the 2016/2017 sdists (zope.interface 4.3.3, ...)
+#   still import the `Feature` API, removed in setuptools 46 (2020).
+# - Debian buster was archived in 2024: apt sources are repointed to
+#   archive.debian.org (Release files are frozen, hence
+#   Check-Valid-Until=false).
+# - libzmq3-dev: pyzmq 14.4.1 (via ecreall_dace) predates Python 3.6
+#   wheels and must be compiled against the system libzmq.
+# - libjpeg-dev, zlib1g-dev: Pillow 3.4.2 predates Python 3.6 wheels
+#   and requires both to build from source.
+# - the [test] extra ships mock: substanced's venusian scan imports
+#   its own test modules at Configurator setup.
 
 on:
   push:
@@ -16,11 +29,16 @@ jobs:
   legacy-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run test suite in a Python 3.6 container
         run: |
           docker run --rm -v "$PWD":/src -w /src python:3.6-buster bash -ec "
+            sed -i 's|deb.debian.org|archive.debian.org|g; s|security.debian.org|archive.debian.org|g' /etc/apt/sources.list &&
+            sed -i '/buster-updates/d' /etc/apt/sources.list &&
+            apt-get update -o Acquire::Check-Valid-Until=false &&
+            apt-get install -y --no-install-recommends libzmq3-dev libjpeg-dev zlib1g-dev &&
             pip install --no-cache-dir --upgrade 'pip<22' &&
+            pip install --no-cache-dir 'setuptools<46' wheel &&
             pip install --no-cache-dir -c constraints-legacy.txt 'git+https://github.com/michaellaunay/dace.git#egg=ecreall_dace' &&
             pip install --no-cache-dir -c constraints-legacy.txt -e '.[test]' &&
             python setup.py test

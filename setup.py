@@ -41,7 +41,7 @@ setup(name='ecreall_pontus',
       include_package_data=True,
       zip_safe=False,
       install_requires=requires,
-      tests_require=requires,
+      tests_require=requires + ['mock'],
       test_suite="pontus",
       message_extractors={
           'pontus': [
@@ -50,7 +50,9 @@ setup(name='ecreall_pontus',
           ],
       },
       extras_require = dict(
-          test=['WebTest'],
+          # mock: substanced's venusian scan imports its own test modules
+          # (see docs/en/worklog.md, 2026-07-13)
+          test=['WebTest', 'mock'],
       ),
       entry_points="""\
       """,
