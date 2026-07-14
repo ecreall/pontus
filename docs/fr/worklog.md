@@ -28,3 +28,13 @@ English version: [`../en/worklog.md`](../en/worklog.md).
 - Ajout de `libjpeg-dev` et `zlib1g-dev` : Pillow 3.4.2 est antérieur aux
   wheels Python 3.6 (vérifié sur PyPI) et doit être compilé depuis les
   sources.
+
+
+## 2026-07-14
+
+- Suppression de la dependance C amont `cryptacular` de l'environnement de
+  CI (elle n'etait pas epinglee : pip compilait silencieusement le sdist
+  1.6.2). La reecriture drop-in maintenue (`michaellaunay/cryptacular` 2.x,
+  backends bcrypt PyCA + hashlib, compatible hash pour hash avec le module
+  deploye) est installee depuis son depot a la place ; `bcrypt`, `cffi` et
+  `pycparser` epingles pour la cible Python 3.6.
