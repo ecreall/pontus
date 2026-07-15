@@ -4,6 +4,13 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""The ``@@index`` of every object.
+
+Collects the context's actions flagged ``isautomatic`` — which, in
+pontus-land, means *part of the object's index page* — and composes
+their registered views into a ``MultipleView``. No applicable action:
+``ViewError`` (the object shows nothing to this user).
+"""
 from pyramid.view import view_config
 
 from dace.interfaces import IObject
@@ -23,6 +30,7 @@ from pontus import _
     )
 class Index(View):
 
+    """Default object page: the MultipleView of the automatic actions' views."""
     title = _('Index')
     viewid = 'index'
 
@@ -37,6 +45,7 @@ class Index(View):
         self.title = self.context.title
 
     def update(self):
+        """Build and render the index MultipleView, or raise ``ViewError``."""
         allactions = getAllBusinessAction(self.context, self.request, True)
         allactions.sort(key=lambda x: x.title)
         views = []

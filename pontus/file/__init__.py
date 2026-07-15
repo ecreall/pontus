@@ -4,6 +4,16 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Files, images and the colander ↔ object bridge.
+
+``File``/``Image`` marry the dace ``Object`` with the substanced blob
+file; ``generate_variants`` derives the thumbnail set (attributes
+named after ``IMAGES_FORMATS``); ``Image`` adds the cropper
+area-of-interest. ``ObjectData`` is the schema type creating
+(``factory``) or editing (``__objectoid__`` + ``set_data``) the
+domain object at deserialisation — the object travels in the
+appstruct under ``_object_data``.
+"""
 import colander
 import transaction
 from persistent.dict import PersistentDict
@@ -46,6 +56,7 @@ MARKER = object()
 @implementer(IFile)
 class File(DaceObject, OriginFile):
 
+    """A dace object holding a substanced blob (variants, url, uid)."""
     variants = CompositeMultipleProperty('variants')
 
     def __init__(self, fp, mimetype=None, filename=None, **kwargs):
@@ -69,26 +80,32 @@ class File(DaceObject, OriginFile):
 
     @property
     def fp(self):
+        """A fresh read handle on the blob."""
         return self.blob.open('r')
 
     @property
     def filename(self):
+        """Alias of the title."""
         return self.title
 
     @property
     def uid(self):
+        """The oid as a string (form round-trips)."""
         return str(get_oid(self, None))
 
     @property
     def is_image(self):
+        """Mimetype-based image test."""
         return self.mimetype.startswith('image')
 
     @property
     def url(self):
+        """The file's URL (served by ``view_file``)."""
         request = get_current_request()
         return request.resource_url(self)
 
     def set_data(self, appstruct, omit=('_csrf_token_', '__objectoid__')):
+        """Apply the appstruct, then (re)generate the variants unless elementary."""
         super(File, self).set_data(appstruct, omit)
         if not appstruct.get('elementary', False):
             try:
@@ -97,6 +114,7 @@ class File(DaceObject, OriginFile):
                 log.warning(e)
 
     def generate_variants(self):
+        """Derive and attach the thumbnail variants (images only)."""
         if self.is_image:
             results = generate_images(self.fp, self.filename)
             self.setproperty('variants', [])
@@ -111,6 +129,7 @@ class File(DaceObject, OriginFile):
                     pass
 
     def __getattr__(self, name):
+        """Expose the variants as attributes (``photo.medium``)."""
         if name in AVAILABLE_FORMATS:
             attr = self.get(name)
             if attr is None:
@@ -121,6 +140,7 @@ class File(DaceObject, OriginFile):
             return super(File, self).__getattr__(name)
 
     def get_data(self, node):
+        """The upload appstruct (filename, uid, mimetype, size, fp)."""
         result = {}
         result['filename'] = self.title
         result['uid'] = getattr(self, 'uid', None)
@@ -130,6 +150,7 @@ class File(DaceObject, OriginFile):
         return result
 
     def get_size(self):
+        """Blob size, committing once on a fresh-blob ``BlobError``."""
         try:
             return OriginFile.get_size(self)
         except BlobError:
@@ -137,6 +158,7 @@ class File(DaceObject, OriginFile):
             return OriginFile.get_size(self)
 
     def __setattr__(self, name, value):
+        """Route ``fp``/``filename``/``uid`` writes to blob/title/no-op."""
         if name == 'fp':
             self.blob = Blob()
             self.upload(value, mimetype_hint=USE_MAGIC)
@@ -148,6 +170,7 @@ class File(DaceObject, OriginFile):
             super(File, self).__setattr__(name, value)
 
     def copy(self):
+        """A new file with the same data (uid dropped)."""
         data = self.get_data(None)
         data.pop('uid')
         return self.__class__(**data)
@@ -160,10 +183,12 @@ class File(DaceObject, OriginFile):
 @implementer(IImage)
 class Image(File):
 
+    """A file with a cropper area of interest."""
     def __init__(self, fp, mimetype=None, filename=None, **kwargs):
         super(Image, self).__init__(fp, mimetype, filename, **kwargs)
 
     def get_area_of_interest_dimension(self):
+        """The crop values, defaulted from the actual image size."""
         result = {'x': float(getattr(self, 'x', 0)),
                   'y': float(getattr(self, 'y', 0)),
                   'r': float(getattr(self, 'r', 0))}
@@ -180,6 +205,7 @@ class Image(File):
             return result
 
     def get_data(self, node):
+        """File appstruct plus the crop values."""
         result = super(Image, self).get_data(node)
         result.update(self.get_area_of_interest_dimension())
         return result
@@ -187,7 +213,9 @@ class Image(File):
 
 class Object(colander.SchemaType):
 
+    """Schema type serializing an object to its oid string."""
     def serialize(self, node, appstruct):
+        """Object → oid string (null when unsaved)."""
         if appstruct is None:
             appstruct = colander.null
 
@@ -201,12 +229,15 @@ class Object(colander.SchemaType):
         return appstruct
 
     def deserialize(self, node, cstruct):
+        """Pass the cstruct through (widgets resolve)."""
         return cstruct
 
 
 class SetObject(Object):
 
+    """Schema type serializing a collection of objects to oid strings."""
     def serialize(self, node, appstruct):
+        """Objects → oid strings (null when empty)."""
         if not appstruct:
             appstruct = colander.null
 
@@ -227,6 +258,11 @@ class SetObject(Object):
 
 class ObjectData(colander.Mapping):
 
+    """The colander ↔ domain bridge (see module docstring): add mode
+    instantiates ``factory``, edit mode resolves ``__objectoid__`` and
+    ``set_data``s it; omitted/private nodes are cleaned out; nested
+    ``_object_data`` children are folded.
+    """
     _specialObjects = (File, Image)
 
     def __init__(self, factory=None, editable=False, unknown='ignore'):
@@ -238,6 +274,7 @@ class ObjectData(colander.Mapping):
 
     @property
     def _is_special_object(self):
+        """Is the factory a File/Image (raw appstruct mode)?"""
         if self.factory:
             for obj_type in self._specialObjects:
                 if obj_type in getattr(self.factory, '__mro__', []):
@@ -246,6 +283,7 @@ class ObjectData(colander.Mapping):
         return False
 
     def serialize(self, node, appstruct):
+        """Serialize the object data, appending ``__objectoid__`` when editing."""
         _object = None
         if appstruct is None:
             appstruct = colander.null
@@ -272,6 +310,7 @@ class ObjectData(colander.Mapping):
         return result
 
     def clean_cstruct(self, node, cstruct):
+        """Split omitted/private values out and fold nested object children."""
         appstruct = {}
         has_values = False
         if isinstance(cstruct, (dict, PersistentDict)):
@@ -331,6 +370,7 @@ class ObjectData(colander.Mapping):
         return cstruct, appstruct, has_values
 
     def deserialize(self, node, cstruct):
+        """Build or update the object; return the appstruct with ``_object_data``."""
         obj_oid = None
         if self.editable and cstruct and OBJECT_OID in cstruct:
             obj_oid = cstruct.get(OBJECT_OID, None)
@@ -373,6 +413,7 @@ class ObjectData(colander.Mapping):
         return appstruct
 
     def cstruct_children(self, node, cstruct):
+        """Origin children except for special (file) objects."""
         result = []
         if not self._is_special_object:
             result = colander.Mapping.cstruct_children(self, node, cstruct)

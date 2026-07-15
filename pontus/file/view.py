@@ -4,6 +4,7 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Serving files and upload previews."""
 import mimetypes
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -19,6 +20,7 @@ from pontus.form import FileUploadTempStore
     name='',
     )
 def view_file(context, request):
+    """Stream the file content (substanced response)."""
     return context.get_response(request=request)
 
 
@@ -26,6 +28,7 @@ def view_file(context, request):
     name='preview_image_upload',
     )
 def preview_image_upload(request):
+    """Stream a temp-store upload preview (one-pixel fallback)."""
     uid = request.subpath[0]
     tempstore = FileUploadTempStore(request)
     filedata = tempstore.get(uid, {})

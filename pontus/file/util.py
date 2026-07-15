@@ -1,4 +1,5 @@
 
+"""Thumbnail generation (PIL) over the fixed format set."""
 import io
 import os
 from PIL import Image, ImageFilter
@@ -18,6 +19,7 @@ AVAILABLE_FORMATS = [img_format['id'] for img_format in IMAGES_FORMATS]
 
 
 def generate_images(fp, filename):
+    """One resized copy of ``fp`` per ``IMAGES_FORMATS`` entry (id + fp)."""
     result = []
     for img_format in IMAGES_FORMATS:
         try:

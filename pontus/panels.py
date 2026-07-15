@@ -5,6 +5,13 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Navigation panels built from the actions.
+
+The navbar renders the non-automatic, non-access-controlled actions
+of ``context.actions``, split *start* (virtual start work-items) vs
+*active*, grouped along the ``groups`` hierarchy of the action
+definitions. Breadcrumbs walk the lineage (hidden from anonymous).
+"""
 from pyramid_layout.panel import panel_config
 from pyramid.location import lineage
 from pyramid import renderers
@@ -17,6 +24,7 @@ from dace.objectofcollaboration.principal.util import has_any_roles
 @panel_config(name='usermenu',
               renderer='templates/panels/usermenu.pt')
 def usermenu_panel(context, request):
+    """The user menu panel (template only)."""
     return {}
 
 
@@ -24,11 +32,13 @@ def usermenu_panel(context, request):
               renderer='templates/panels/breadcrumbs.pt')
 class BreadcrumbsPanel(object):
 
+    """Lineage breadcrumbs (entities linked to their ``@@index``)."""
     def __init__(self, context, request):
         self.context = context
         self.request = request
 
     def breadcrumbs(self):
+        """Build the crumb list up to the virtual root."""
         request = self.request
         context = self.context
         breadcrumbs = []
@@ -73,11 +83,13 @@ class BreadcrumbsPanel(object):
     )
 class NavBarPanel(object):
 
+    """The object's action menu (see module docstring)."""
     def __init__(self, context, request):
         self.context = context
         self.request = request
 
     def render_group(self, name, group, active_items, isrelative):
+        """Render one action group (recursive template)."""
         body = renderers.render('pontus:templates/panels/group.pt', 
                                 {'name': name,
                                  'group':group,
@@ -88,6 +100,7 @@ class NavBarPanel(object):
         return Structure(body)
 
     def _classifier(self, actions, groups):
+        """Split actions into ungrouped links and the nested groups tree."""
         actionsgroups = {}
         links = []
         titles = []
@@ -133,6 +146,7 @@ class NavBarPanel(object):
 
 
     def _actions(self):
+        """Collect, filter and classify the actions (start vs active)."""
         actions = [a for a in self.context.actions \
                    if not a.action.isautomatic and \
                       not a.action.access_controled]

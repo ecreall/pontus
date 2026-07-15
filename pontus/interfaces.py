@@ -4,6 +4,7 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Public contracts: visualisable elements, files/images, views."""
 from zope.interface import Interface
 
 from substanced.interfaces import IFile as SourceIFile
@@ -13,6 +14,7 @@ from dace.interfaces import Attribute
 
 class IVisualisableElement(Interface):
 
+    """Title/label/description contract of displayable contents."""
     title = Attribute('title')
 
     label = Attribute('label')
@@ -22,6 +24,7 @@ class IVisualisableElement(Interface):
 
 class IFile(SourceIFile):
 
+    """A stored file: filename, mimetype, size, url."""
     filename = Attribute('filename')
 
     mimetype = Attribute('mimetype')
@@ -32,12 +35,15 @@ class IFile(SourceIFile):
 
 
 class IImage(IFile):
+    """A stored image (file with variants and crop area)."""
     pass
 
 
 class IView(Interface):
+    """Marker of pontus views."""
     pass
 
 
 class IFormView(IView):
+    """Marker of pontus form views."""
     pass

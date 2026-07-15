@@ -4,6 +4,18 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""The composition algebra of views.
+
+Operations share the ``views``/``contexts`` class attributes (values
+or callables) and compose through the result contract by deep merge:
+``MultipleView`` (several views, one context — the tabs),
+``CallView`` (one view class, several contexts — the accordion),
+``MergedFormsView`` (one form over several contexts, buttons suffixed
+*All*, per-context dispatch), ``CallSelectedContextsViews`` (checkbox
+selection + one button per operation, routed to the two above), and
+``Wizard`` (a step graph of views mirroring the dace behaviour-level
+wizard, current step in the session).
+"""
 import re
 import deform.widget
 import colander
@@ -34,23 +46,28 @@ from pontus.core import STEPID, Step
 
 
 def default_view(callview):
+    """Default ``view`` callable: none."""
     return None
 
 
 def default_views(callview):
+    """Default ``views`` callable: empty."""
     return []
 
 
 def default_contexts(callview):
+    """Default ``contexts`` callable: empty."""
     return []
 
 
 def default_context(callview):
+    """Default single-context callable: the operation context."""
     return callview.context
 
 
 class ViewOperation(View):
 
+    """Base operation: resolves ``views``/``contexts``, tracks validated/failed children."""
     merged = False
     contexts = default_contexts
     views = default_views
@@ -80,11 +97,13 @@ class ViewOperation(View):
 
     @property
     def all_children(self):
+        """Validated then failed children."""
         result = list(self.validated_children)
         result.extend(list(self.failed_children))
         return result
 
     def _request_configuration(self):
+        """Also honour the ``tomerge`` request param."""
         super(ViewOperation, self)._request_configuration()
         tomerge = self.params('tomerge')
         if tomerge is not None:
@@ -96,11 +115,13 @@ class ViewOperation(View):
 
 
 class MultipleViewsOperation(ViewOperation):
+    """Marker: several views over one context."""
     pass
 
 
 class MultipleContextsOperation(ViewOperation):
 
+    """One view class instantiated per context (validation splits the children)."""
     def __init__(self, 
                  context, 
                  request, 
@@ -119,6 +140,7 @@ class MultipleContextsOperation(ViewOperation):
 
 
     def _init_children(self, contexts=None):
+        """Instantiate the view on each context; sort validated/failed."""
         if contexts is None:
             contexts = self.contexts
 
@@ -137,6 +159,7 @@ class MultipleContextsOperation(ViewOperation):
                 self.errors.append((subview, error))
 
     def has_id(self, id):
+        """Does any validated child match ``id``?"""
         for view in self.validated_children:
             if view.has_id(id):
                 return True
@@ -144,6 +167,7 @@ class MultipleContextsOperation(ViewOperation):
         return False
 
     def get_view_requirements(self):
+        """Children's requirements merged with the operation's."""
         result = self.requirements_copy
         for view in self.validated_children:
             view_requirements = view.get_view_requirements()
@@ -153,10 +177,15 @@ class MultipleContextsOperation(ViewOperation):
 
 
 class MultipleContextsViewsOperation(ViewOperation):
+    """Marker: several views over several contexts."""
     pass
 
 
 def default_builder(parent, views, **kwargs):
+    """Default ``MultipleView`` builder: views and nested ``(title,
+    [views])`` tuples become validated children (or sub-multiple-views),
+    inheriting the coordinates when merged.
+    """
     if views is None:
         return
 
@@ -191,6 +220,7 @@ def default_builder(parent, views, **kwargs):
 
 class MultipleView(MultipleViewsOperation):
 
+    """Several views on one context, composed as tabs (see module docstring)."""
     title = 'Multiple View'
     name = 'multipleview'
     builder = default_builder
@@ -211,11 +241,13 @@ class MultipleView(MultipleViewsOperation):
             self._init_views(self.views, **kwargs)
 
     def _init_views(self, views, **kwargs):
+        """Build the children through ``builder`` and recompute executability."""
         self.validated_children = []
         self.builder(views, **kwargs)
         self.define_executable()
 
     def get_view_requirements(self):
+        """Children's requirements merged with the operation's."""
         result = self.requirements_copy
         for view in self.validated_children:
             view_requirements = view.get_view_requirements()
@@ -224,6 +256,7 @@ class MultipleView(MultipleViewsOperation):
         return result
 
     def define_executable(self):
+        """Executable iff any child is; born finished otherwise."""
         self.isexecutable = False
         self.finished_successfully = True
         for child in self.validated_children:
@@ -235,6 +268,7 @@ class MultipleView(MultipleViewsOperation):
         return self.isexecutable
 
     def _activate(self, items):
+        """Force the first item (recursively) active."""
         if items:
             item = items[0]
             item['isactive'] = True
@@ -242,12 +276,14 @@ class MultipleView(MultipleViewsOperation):
                 self._activate(item['items'])
 
     def before_update(self):
+        """Bind, then prepare every validated child."""
         self.bind()
         for view in self.validated_children:
             view.before_update()
 
 
     def has_id(self, id):
+        """Does any validated child match ``id``?"""
         for view in self.validated_children:
             if view.has_id(id):
                 return True
@@ -255,6 +291,7 @@ class MultipleView(MultipleViewsOperation):
         return False
 
     def _update_all_children(self):
+        """Update children including failures (rendered via ``failure``)."""
         result = {}
         for view in self.all_children:
             try:
@@ -281,6 +318,7 @@ class MultipleView(MultipleViewsOperation):
         return result
 
     def _update_validated_children(self):
+        """Update the validated children, short-circuiting on success."""
         result = {}
         for view in self.validated_children:
             try:
@@ -304,6 +342,10 @@ class MultipleView(MultipleViewsOperation):
 
     def update(self,):
         #validation
+        """Merge the children results, keep one active item per slot, and wrap
+        each slot in the multiple-view template — or raise ``ViewError`` when
+        nothing rendered.
+        """
         if not self.validated_children and \
            not self.include_failed_views:
             error = ViewError()
@@ -365,11 +407,13 @@ class MultipleView(MultipleViewsOperation):
 
 
     def adapt_item(self, render, id, isactive=True):
+        """Mark the item as a multiple view."""
         item  = super(MultipleView, self).adapt_item(render, id, isactive)
         item['ismultipleview'] = True
         return item
 
     def after_update(self):
+        """Close the (successful) children."""
         if self.finished_successfully:
             for view in self.validated_children:
                 view.after_update()
@@ -379,11 +423,13 @@ class MultipleView(MultipleViewsOperation):
                     view.after_update()
 
     def success(self, validated=None):
+        """Pass the successful child result through (redirect)."""
         return validated
 
 
 class ViewSchema(Schema):
 
+    """Hidden per-subform identity (id, context oid, title) of merged forms."""
     id = colander.SchemaNode(
                 colander.String(),
                 widget=deform.widget.HiddenWidget()
@@ -401,6 +447,7 @@ class ViewSchema(Schema):
 
 
 class EmptySchema(Schema):
+    """The ``views`` sequence holding one entry per context in merged forms."""
     views = colander.SchemaNode(
                 colander.Sequence(),
                 ViewSchema(name='view', widget=SimpleMappingWidget())
@@ -408,6 +455,11 @@ class EmptySchema(Schema):
 
 
 class MergedFormsView(MultipleContextsOperation, FormView):
+    """One form over several contexts: the subview's schema is embedded as
+    the ``item`` of each ``views`` entry, buttons are suffixed, and each
+    validated entry is dispatched to the behaviour of the matching
+    subform (by ``context_oid`` and viewid).
+    """
     title = 'MergedFormsView'
     name = 'mergedformsview'
     schema = EmptySchema(widget=SimpleFormWidget())
@@ -428,6 +480,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
         self._addItemsNode()
 
     def _init_children(self, contexts):
+        """Instantiate the subforms and index them by context oid."""
         MultipleContextsOperation._init_children(self, contexts)
         items = self.validated_children
         self.children_by_context = {}
@@ -439,6 +492,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
                 self.children_by_context[context_oid] = [subform]
 
     def _addItemsNode(self):
+        """Embed the subview's schema as the ``item`` of the views sequence."""
         if self.schema.get('views').children[0].get('item') is not None:
             self.schema.get('views').children[0].__delitem__('item') #return
 
@@ -451,11 +505,16 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
 
     def before_update(self):
+        """Prepare every child (failed ones included: their errors are shown)."""
         self.bind()
         for view in self.all_children:
             view.before_update()
 
     def update(self,):
+        """Build the merged form; on submit, validate then run the matching
+        subform behaviour per entry; render warnings for the children that
+        did not validate.
+        """
         if not self.children_by_context:
             error = ViewError()
             error.principalmessage = CallViewErrorPrincipalmessage
@@ -561,15 +620,18 @@ class MergedFormsView(MultipleContextsOperation, FormView):
         return result
 
     def after_update(self):
+        """Close every child once the whole operation succeeded."""
         if self.finished_successfully:
             for view in self.all_children:
                 view.after_update()
 
     def success(self, validated):
+        """Redirect to the context's ``@@index``."""
         return HTTPFound(
             self.request.resource_url(self.context, '@@index'))
 
     def default_data(self):
+        """One pre-filled entry per subform (id, context oid, title, item)."""
         result = {'views':[]}
         views = list(itertools.chain.from_iterable(
                           list(self.children_by_context.values())))
@@ -588,6 +650,7 @@ class MergedFormsView(MultipleContextsOperation, FormView):
 
 class CallView(MultipleContextsOperation):
 
+    """One view class over several contexts, aggregated per slot (accordion)."""
     title = 'CallView'
     name = 'callview'
     template = 'pontus:templates/views_templates/global_accordion.pt'
@@ -604,6 +667,7 @@ class CallView(MultipleContextsOperation):
         self.define_executable()
 
     def define_executable(self):
+        """Executable iff any child is; born finished otherwise."""
         _isexecutable = False
         for child in self.validated_children:
             if child.isexecutable:
@@ -617,11 +681,16 @@ class CallView(MultipleContextsOperation):
         return self.isexecutable
 
     def before_update(self):
+        """Bind, then prepare every validated child."""
         self.bind()
         for view in self.validated_children:
             view.before_update()
 
     def update(self,):
+        """Update every validated child, short-circuit on an executable
+        success, then wrap the collected items of each slot in the accordion
+        template.
+        """
         if not self.validated_children:
             e = ViewError()
             e.principalmessage = CallViewErrorPrincipalmessage
@@ -681,6 +750,7 @@ class CallView(MultipleContextsOperation):
         return  global_result
 
     def after_update(self):
+        """Re-prepare the (successful) children."""
         if self.finished_successfully:
             for view in self.validated_children:
                 view.before_update()
@@ -690,10 +760,12 @@ class CallView(MultipleContextsOperation):
                     view.before_update()
 
     def success(self, validated=None):
+        """Pass the successful child result through."""
         return validated
 
 
 class ItemsSchema(Schema):
+        """The context-selection node of the batch pattern."""
         items = colander.SchemaNode(
             colander.Set()
             )
@@ -701,6 +773,11 @@ class ItemsSchema(Schema):
 
 class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
 
+    """The batch pattern: check contexts, pick an operation (one button per
+    target view), route to ``MergedFormsView`` (form target) or
+    ``CallView``, round-tripping the selection via the ``__viewid__`` /
+    ``__contextsoids__`` hidden nodes.
+    """
     title = 'CallSelectedContextsViews'
     name = 'callselectedcontextsviews'
     #widgets
@@ -726,6 +803,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         self.buttons = [b.title for b in self.views]
 
     def _init_children(self):
+        """One CallView/MergedFormsView per target view, keyed by title."""
         for view in self.views:
             name = re.sub(r'\s', '_', view.title)
             multiplecontextsview_class = CallView
@@ -740,6 +818,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
             self.validated_children[name] = view_instance
 
     def has_id(self, id):
+        """Does any child operation match ``id``?"""
         for view in self.validated_children.values():
             if view.has_id(id):
                 return True
@@ -747,12 +826,17 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         return False
 
     def _additemswidget(self):
+        """Checkbox widget over the candidate contexts (rendered snippets)."""
         values = [(i, i.get_view(self.request)) for i in self.contexts]
         widget = self.items_widget(values=values, multiple=True)
         viewsschemanode =  self.schema.get('items')
         viewsschemanode.widget = widget
 
     def update(self,):
+        """Show/validate the selection form, or answer a child form post
+        (``__viewid__``), then delegate to the chosen operation over the
+        validated items.
+        """
         if not self.contexts:
             e = ViewError()
             e.principalmessage = CallViewErrorPrincipalmessage
@@ -828,6 +912,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         return result
 
     def _call_callview(self, viewname):
+        """Re-target the chosen operation on the selected contexts and run it."""
         callview = self.validated_children[viewname]
         callview._init_children(self.validated_items)
         callview.define_executable()
@@ -848,6 +933,7 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         return callview_result
 
     def _getcontextsoids(self):
+        """The selected oids as the ``__contextsoids__`` payload."""
         result = ''
         for context in self.validated_items:
             result += ':' + str(get_oid(context))
@@ -855,15 +941,20 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         return result
 
     def success(self, validated=None):
+        """Pass the operation result through."""
         return validated
 
 
 def default_condition(context, request):
+    """Default UI-transition condition: always True."""
     return True
 
 
 class Transition(object):
 
+    """A wizard UI transition; ``validate`` requires the matching
+    transition of the *behaviour's* wizard (same id) to validate too.
+    """
     def __init__(self, source, target, id, condition=(lambda x, y:True), isdefault=False):
         self.wizard = source.wizard
         self.source = source
@@ -875,6 +966,7 @@ class Transition(object):
         self.id = id
 
     def validate(self):
+        """UI condition ∧ behaviour-wizard condition (when bound)."""
         behavior_transition = None
         if self.wizard.behaviorinstance is not None:
             behavior_transitions = dict(self.wizard.behaviorinstance.transitionsinstances)
@@ -892,6 +984,10 @@ class Transition(object):
 
 class Wizard(MultipleViewsOperation):
 
+    """A step graph of views mirroring the dace behaviour wizard: same
+    transition tuples, session-stored current step, synthetic start/end
+    nodes, optional progression bar.
+    """
     transitions = ()
     title = 'Wizard'
     name = 'wizard'
@@ -953,6 +1049,7 @@ class Wizard(MultipleViewsOperation):
         self.currentsteps = [t.target for t in self.startnode._outgoing]
 
     def get_view_requirements(self):
+        """The current step's requirements merged with the wizard's."""
         stepidkey = STEPID + self.viewid
         if stepidkey in self.request.session:
             self.currentsteps = [self.nodes[self.request.session.pop(stepidkey)]]
@@ -965,6 +1062,7 @@ class Wizard(MultipleViewsOperation):
         return result
 
     def _add_startnode(self):
+        """Wire a synthetic start step to every initial node."""
         initnodes = self._getinitnodes()
         self.startnode = Step(self,'start_' + self.viewid)
         for node in initnodes:
@@ -973,6 +1071,7 @@ class Wizard(MultipleViewsOperation):
                                self.startnode, node, transitionid)
 
     def _add_endnode(self):
+        """Wire every final node to a synthetic end step."""
         finalnodes = self._getfinalnodes()
         self.endnode = Step(self,'end_' + self.viewid)
         for node in finalnodes:
@@ -981,6 +1080,7 @@ class Wizard(MultipleViewsOperation):
                                  node, self.endnode, transitionid)
 
     def _getinitnodes(self):
+        """Steps without incoming transitions."""
         result = []
         for view in self.nodes.values():
             if not view._incoming:
@@ -989,6 +1089,7 @@ class Wizard(MultipleViewsOperation):
         return result
 
     def _getfinalnodes(self):
+        """Steps without outgoing transitions."""
         result = []
         for view in self.nodes.values():
             if not view._outgoing:
@@ -997,6 +1098,7 @@ class Wizard(MultipleViewsOperation):
         return result
 
     def _count_path(self, source, target):
+        """Shortest step count between two nodes (for the progression bar)."""
         nsteps = 1
         listincomming = source._incoming
         if not listincomming:
@@ -1018,6 +1120,7 @@ class Wizard(MultipleViewsOperation):
         return nsteps
 
     def _calculate_wizard_informations(self):
+        """Current step, covered/remaining counts and percentage."""
         stepidkey = STEPID + self.viewid
         currentsteps = []
         if stepidkey in self.request.session:
@@ -1031,6 +1134,7 @@ class Wizard(MultipleViewsOperation):
         return currentstep, total, covered, rest, pourcentage
 
     def getwizardinformationsview(self):
+        """Render the progression bar block."""
         currentstep, total, covered, rest, pourcentage = self._calculate_wizard_informations()
         values = {'total':total, 
                   'current': covered, 
@@ -1045,6 +1149,10 @@ class Wizard(MultipleViewsOperation):
         return result
 
     def update(self):
+        """Render the current step(s); while a step finishes successfully,
+        follow the first validating (non-default, else default) transition;
+        reaching the end closes the wizard (``success``).
+        """
         stepidkey = STEPID+self.viewid
         #TODO 
         #if stepidkey in self.request.POST:
@@ -1095,6 +1203,7 @@ class Wizard(MultipleViewsOperation):
         return result
 
     def _get_result(self, sourceviews):
+        """Update one step, or several as an ad-hoc MultipleView."""
         result = None
         if len(sourceviews) == 1:
             viewinstance = sourceviews[0]
@@ -1127,5 +1236,6 @@ class Wizard(MultipleViewsOperation):
                     result)
 
     def success(self, validated=None):
+        """Redirect to the context's ``@@index``."""
         return HTTPFound(
             self.request.mgmt_path(self.context, '@@index'))

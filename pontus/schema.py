@@ -4,6 +4,14 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Schemas and their algebra.
+
+``Schema`` plugs the ``ObjectData`` type in (colander ↔ domain-object
+bridge), marks csrf/id nodes ``to_omit``/``private`` and runs the zope
+invariants at ``deserialize``. ``select``/``omit`` derive sub-schemas
+(recursively, sequence-aware); ``flatten``/``schemes_sum`` combine
+schemas.
+"""
 from zope.interface.interface import TAGGED_DATA
 import inspect
 import deform
@@ -21,6 +29,7 @@ except NameError:
 
 
 def omit_nodes(schemanode, omit):
+    """Flag the masked nodes ``to_omit`` (recursing into mappings/sequences)."""
     for o in omit:
         if isinstance(o, basestring):
             node = schemanode.get(o, None)
@@ -41,6 +50,7 @@ def omit_nodes(schemanode, omit):
 
 class Schema(OriginSchema):
 
+    """Base schema bound to ``ObjectData`` (factory/editable) with omit support."""
     title = ''
     label = ''
     description = ''
@@ -56,6 +66,7 @@ class Schema(OriginSchema):
             self.add_idnode(OBJECT_OID)
 
     def _omit_nodes(self, omit):
+        """Flag csrf and the ``omit=`` mask."""
         csrf = self.get('_csrf_token_', None)
         if csrf is not None:
             csrf.to_omit = True
@@ -64,6 +75,7 @@ class Schema(OriginSchema):
         omit_nodes(self, omit)
 
     def deserialize(self, cstruct=colander.null):
+        """Run the interface invariants, then colander deserialisation."""
         members = dict(inspect.getmembers(self))
         if TAGGED_DATA in members and 'invariants' in members[TAGGED_DATA]:
             for invariant in members[TAGGED_DATA]['invariants']:
@@ -73,6 +85,7 @@ class Schema(OriginSchema):
         return appstruct
 
     def add_idnode(self, id, value=None):
+        """Append a hidden, omitted, private id node (e.g. ``__objectoid__``)."""
         if self.get(id) is not None:
             self.__delitem__(id)
 
@@ -117,6 +130,7 @@ def select(schema, mask):
 
 
 def flatten(schemes):
+    """One schema with the children of all (clones)."""
     if len(schemes) == 0:
         return None
 
@@ -129,6 +143,7 @@ def flatten(schemes):
 
 
 def schemes_sum(schemes):
+    """One schema with each input schema as a named child."""
     if len(schemes)==0:
         return None
 

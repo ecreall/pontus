@@ -38,3 +38,26 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   backends bcrypt PyCA + hashlib, compatible hash pour hash avec le module
   deploye) est installee depuis son depot a la place ; `bcrypt`, `cffi` et
   `pycparser` epingles pour la cible Python 3.6.
+
+
+## 2026-07-16
+
+- Documentation de phase 2 de pontus, livrée en une passe (la couche
+  fait le quart de dace) : document de conception `architecture.md`
+  (EN/FR — le principe behaviors-comme-boutons, le contrat de résultat
+  fusionné, le cycle de vie des vues et la liaison aux behaviors,
+  l'aller-retour du POST via `ObjectData`, l'algèbre de composition,
+  index/navbar depuis les actions, widgets conscients des oids,
+  fichiers/variantes) et `usage-scenarios.md` (EN/FR — huit scénarios
+  sur l'API réelle et les motifs de nova-ideo).
+- Passe de docstrings complète après lecture intégrale des
+  3 600 lignes : 241 docstrings insérés avec l'outil AST
+  (`tools/doc_coverage.py` ajouté, comme pour dace). Couverture :
+  2,8 % → 88,3 % (18/18 modules, 58/58 classes, 173/206 fonctions). Le
+  résidu non couvert relève de la politique annoncée : constructeurs et
+  quelques surcharges triviales. Savoirs notables fixés par écrit : la
+  lecture pontus d'`isautomatic` (« fait partie de la page d'index de
+  l'objet »), le `viewid` compositionnel, le court-circuit `Cancel`,
+  les hooks d'échec `<titre>_failure` par bouton, l'aller-retour de lot
+  `__viewid__`/`__contextsoids__`, et la conjonction des transitions
+  wizard interface/behavior.

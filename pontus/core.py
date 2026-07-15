@@ -5,6 +5,12 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Base bricks: wizard steps and visualisable elements.
+
+``VisualisableElement`` gives content classes their title/label/
+description contract, their ``@@index`` URL and a rendered snippet
+(``get_view``) — the mixin every nova-ideo content class carries.
+"""
 import colander
 import deform
 from zope.interface import implementer
@@ -20,6 +26,7 @@ STEPID = '__stepid__'
 
 class Step(object):
 
+    """Base of wizard steps: identity, wiring and completion state."""
     isexecutable = True
 
     def __init__(self, wizard=None, stepid=None):
@@ -30,12 +37,15 @@ class Step(object):
         self._incoming = []
 
     def add_outgoing(self, transition):
+        """Register an outgoing wizard transition."""
         self._outgoing.append(transition)
 
     def add_incoming(self, transition):
+        """Register an incoming wizard transition."""
         self._incoming.append(transition)
 
     def init_stepid(self, schema=None, wizard=None):
+        """Record this step as the current one in the session."""
         if self.wizard is not None:
             self.wizard.request.session[STEPID+self.wizard.viewid] = self.stepid
             #if self.id is not None:
@@ -47,6 +57,7 @@ class Step(object):
 
 class VisualisableElementSchema(Schema):
     
+    """The title/label/description schema slice."""
     title = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.TextInputWidget(),
@@ -69,6 +80,7 @@ class VisualisableElementSchema(Schema):
 @implementer(IVisualisableElement)
 class VisualisableElement(object):
 
+    """Title/label/description contract of displayable contents."""
     template = 'templates/visualisable_templates/object.pt'
 
     def __init__(self, **kwargs):
@@ -79,13 +91,16 @@ class VisualisableElement(object):
 
     @property
     def url(self,):
+        """The object's ``@@index`` URL (current request)."""
         request = get_current_request()
         return request.resource_url(self, '@@index')
 
     def get_url(self, request):
+        """The object's ``@@index`` URL for ``request``."""
         return request.resource_url(self, '@@index')
 
     def get_view(self, request, template=None):
+        """Render the object snippet (``template``) as a layout Structure."""
         if template is None:
             template = self.template
         body = renderers.render(template, {'object': self}, request)

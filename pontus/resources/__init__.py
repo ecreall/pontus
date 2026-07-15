@@ -6,6 +6,9 @@
 # author: Amen Souissi
 
 
+"""Default user-facing error messages (French-authored) used by
+``ViewError`` renderings across views and operations.
+"""
 IndexViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour accéder à l'information demandée."
 IndexViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
                         u"Certaines conditions ne sont pas encore satisfaites."]

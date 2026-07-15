@@ -36,3 +36,24 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   PyCA bcrypt + hashlib backends, hash-compatible with the deployed module)
   is installed from its repository instead; `bcrypt`, `cffi` and `pycparser`
   pinned for the Python 3.6 target.
+
+
+## 2026-07-16
+
+- Phase 2 documentation of pontus, delivered in one pass (the layer is
+  a quarter of dace's size): design document `architecture.md` (EN/FR —
+  the behaviours-as-buttons principle, the merged result contract, the
+  view lifecycle and behaviour binding, the POST round-trip through
+  `ObjectData`, the composition algebra, index/navbar from the actions,
+  oid-aware widgets, files/variants) and `usage-scenarios.md` (EN/FR —
+  eight scenarios on the real API and the nova-ideo patterns).
+- Full docstring pass from a complete read of the 3,600 lines:
+  241 docstrings inserted with the AST tool (`tools/doc_coverage.py`
+  added, same as dace). Coverage: 2.8 % → 88.3 % (18/18 modules,
+  58/58 classes, 173/206 functions). The uncovered residue is the
+  stated policy: constructors and a handful of trivial overrides.
+  Notable knowledge fixed in writing: pontus's reading of
+  `isautomatic` ("part of the object's index page"), the compositional
+  `viewid`, the `Cancel` bypass, the per-button `<title>_failure`
+  hooks, the `__viewid__`/`__contextsoids__` batch round-trip, and the
+  wizard UI/behaviour transition conjunction.

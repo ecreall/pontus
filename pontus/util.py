@@ -4,6 +4,13 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Result-merging rules and small lookups.
+
+``merge_dicts`` (with the list/dict rules) is the composition engine
+behind the view result contract; ``update_resources`` accumulates the
+js/css links on the request; ``get_view`` resolves a registered
+Pyramid view by name.
+"""
 from zope.interface import providedBy
 
 from pyramid.interfaces import IViewClassifier, IView
@@ -12,6 +19,7 @@ from pyramid.compat import map_
 
 
 def get_copy_fn(obj):
+    """Copy function for ``obj`` (list/dict deep-ish copy, identity otherwise)."""
     def default(obj):
         return obj
 
@@ -19,10 +27,12 @@ def get_copy_fn(obj):
 
 
 def copy_list(obj):
+    """Copy a list, copying its items by rule."""
     return [get_copy_fn(item)(item) for item in list(obj)]
 
 
 def copy_dict(obj):
+    """Copy a dict, copying its values by rule."""
     result = obj.copy()
     for key, value in result.items():
         result[key] = get_copy_fn(value)(value)
@@ -31,15 +41,18 @@ def copy_dict(obj):
 
 
 def get_merge_fn(obj):
+    """Merge function for ``obj`` (lists extend, dicts recurse), or ``None``."""
     return merge_rules.get(obj.__class__, None)
 
 
 def merge_list(source, target):
+    """Merge: extend ``target`` with ``source``."""
     target.extend(source)
     return target
 
 
 def merge_dicts(source, target, keys=()):
+    """Deep merge ``source`` into a copy of ``target`` (optionally only ``keys``)."""
     selected_dict = source
     if keys:
         selected_dict = {}
@@ -65,6 +78,7 @@ def merge_dicts(source, target, keys=()):
 
 
 def update_resources(request, resources={'js_links': [], 'css_links': []}):
+    """Accumulate ``js_links``/``css_links`` on ``request.resources``."""
     old_resources = getattr(
         request, 'resources', {'js_links': [], 'css_links': []})
     old_resources['js_links'].extend(resources.get('js_links', []))
@@ -73,6 +87,7 @@ def update_resources(request, resources={'js_links': [], 'css_links': []}):
 
 
 def get_view(context, request, view_name):
+    """Resolve the registered view ``view_name`` for (context, request)."""
     provides = [IViewClassifier] + map_(providedBy, (request, context))
     try:
         reg = request.registry

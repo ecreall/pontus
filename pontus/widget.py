@@ -4,6 +4,15 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Deform widgets, made oid-aware.
+
+The select/checkbox/radio family serializes domain objects to oid
+strings and deserializes oid strings back to objects (``get_obj``):
+schemas manipulate real objects. ``SequenceWidget`` carries the
+historical parent-weakref fix and stable oids; the file/image widgets
+plug the temp-stores and the cropper; the resource registry wires
+tinymce, select2, cropper and fileinput.
+"""
 import weakref
 import colander
 from persistent.list import PersistentList
@@ -41,17 +50,23 @@ from pontus import log
 
 class TextInputWidget(OriginTextInputWidget):
 
+    """Text input with the pontus template."""
     template = 'pontus:templates/textinput.pt'
     readonly_template = 'pontus:templates/readonly/textinput.pt'
 
 
 class MappingWidget(OriginMappingWidget):
 
+    """Mapping with the pontus template."""
     template = 'pontus:templates/mapping.pt'
 
 
 class SequenceWidget(OriginSequenceWidget):
 
+    """Sequence with the pontus templates and the historical fixes:
+    cloned items keep a weak reference to their parent, prototypes get
+    stable oids (automated testing).
+    """
     template = 'pontus:templates/sequence.pt'
     item_template = 'pontus:templates/sequence_item.pt'
     requirements = (('deform', None), 
@@ -62,6 +77,7 @@ class SequenceWidget(OriginSequenceWidget):
     def prototype(self, field):
         # we clone the item field to bump the oid (for easier
         # automated testing; finding last node)
+        """The url-quoted item prototype (cloned, parented)."""
         item_field = field.children[0].clone()
         # root ++ Ecreall++ Amen
         if field.children[0].parent is not None:
@@ -79,6 +95,7 @@ class SequenceWidget(OriginSequenceWidget):
 
     def serialize(self, field, cstruct, **kw):
         # XXX make it possible to override min_len in kw
+        """Origin serialisation with parented clones and min_len padding."""
         if cstruct in (null, None):
             if self.min_len is not None:
                 cstruct = [null] * self.min_len
@@ -146,6 +163,7 @@ class SequenceWidget(OriginSequenceWidget):
         return field.renderer(template, **values)
 
     def deserialize(self, field, pstruct):
+        """Origin deserialisation keeping the parented subfields."""
         result = []
         error = None
 
@@ -179,6 +197,7 @@ class SequenceWidget(OriginSequenceWidget):
 
 class TableWidget(SequenceWidget):
 
+    """Sequence rendered as a table."""
     template = 'pontus:templates/table.pt'
     item_template = 'pontus:templates/table_item.pt'
     readonly_template = 'pontus:templates/readonly/table.pt'
@@ -187,6 +206,7 @@ class TableWidget(SequenceWidget):
 
 class LineWidget(MappingWidget):
 
+    """Mapping rendered as a line."""
     template = 'pontus:templates/line_mapping.pt'
     item_template = 'pontus:templates/line_mapping_item.pt'
     readonly_template = 'pontus:templates/readonly/line_mapping.pt'
@@ -195,11 +215,13 @@ class LineWidget(MappingWidget):
 
 class AccordionWidget(SequenceWidget):
 
+    """Sequence rendered as an accordion."""
     template = 'pontus:templates/accordion.pt'
     item_template = 'pontus:templates/accordion_item.pt'
 
 
 class RichTextWidget(RichTextWidget):
+    """TinyMCE with the pontus defaults (toolbar, sizes)."""
     requirements = (('tinymce', None), )
     default_options = (('height', 240),
                        ('width', 0),
@@ -218,12 +240,15 @@ class RichTextWidget(RichTextWidget):
 
 
 class MemoryTmpStore(dict):
+    """In-memory upload store (no preview)."""
     def preview_url(self, name):
+        """No preview for memory stores."""
         return None
 
 
 class FileWidget(FileUploadWidget):
 
+    """Upload widget bound to a temp-store; keeps the stored fp across posts."""
     template = 'pontus:file/templates/file_upload.pt'
     requirements = (('file_upload', None),)
 
@@ -238,6 +263,7 @@ class FileWidget(FileUploadWidget):
         return get_current_request()
 
     def serialize(self, field, cstruct, **kw):
+        """Remember the uid in the store (and per-field) before rendering."""
         if cstruct in (null, None):
             cstruct = {}
 
@@ -264,6 +290,10 @@ class FileWidget(FileUploadWidget):
         return field.renderer(template, **values)
 
     def deserialize(self, field, pstruct):
+        """Collect the store on the form (for later cleanup), honour
+        ``_object_removed``, and resolve ``__objectoid__`` back to the stored
+        file's fp when only the reference was posted.
+        """
         form = field.get_root()
         form.stores = getattr(form, 'stores', [])
         form.stores.append(self.tmpstore)
@@ -301,10 +331,12 @@ class FileWidget(FileUploadWidget):
 
 class ImageWidget(FileWidget):
 
+    """Upload widget with cropper: preview URL and area-of-interest fields."""
     template = 'pontus:file/templates/img_upload.pt'
     requirements = (('img_upload', None),)
 
     def preview_url(self, field):
+        """The temp-store preview, else the current image's URL."""
         img_src = None
         uid = getattr(self, 'uids', {}).get(field, None)
         if uid:
@@ -319,6 +351,7 @@ class ImageWidget(FileWidget):
         return img_src
 
     def deserialize(self, field, pstruct):
+        """Parse the crop values (x, y, r, area) with safe defaults."""
         data = super(ImageWidget, self).deserialize(field, pstruct)
         if data is null:
             return null
@@ -365,12 +398,14 @@ class ImageWidget(FileWidget):
 
 @colander.deferred
 def image_upload_widget(node, kw):
+    """Deferred: an ``ImageWidget`` bound to the request temp-store."""
     request = node.bindings['request']
     tmpstore = FileUploadTempStore(request)
     return ImageWidget(tmpstore)
 
 
 def _normalize_choices(values):
+    """Normalise option values to oid strings (OptGroup-aware, deduplicated)."""
     result = []
     for item in values:
         if isinstance(item, OptGroup):
@@ -392,7 +427,9 @@ def _normalize_choices(values):
  
 class SelectWidget(OriginSelectWidget):
 
+    """Oid-aware select: objects ↔ oid strings, unknown values preserved."""
     def serialize(self, field, cstruct, **kw):
+        """Serialize object values to oids, appending unknown ones to values."""
         if cstruct in (null, None):
             if hasattr(self, 'pstruct') and field in self.pstruct:
                 cstruct = self.pstruct[field]
@@ -435,6 +472,7 @@ class SelectWidget(OriginSelectWidget):
         return field.renderer(template, **tmpl_values)
 
     def deserialize(self, field, pstruct):
+        """Resolve posted oids to objects (lists preserved)."""
         pstruct = super(SelectWidget, self).deserialize(field, pstruct)
         if pstruct in (null, self.null_value):
             return null
@@ -473,16 +511,19 @@ class SelectWidget(OriginSelectWidget):
 
 
 class Select2Widget(SelectWidget):
+    """Select2-powered select (optional tag creation)."""
     template = 'pontus:templates/select2.pt'
     requirements = (('deform', None), ('select2creation', None))
     create = False
 
 
 def default_title_getter(id):
+    """Fallback title getter: the id itself."""
     return id
 
 
 class AjaxSelect2Widget(Select2Widget):
+    """Select2 with ajax-fetched candidates."""
     template = 'pontus:templates/ajax_select2.pt'
     requirements = ( ('ajaxselect2', None),) 
 
@@ -492,10 +533,12 @@ class AjaxSelect2Widget(Select2Widget):
 
 
 class RadioChoiceWidget(SelectWidget):
+    """Oid-aware radio choice."""
     template = 'deform:templates/radio_choice.pt'
     readonly_template = 'deform:templates/readonly/radio_choice.pt'
 
     def serialize(self, field, cstruct, **kw):
+        """Normalise the value (multiple-aware) before origin rendering."""
         if cstruct in (null, None):
             cstruct = self.null_value
 
@@ -506,6 +549,7 @@ class RadioChoiceWidget(SelectWidget):
         return super(RadioChoiceWidget, self).serialize(field, cstruct, **kw)
 
     def deserialize(self, field, pstruct):
+        """Resolve the posted oid to an object."""
         if pstruct in (null, self.null_value):
             return null
 
@@ -522,7 +566,9 @@ class RadioChoiceWidget(SelectWidget):
 class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
 
 
+    """Oid-aware checkbox choice."""
     def serialize(self, field, cstruct, **kw):
+        """Serialize object values to oids before origin rendering."""
         if cstruct in (null, None):
             cstruct = ()
 
@@ -550,6 +596,7 @@ class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
         return field.renderer(template, **tmpl_values)
 
     def deserialize(self, field, pstruct):
+        """Resolve posted oids to objects (tuple preserved)."""
         if pstruct is null:
             return null
 
@@ -576,11 +623,13 @@ class CheckboxChoiceWidget(OriginCheckboxChoiceWidget):
 
 class SimpleMappingWidget(MappingWidget):
 
+    """Mapping without decoration."""
     template = 'pontus:templates/simple_mapping.pt'
 
 
 class SimpleFormWidget(OriginFormWidget):
 
+    """Form with the simple item template."""
     item_template = 'pontus:templates/simple_mapping_item.pt'
 
 

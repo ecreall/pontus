@@ -4,6 +4,17 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""The view lifecycle and the behaviour binding.
+
+``View.__call__`` runs ``validate → before_update → update →
+after_update`` and enforces the result contract
+(``{'coordinates': {slot: [items]}, 'js_links', 'css_links'}``).
+``viewid`` is compositional (parent + name + context oid), which
+disambiguates several instances on one page. ``ElementaryView`` binds
+dace behaviours: instances via ``get_instance``, their validators
+added to the view's — a view whose actions all refuse raises
+``ViewError`` and is never rendered.
+"""
 import re
 from collections import OrderedDict
 from webob.multidict import MultiDict
@@ -29,6 +40,7 @@ from pontus import _, log
 
 
 class ViewError(Error):
+    """User-facing error (message/causes/solutions) rendered by its template."""
     principalmessage = u""
     causes = []
     solutions = []
@@ -36,6 +48,7 @@ class ViewError(Error):
     template = 'pontus:templates/views_templates/alert_message.pt'
 
     def render_message(self, request, subject=None):
+        """Render the error block for the request."""
         content_message = renderers.render(
             self.template,
             {'error': self, 'subject': subject}, request)
@@ -62,6 +75,7 @@ class View(Step):
     container_css_class = ""
 
     def render_item(self, item, coordinates, parent):
+        """Wrap a child item in the wrapper template (layout Structure)."""
         body = renderers.render(
             self.wrapper_template,
             {'coordinates': coordinates,
@@ -93,24 +107,29 @@ class View(Step):
         self._request_configuration()
 
     def _request_configuration(self):
+        """Read per-request options (``coordinates``)."""
         coordinates = self.params('coordinates')
         if coordinates is not None:
             self.coordinates = coordinates
 
     @property
     def requirements_copy(self):
+        """A private copy of the static js/css requirements."""
         if self.requirements is None:
             return {'css_links': [], 'js_links': []}
         else:
             return copy_dict(self.requirements)
 
     def has_id(self, id):
+        """Does ``id`` designate this view?"""
         return self.viewid == id
 
     def get_view_requirements(self):
+        """The js/css requirements of this view (specialised by operations)."""
         return self.requirements_copy
 
     def validate(self):
+        """Run the view validators; wrap refusals in a ``ViewError``."""
         for validator in self.validators:
             try:
                 validator.validate(self.context, self.request)
@@ -126,6 +145,7 @@ class View(Step):
         return True
 
     def params(self, key=None):
+        """Request param accessor, honouring the ``key[]`` list convention."""
         result = []
         if key is None:
             return self.request.params
@@ -151,15 +171,19 @@ class View(Step):
         return None
 
     def before_update(self):
+        """Pre-render hook (binds the view)."""
         self.bind()
 
     def update(self):
+        """Produce the result dict. Subclass hook."""
         pass
 
     def after_update(self):
+        """Post-render hook."""
         pass
 
     def __call__(self):
+        """The lifecycle; pushes the result js/css onto the request."""
         result = None
         try:
             self.validate()
@@ -185,6 +209,7 @@ class View(Step):
         return result
 
     def content(self, args, template=None, main_template=None):
+        """Render ``template`` with ``args`` (plus a main template); return body+args."""
         if template is None:
             template = self.template
 
@@ -199,6 +224,7 @@ class View(Step):
                 'args': args}
 
     def adapt_item(self, render, id, isactive=True):
+        """Wrap a rendering into a result item (view, id, isactive)."""
         if self.parent is not None:
             isactive = False
 
@@ -211,10 +237,12 @@ class View(Step):
         return item
 
     def setviewid(self, viewid):
+        """Force the view id (and remember it as the original)."""
         self.viewid = viewid
         self._original_view_id = viewid
 
     def failure(self, error, subject=None):
+        """The result dict rendering ``error`` in this view slot."""
         error_body = error.render_message(self.request, subject)
         item = self.adapt_item('', self.viewid, True)
         item['messages'] = {error.type: [error_body]}
@@ -224,13 +252,16 @@ class View(Step):
         return result
 
     def success(self, validated=None):
+        """Success hook of executable views (redirects, typically)."""
         pass
 
     def bind(self):
+        """Initialise the view bindings (schema bindings source)."""
         setattr(self, '_bindings', {})
 
     @property
     def bindings(self):
+        """Own bindings merged under the parent chain."""
         bindings = getattr(self, '_bindings', {}).copy()
         if self.parent:
             bindings.update(self.parent.bindings)
@@ -238,6 +269,7 @@ class View(Step):
         return bindings
 
     def get_binding(self, key):
+        """One binding by key."""
         return self.bindings.get(key, None)
 
 
@@ -275,6 +307,7 @@ class ElementaryView(View):
         self._init_behaviors(specific_behaviors)
 
     def validate(self):
+        """View validators + behaviour validators; refusals become ``ViewError``."""
         try:
             for validator in self._all_validators:
                 validator.validate(self.context, self.request)
@@ -295,6 +328,7 @@ class ElementaryView(View):
         return True
 
     def _add_behaviorinstance(self, behaviorinstance):
+        """Register an instance (keyed by title) and extend the viewid."""
         key = re.sub(r'\s', '_', behaviorinstance.title)
         self.behaviors_instances[key] = behaviorinstance
         try:
@@ -303,6 +337,7 @@ class ElementaryView(View):
             pass
 
     def _init_behaviors(self, specific_behaviors):
+        """Instantiate the declared behaviours (order preserved, errors kept)."""
         self.viewid = self._original_view_id
         self.behaviors_instances = OrderedDict()
         behaviors = [behavior for behavior in self.behaviors
@@ -336,11 +371,13 @@ class ElementaryView(View):
             self._add_behaviorinstance(behaviorinstance)
 
     def before_update(self):
+        """Bind, then ``before_execution`` (locking) on every instance."""
         self.bind()
         for behavior in self.behaviors_instances.values():
             behavior.before_execution(self.context, self.request)
 
     def execute(self, appstruct=None):
+        """Run every behaviour instance with ``appstruct``."""
         results = []
         for behavior in self.behaviors_instances.values():
             results.append(behavior.execute(
@@ -369,6 +406,7 @@ class BasicView(ElementaryView):
         self.finished_successfully = True
 
     def update(self):
+        """Empty result by default."""
         return {}
 
 
@@ -377,11 +415,13 @@ class BasicView(ElementaryView):
     renderer='pontus:templates/views_templates/grid.pt',
     )
 class ViewErrorView(BasicView):
+    """The page rendering an uncaught ``ViewError``."""
     title = _('An error has occurred!')
     name = 'viewerrorview'
     template = 'pontus:templates/views_templates/alert_message.pt'
 
     def update(self):
+        """Render the error in this view slot."""
         self.title = self.request.localizer.translate(self.title)
         result = {}
         body = self.content(

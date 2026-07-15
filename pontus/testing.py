@@ -4,6 +4,12 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Functional test harness.
+
+Same shape as dace's: a real Pyramid app (substanced + dace + pontus)
+on a temporary file ZODB, request extensions applied, admin logged in.
+Pontus's own suite and nova-ideo's functional layers build on it.
+"""
 import unittest
 from pyramid.config import Configurator
 from pyramid.testing import DummyRequest
@@ -23,6 +29,7 @@ def main(global_config, **settings):
 
 class FunctionalTests(unittest.TestCase):
 
+    """Base class of the functional layers (see module docstring)."""
     def setUp(self):
         import tempfile
         import os.path

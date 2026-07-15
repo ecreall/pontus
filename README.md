@@ -55,6 +55,8 @@ Documentation lives in [`docs/`](docs/):
 
 Audits, design documents and the worklog are maintained in both languages. See [`docs/README.md`](docs/README.md) for the documentation policy.
 
+Design documents: [architecture](docs/en/architecture.md) · [usage scenarios](docs/en/usage-scenarios.md) (English originals; French mirrors under [`docs/fr/`](docs/fr/)).
+
 ## Used by
 
 - [nova-ideo](https://github.com/ecreall/nova-ideo) and its variant [KuneAgi](https://github.com/ecreall/KuneAgi)

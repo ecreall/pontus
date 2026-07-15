@@ -5,6 +5,15 @@
 # licence: AGPL
 # author: Amen Souissi
 
+"""Forms whose submit buttons are business actions.
+
+``FormView`` = ``ElementaryView`` × substanced ``FormView``: one
+``Button`` per behaviour instance, POST dispatch on ``__formid__`` +
+button name, ``form.validate`` then ``behaviour.execute(validated)``
+(``Cancel`` bypasses validation), per-button ``<title>_failure``
+hooks, ``chmod`` read-only masks, and the upload temp-store with
+preview/cleanup.
+"""
 import os
 from zope.interface import implementer
 import deform.exception
@@ -30,6 +39,7 @@ except NameError:
 
 
 def set_oid(children, formid):
+    """Suffix every field oid with the formid (stable ids across forms)."""
     for child in children:
         child.oid = child.oid + formid
         if hasattr(child, 'children'):
@@ -39,6 +49,7 @@ def set_oid(children, formid):
 @implementer(IFormView)
 class FormView(ElementaryView, SubstanceDFormView):
 
+    """Deform form bound to behaviours (see module docstring)."""
     title = 'Form View'
     chmod = []
     schema = Schema()
@@ -57,6 +68,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         self.formid = kwargs.get('formid', getattr(self, 'formid', 'deform'))
 
     def _init_behaviors(self, specific_behaviors):
+        """Resolve the behaviours, then derive the submit buttons."""
         super(FormView, self)._init_behaviors(specific_behaviors)
         self.buttons = [Button(title=getattr(behavior,
                                             'submission_title',
@@ -65,6 +77,7 @@ class FormView(ElementaryView, SubstanceDFormView):
                         for behavior in self.behaviors_instances.values()]
 
     def _build_form(self):
+        """Bind the schema (request/context/csrf + view bindings) and build the form."""
         use_ajax = getattr(self, 'use_ajax', False)
         ajax_options = getattr(self, 'ajax_options', '{}')
         action = getattr(self, 'action', '')
@@ -91,10 +104,12 @@ class FormView(ElementaryView, SubstanceDFormView):
         return form, reqts
 
     def setviewid(self, viewid):
+        """Force viewid and formid together."""
         ElementaryView.setviewid(self, viewid)
         self.formid = viewid
 
     def get_view_requirements(self):
+        """The widgets' js/css merged with the view's own."""
         bindings = self.bind()
         bindings.update({
             'request': self.request,
@@ -109,14 +124,21 @@ class FormView(ElementaryView, SubstanceDFormView):
         return result
 
     def has_id(self, id):
+        """Match against ``viewid_formid``."""
         formid = self.viewid + '_' + self.formid
         return formid == id
 
     def remove_tmp_stores(self, form):
+        """Clear the upload temp-stores collected by the form."""
         for store in getattr(form, 'stores', []):
             store.clear()
 
     def update(self,):
+        """The POST round-trip: match ``__formid__``, find the pressed button,
+        validate (or bypass for ``Cancel``), run the behaviour with the
+        validated appstruct, or render the failure; otherwise show the form
+        (``default_data`` pre-fill).
+        """
         self.init_stepid(self.schema)
         form, reqts = self._build_form()
         form.formid = self.viewid + '_' + form.formid
@@ -187,13 +209,16 @@ class FormView(ElementaryView, SubstanceDFormView):
         return result
 
     def bind(self):
+        """Extra schema bindings (subclass hook)."""
         return {}
 
     def before(self, form):
+        """Pre-render form hook (applies ``chmod``)."""
         if self.chmod:
             self._chmod(form, self.chmod)
 
     def show(self, form):
+        """Render the form (pre-filled by ``default_data`` when available)."""
         result = self.default_data()
         body = None
         if result is None:
@@ -204,12 +229,15 @@ class FormView(ElementaryView, SubstanceDFormView):
         return self.adapt_item(body, form.formid)
 
     def default_data(self):
+        """Appstruct pre-filling the form (subclass hook)."""
         return None
 
     def _failure(self, e, form):
+        """Default failure: render the deform error form."""
         return self.adapt_item(e.render(), form.formid)
 
     def _get(self, form, node):
+        """Find a first-level form child by name."""
         for child in form.children:
             if child.name == node:
                 return child
@@ -217,6 +245,7 @@ class FormView(ElementaryView, SubstanceDFormView):
         return None
 
     def _chmod(self, form, mask):
+        """Apply the read-only mask (``[('field', 'r'), ...]``, recursive)."""
         for m in mask:
             node = self._get(form, m[0])
             if node is not None:
@@ -229,12 +258,15 @@ class FormView(ElementaryView, SubstanceDFormView):
 
 class FileUploadTempStore(FileUploadTempStoreOrigine):
 
+    """Upload temp-store with a preview URL and per-item cleanup."""
     def preview_url(self, uid):
+        """The ``@@preview_image_upload`` URL for ``uid``."""
         root = self.request.virtual_root
         return self.request.resource_url(
             root, '@@preview_image_upload', uid)
 
     def clear_item(self, uid):
+        """Drop one stored upload (session entry + temp file)."""
         data = self.session.get('substanced.tempstore', {})
         value = data.pop(uid, None)
         if value:
