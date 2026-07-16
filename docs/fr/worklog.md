@@ -61,3 +61,35 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   les hooks d'échec `<titre>_failure` par bouton, l'aller-retour de lot
   `__viewid__`/`__contextsoids__`, et la conjonction des transitions
   wizard interface/behavior.
+
+
+## 16/07/2026 — Phase 3 / M2
+
+- **pontus est vert sur Python 3.12 : 8 tests, 0 échec, 0 erreur**
+  (les 7 tests historiques plus le nouveau test de régression). Pile
+  encore plus moderne que la cible du plan : deform 3.0.1 et
+  colander 2.0 (tirés par substanced 1.0b1), Chameleon 4.6 — les
+  templates de widgets ont survécu à la passe de diff sans
+  modification.
+- Le reliquat py2 confirmé est réparé *avec son test*, comme le plan
+  l'exigeait : ``CallView.update`` indexait ``dict.items()`` dans sa
+  branche à coordonnée unique — inatteignable sur tout Python 3 —
+  ``test_CallView_single_coordinate`` l'exerce désormais (deux
+  contextes, exécution des deux enfants prouvée par
+  ``request.viewexecuted``). Le test emploie des objets frais : le
+  ``add`` de substanced 1.0b1 refuse le ré-ajout d'objets parentés,
+  les singletons de module ne peuvent plus être partagés entre tests.
+- Traversée de la pile moderne, chaque correction à une ligne de
+  fond : ``pyramid.compat.map_`` → ``map`` ; noms de
+  ``deform.compat`` shimés ; l'exigence ``'sortable'`` réenregistrée
+  (deform 3 a retiré la clé, livre toujours le script) ; l'include
+  ``pyramid_mailer.testing`` → utilitaire ``DummyMailer`` direct
+  (substanced enregistre désormais le mailer lui-même) ;
+  ``tm.annotate_user = false`` — **note pour M4** : pyramid_tm annote
+  l'utilisateur de la transaction avant la traversée et le groupfinder
+  de substanced lit ``request.context`` ; tout hôte de la pile moderne
+  a besoin de ce réglage.
+- Emballage bi-pile calqué sur M1 : `constraints-modern.txt`, tox
+  `py312`, job CI `py312-tests` (dace installé depuis git d'abord),
+  job legacy épinglé sur le tag `legacy-golden-master`. Le buildout de
+  KuneAgi épingle déjà pontus au SHA certifié.

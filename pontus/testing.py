@@ -37,6 +37,11 @@ class FunctionalTests(unittest.TestCase):
         dbpath = os.path.join( self.tmpdir, 'test.db')
         uri = 'file://' + dbpath
         settings = {'zodbconn.uri': uri,
+                    # pyramid_tm annotates the transaction with the user
+                    # *before* traversal; substanced 1.0b1's groupfinder
+                    # then reads request.context, which does not exist
+                    # yet. Hosts on the modern stack need this too (M4).
+                    'tm.annotate_user': 'false',
                     'substanced.secret': 'sosecret',
                     'substanced.initial_login': 'admin',
                     'substanced.initial_password': 'admin',
@@ -44,13 +49,19 @@ class FunctionalTests(unittest.TestCase):
                         'substanced',
                         'pyramid_chameleon',
                         'pyramid_layout',
-                        'pyramid_mailer.testing', # have to be after substanced to override the mailer
                         'pyramid_tm',
                         'dace',
                         'pontus',
         ]}
 
         app = main({}, **settings)
+        # The historical 'pyramid_mailer.testing' include (placed after
+        # substanced to override the mailer) now conflicts: substanced
+        # >= 1.0b1 registers request.mailer itself. Same override, done
+        # directly on the registry (Phase 3 / M2):
+        from pyramid_mailer.testing import DummyMailer
+        from pyramid_mailer.interfaces import IMailer
+        app.registry.registerUtility(DummyMailer(), IMailer)
         self.db = app.registry._zodb_databases['']
         request = DummyRequest()
         testing.setUp(registry=app.registry, request=request)

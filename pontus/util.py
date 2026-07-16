@@ -15,7 +15,7 @@ from zope.interface import providedBy
 
 from pyramid.interfaces import IViewClassifier, IView
 from pyramid.threadlocal import get_current_registry
-from pyramid.compat import map_
+map_ = map      # pyramid.compat.map_ (removed in pyramid 2) was the py2/3 alias
 
 
 def get_copy_fn(obj):

@@ -196,6 +196,45 @@ class TestPontusView(FunctionalTests):
     #    for x in range(1000):
     #        self.test_MultipleFormView(log=x) 
 
+    def test_CallView_single_coordinate(self):
+        """Phase 3 / M2 regression test.
+
+        ``CallView.update`` aggregated single-coordinate children through
+        ``dict.items()[0]``, which crashes on any Python 3: the branch
+        was unreachable since the py3 migration. This exercises it — two
+        contexts, one BasicView each, one coordinate, one item per child.
+        """
+        from pontus.view_operation import CallView
+        from dace.objectofcollaboration.object import Object
+        self.request.validationA = True
+        self.request.viewexecuted = []
+        # fresh objects: the module-level objectA/objectB singletons keep
+        # their __parent__ across tests, and substanced 1.0b1 refuses to
+        # re-add a parented object (1.0a1 was laxer)
+        obj_a = Object(title='call_a')
+        obj_b = Object(title='call_b')
+        self.app['call_a'] = obj_a
+        self.app['call_b'] = obj_b
+
+        class CallViewA(CallView):
+            views = ViewA
+            title = 'CallView A'
+            name = 'callviewa'
+
+            def contexts(self):
+                return [obj_a, obj_b]
+
+        view = CallViewA(self.app['runtime'], self.request)
+        result = view()
+        # both children executed through the repaired branch
+        self.assertEqual(self.request.viewexecuted,
+                         ['behaviorA', 'behaviorA'])
+        self.assertEqual(len(result['coordinates']), 1)
+        coordinate = next(iter(result['coordinates']))
+        self.assertEqual(len(result['coordinates'][coordinate]), 1)
+        body = result['coordinates'][coordinate][0]['body']
+        self.assertEqual(body.count("Hello_"), 2)
+
     def test_MergedFormsView(self):
         self.request.validationA = True
         self.request.validationB = True

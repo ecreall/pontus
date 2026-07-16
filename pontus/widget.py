@@ -35,10 +35,9 @@ from deform.widget import (
     CheckboxChoiceWidget as OriginCheckboxChoiceWidget,
     default_resource_registry
     )
-from deform.compat import (
-    string_types,
-    url_quote
-    )
+# deform 3 removed deform.compat; local py3 equivalents (Phase 3 / M2):
+string_types = (str,)
+from urllib.parse import quote as url_quote
 from substanced.file import FileUploadTempStore
 from substanced.util import get_oid
 
@@ -660,6 +659,10 @@ class Length(object):
                 raise Invalid(node, max_err)
 
 
+# deform 3 dropped the 'sortable' requirement key from its registry but
+# still ships the script; re-register the historical token (Phase 3 / M2):
+default_resource_registry.set_js_resources(
+    'sortable', None, 'deform:static/scripts/jquery-sortable.js')
 default_resource_registry.set_js_resources(
     'tinymce', None,
     'deform:static/tinymce/tinymce.min.js',

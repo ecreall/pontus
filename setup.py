@@ -14,13 +14,13 @@ requires = [
     ]
 
 setup(name='ecreall_pontus',
-      version='1.1.1.dev0',
+      version='2.0.0.dev0',
       description='An application programming interface built upon the Pyramid web framework and substanced application. It provides libraries which make it easy to manage complex and imbricated views. For that purpose, Pontus introduces the concept of operations on views.',
       long_description=README + '\n\n' +  CHANGES,
       long_description_content_type='text/markdown',
       classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.12",
         "Framework :: Pyramid",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",

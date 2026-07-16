@@ -57,3 +57,33 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   `viewid`, the `Cancel` bypass, the per-button `<title>_failure`
   hooks, the `__viewid__`/`__contextsoids__` batch round-trip, and the
   wizard UI/behaviour transition conjunction.
+
+
+## 2026-07-16 — Phase 3 / M2
+
+- **pontus is green on Python 3.12: 8 tests, 0 failures, 0 errors**
+  (the 7 historical tests plus the new regression test). Stack even
+  more modern than the plan's target: deform 3.0.1 and colander 2.0
+  (pulled by substanced 1.0b1), Chameleon 4.6 — the widget templates
+  survived the diff pass without changes.
+- The confirmed py2 remnant is repaired *with its test*, as the plan
+  required: ``CallView.update`` subscripted ``dict.items()`` in its
+  single-coordinate branch — unreachable on any Python 3 —
+  ``test_CallView_single_coordinate`` now exercises it (two contexts,
+  both children proven executed through ``request.viewexecuted``). The
+  test uses fresh objects: substanced 1.0b1's ``add`` refuses parented
+  re-adds, so the module-level singletons cannot be shared across
+  tests any more.
+- Traversal of the modern stack, each fix one line deep:
+  ``pyramid.compat.map_`` → ``map``; ``deform.compat`` names shimmed;
+  the ``'sortable'`` requirement re-registered (deform 3 dropped the
+  key, still ships the script); the ``pyramid_mailer.testing`` include
+  → direct ``DummyMailer`` utility (substanced now registers the
+  mailer itself); ``tm.annotate_user = false`` — **note for M4**:
+  pyramid_tm annotates the transaction user before traversal and
+  substanced's groupfinder reads ``request.context``; every host on
+  the modern stack needs this setting.
+- Dual-stack packaging mirrored from M1: `constraints-modern.txt`,
+  tox `py312`, CI `py312-tests` job (dace installed from git first),
+  legacy job pinned to the `legacy-golden-master` tag. KuneAgi's
+  buildout already pins pontus at the certified SHA.

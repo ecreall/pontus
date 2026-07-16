@@ -1,0 +1,65 @@
+# Known-good modern pins for the Python 3.12 stack (Phase 3, M2).
+# Frozen from the first fully green run (8/8) on 2026-07-16.
+# ecreall_dace comes from git (tox/CI install it explicitly):
+#   ecreall_dace @ git+https://github.com/michaellaunay/dace.git
+#   (pin to the M1 sha once it lands on master)
+BTrees==6.4
+Chameleon==4.6.0
+PasteDeploy==3.1.0
+PyYAML==6.0.3
+Unidecode==1.4.0
+WebOb==1.8.10
+WebTest==3.0.7
+ZConfig==4.3
+ZEO==6.2
+ZODB==6.3
+bcrypt==5.0.0
+beautifulsoup4==4.15.0
+cffi==2.1.0
+colander==2.0
+deform==3.0.1
+hupper==1.12.1
+hypatia==0.5
+iso8601==2.1.0
+mock==5.2.0
+peppercorn==0.6
+persistent==6.7
+pillow==12.3.0
+plaster-pastedeploy==1.0.1
+plaster==1.1.2
+pycparser==3.0
+pyramid-mailer==0.15.1
+pyramid-zodbconn==0.8.1
+pyramid==1.10.8
+pyramid_chameleon==0.3
+pyramid_layout==1.0
+pyramid_tm==2.6
+python-magic==0.4.27
+pytz==2026.2
+pyzmq==27.1.0
+repoze-sendmail==4.5
+setuptools==80.10.2
+soupsieve==2.8.4
+statsd==4.0.1
+substanced @ git+https://github.com/Pylons/substanced.git@f4eca94ae37aef342d3683161f73aef84db453db
+transaction==5.1
+translationstring==1.4
+typing_extensions==4.16.0
+venusian==3.1.1
+waitress==3.0.2
+walkabout==0.10
+zc.lockfile==4.0
+zdaemon==5.2.1
+zodbpickle==4.4
+zodburi==3.0.0
+zope.component==7.1
+zope.copy==6.0
+zope.deferredimport==6.1.1
+zope.deprecation==6.0
+zope.event==6.2
+zope.exceptions==6.0
+zope.hookable==8.2
+zope.interface==8.5
+zope.processlifetime==4.0
+zope.proxy==7.2
+zope.testrunner==8.2

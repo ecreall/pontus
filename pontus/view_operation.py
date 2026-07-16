@@ -721,9 +721,14 @@ class CallView(MultipleContextsOperation):
 
             global_result = merge_dicts(view_result, global_result)
             if len(view_result['coordinates']) == 1 and \
-               len(view_result['coordinates'].items()[0][1]) == 1:
-                coordinate = view_result['coordinates'].items()[0][0]
-                item = view_result['coordinates'].items()[0][1][0]
+               len(next(iter(view_result['coordinates'].values()))) == 1:
+                # Phase 3 / M2: this branch subscripted dict.items(),
+                # which crashes on any Python 3 — it was therefore
+                # unreachable since the py3 migration. Regression test:
+                # test_CallView_single_coordinate.
+                coordinate, values = next(
+                    iter(view_result['coordinates'].items()))
+                item = values[0]
                 if coordinate in result:
                     result[coordinate].append(item)
                 else:

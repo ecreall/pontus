@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+### Phase 3 / M2 — 2026-07-16 (Python 3.12)
+
+- Python 3.12 support on the modern stack (dace 2.0.0.dev0, substanced
+  1.0b1, deform 3.0.1, colander 2.0, Chameleon 4.6) — 8/8 tests green;
+  see `constraints-modern.txt`. Version bumped to 2.0.0.dev0.
+- The unreachable py2 branch of ``CallView.update`` (it subscripted
+  ``dict.items()``, crashing on any Python 3) is repaired and covered
+  by a new regression test, ``test_CallView_single_coordinate``.
+- deform 3 compatibility: local shims for the removed ``deform.compat``
+  names; the historical ``'sortable'`` widget requirement re-registered
+  onto the script deform still ships.
+- Modern-stack compatibility: ``pyramid.compat.map_`` shim; the
+  ``pyramid_mailer.testing`` include (which now conflicts with
+  substanced's own mailer registration) replaced by registering the
+  ``DummyMailer`` utility directly; ``tm.annotate_user = false`` in the
+  harness — pyramid_tm reads ``authenticated_userid`` before traversal
+  and substanced 1.0b1's groupfinder needs ``request.context`` (hosts
+  on the modern stack need the same setting).
+- Python 3.6 support moves to the ``legacy-golden-master`` tag,
+  consumed by the pinned KuneAgi golden master and the legacy CI job.
+
+
 ### Fork maintenance — 2026-07-13 (`michaellaunay/pontus`)
 
 - Repository forked from `ecreall/pontus`; maintenance resumed by Michaël Launay (Logikascium). Ecréall's intellectual property was acquired by Logikascium in 2024; license unchanged (AGPL v3+).
