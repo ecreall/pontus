@@ -114,3 +114,20 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   accolades de ``${min}`` et laisse le dollar) ; les templates lisent
   ``field.widget.*`` donc serialize exige le câblage canonique
   widget-sur-schéma.
+
+- **T2b : la machinerie du Wizard est épinglée — et elle cache DEUX
+  bugs latents, immortalisés tous deux.** `Wizard.update()` n'a jamais
+  pu tourner : avec des steps simples la session n'est jamais écrite
+  (`init_stepid` appartient aux chemins Form/MultipleView), donc
+  update parcourt toute la chaîne et meurt sur le `__delitem__` de
+  session final et inconditionnel (KeyError) ; session amorcée, la
+  branche de reprise lit `viewsinstances` — attribut qu'aucun chemin
+  de code ne crée — et lève AttributeError. La base à 51 % en
+  témoignait : ces lignes n'avaient jamais tourné nulle part. Tout ce
+  qui entoure update est épinglé vert : construction du graphe
+  (start/end synthétiques, ids de transitions), topologie branchée,
+  conditions de `Transition.validate`, calcul de la barre de
+  progression et son rendu, `get_view_requirements` suivant la
+  session, et la redirection `success` (`mgmt_path` stubé —
+  méthode-requête substanced). 10 tests ; view_operation.py
+  **51 % → 68 %** ; total pontus **75 %** ; suite 29/29.

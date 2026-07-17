@@ -105,3 +105,20 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   half-interpolated messages ('$3'/'$5': str.format eats the braces of
   ``${min}`` and leaves the dollar); templates read ``field.widget.*``
   so serialize requires the canonical schema-widget wiring.
+
+- **T2b: the Wizard machinery is pinned — and it hides TWO latent
+  bugs, both immortalised.** `Wizard.update()` has never been able to
+  run: with plain steps the session is never written (`init_stepid`
+  belongs to the Form/MultipleView paths), so update walks the whole
+  chain and dies on the final unconditional session `__delitem__`
+  (KeyError); with a primed session, the resume branch reads
+  `viewsinstances` — an attribute no code path ever creates — and
+  raises AttributeError. The 51 % baseline agreed: those lines had
+  never run anywhere. Everything around update is pinned green:
+  graph construction (synthetic start/end, transition ids), the
+  branch topology, `Transition.validate` conditions, the
+  progression-bar math and its rendering, `get_view_requirements`
+  following the session, and the `success` redirect (`mgmt_path`
+  stubbed — a substanced request-method). 10 tests;
+  view_operation.py **51 % → 68 %**; pontus total **75 %**;
+  suite 29/29.
