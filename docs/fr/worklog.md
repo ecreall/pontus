@@ -131,3 +131,21 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   session, et la redirection `success` (`mgmt_path` stubé —
   méthode-requête substanced). 10 tests ; view_operation.py
   **51 % → 68 %** ; total pontus **75 %** ; suite 29/29.
+
+- **T2c : le patron batch `CallSelectedContextsViews` est épinglé — et
+  le bug latent n°3 rejoint la collection.** Une sélection VALIDE par
+  bouton meurt sur `validated['items'].values()` : le `colander.Set`
+  moderne déserialise en set (la bibliothèque d'époque répondait
+  vraisemblablement un dict) — le chemin de sélection directe n'a donc
+  jamais pu aboutir sur cette pile ; seul le round-trip `__viewid__`
+  vit, et il est épinglé de bout en bout (le behavior cible s'exécute
+  une fois par contexte sélectionné, le payload vide lève `ViewError`,
+  et l'analyse fragile de `':'` meurt sur `int('')`). Épinglés aussi :
+  le routage de construction (CallView vs MergedFormsView par
+  `IFormView`, clés soulignées, nommage des boutons deform), le
+  protocole contexts()-est-appelé, la mutation de titre AU NIVEAU
+  CLASSE des opérations partagées (design smell — restaurée en
+  tearDown), le rendu du formulaire de sélection (snippets Structure,
+  échappés sinon), et la branche d'échec de validation (drapeau
+  `isactive`). 10 tests ; view_operation.py **68 % → 79 %** ; total
+  pontus **79 %** (63 % au départ de la campagne) ; suite 39/39.

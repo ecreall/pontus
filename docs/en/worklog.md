@@ -122,3 +122,20 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   stubbed — a substanced request-method). 10 tests;
   view_operation.py **51 % → 68 %**; pontus total **75 %**;
   suite 29/29.
+
+- **T2c: the `CallSelectedContextsViews` batch pattern is pinned — and
+  latent bug #3 joins the collection.** A VALID button selection dies
+  on `validated['items'].values()`: modern `colander.Set` deserializes
+  to a set (the era library plausibly answered a dict) — the
+  direct-selection path has therefore never completed on this stack;
+  only the `__viewid__` round-trip works, and it is pinned end to end
+  (the target behaviour executes once per selected context, the empty
+  payload raises `ViewError`, and the brittle `':'` parsing dies on
+  `int('')`). Also pinned: construction routing (CallView vs
+  MergedFormsView by `IFormView`, underscored keys, deform button
+  naming), the contexts()-is-called protocol, the class-level title
+  mutation of the shared operation classes (design smell — restored in
+  tearDown), the selection form rendering (Structure snippets, escaped
+  otherwise), and the validation-failure branch (`isactive` flag).
+  10 tests; view_operation.py **68 % → 79 %**; pontus total **79 %**
+  (was 63 % at campaign start); suite 39/39.
