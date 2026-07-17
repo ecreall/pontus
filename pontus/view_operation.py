@@ -811,12 +811,15 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
         """One CallView/MergedFormsView per target view, keyed by title."""
         for view in self.views:
             name = re.sub(r'\s', '_', view.title)
-            multiplecontextsview_class = CallView
+            base_class = CallView
             if IFormView.implementedBy(view):
-                multiplecontextsview_class = MergedFormsView
+                base_class = MergedFormsView
 
-            multiplecontextsview_class.title = view.title
-            multiplecontextsview_class.views = view
+            # a per-target subclass: the shared operation classes are
+            # no longer mutated
+            multiplecontextsview_class = type(
+                base_class.__name__, (base_class,),
+                {'title': view.title, 'views': view})
             view_instance = multiplecontextsview_class(self.context, 
                                             self.request, self.parent,
                                             self.wizard, self.stepid)
@@ -864,7 +867,11 @@ class CallSelectedContextsViews(FormView, MultipleContextsViewsOperation):
                     try:
                         controls = self.request.POST.items()
                         validated = form.validate(controls)
-                        self.validated_items = list(validated['items'].values())
+                        validated_items = validated['items']
+                        if hasattr(validated_items, 'values'):
+                            # the era colander answered a mapping
+                            validated_items = validated_items.values()
+                        self.validated_items = list(validated_items)
                     except deform.exception.ValidationFailure as e:
                         fail = getattr(self, '%s_failure' % button.name, None)
                         if fail is None:
@@ -1164,7 +1171,9 @@ class Wizard(MultipleViewsOperation):
         #    self.currentsteps = [self.viewsinstances[self.request.POST[stepidkey]]]
 
         if stepidkey in self.request.session:
-            self.currentsteps = [self.viewsinstances[self.request.session.pop(stepidkey)]]
+            # resume from the stored step (mirrors the constructor)
+            self.currentsteps = [
+                self.nodes[self.request.session.pop(stepidkey)]]
 
         result = None
         finished_successfully = False
@@ -1201,7 +1210,9 @@ class Wizard(MultipleViewsOperation):
            (viewinstance._outgoing[0].target == self.endnode):
             self.finished_successfully = True
             viewinstance.after_update()
-            self.request.session.__delitem__(stepidkey)
+            # plain steps never write the key; the resume pop may have
+            # consumed it: clean up tolerantly
+            self.request.session.pop(stepidkey, None)
             if viewinstance.isexecutable:
                 return self.success()
 

@@ -1,6 +1,20 @@
 # Changelog
 
 ## Unreleased
+### Fix — 2026-07-17: the three latent bugs are repaired
+- `Wizard.update()` runs on both of its paths: the resume branch reads
+  `self.nodes` (the constructor's mirror) instead of the phantom
+  `viewsinstances`, and the final cleanup is a tolerant
+  `session.pop(key, None)`.
+- `CallSelectedContextsViews`: the validated button selection is
+  consumed as a set OR a mapping — the direct-selection path completes
+  on both stacks.
+- `_init_children` builds a per-target SUBCLASS of the operation
+  classes: the shared `CallView`/`MergedFormsView` are no longer
+  mutated.
+- The pinning tests were flipped in conscience and now guard the
+  repairs; `docs/en/known-issues.md` becomes the historical record.
+
 ### Characterisation campaign T2/T2b/T2c — 2026-07-16
 - The suite grows from 8 to 39 tests (coverage 63 % → 79 %;
   `widget.py` 38 % → 75 %, `view_operation.py` 51 % → 79 %).

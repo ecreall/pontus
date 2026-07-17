@@ -1,10 +1,15 @@
-# Problèmes connus (épinglés par la suite de tests)
+# Problèmes connus — RÉSOLUS (mémoire historique)
 
-*Découverts pendant la campagne de caractérisation de juillet 2026.
-Chaque problème est immortalisé par un test qui passe AUJOURD'HUI en
-affirmant le comportement cassé — toute correction doit retourner ce
-test en conscience. Version anglaise :
-[`../en/known-issues.md`](../en/known-issues.md).*
+*Découverts pendant la campagne de caractérisation de juillet 2026
+et **RÉSOLUS le 17/07/2026** : les trois correctifs ont atterri
+ensemble et leurs tests d'épinglage ont été retournés en conscience —
+chacun garde désormais la réparation
+(`test_update_walks_the_chain_to_success`,
+`test_update_primed_resumes_and_completes`,
+`test_button_post_valid_selection`,
+`test_construction_leaves_the_operation_classes_untouched`). Les
+chaînes causales ci-dessous sont conservées comme mémoire historique.
+Version anglaise : [`../en/known-issues.md`](../en/known-issues.md).*
 
 ## 1. `Wizard.update()` ne peut pas tourner (deux modes d'échec)
 

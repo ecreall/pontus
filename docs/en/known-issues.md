@@ -1,9 +1,14 @@
-# Known issues (pinned by the test suite)
+# Known issues — RESOLVED (historical record)
 
-*Discovered during the 2026-07 characterisation campaign. Each issue
-is immortalised by a test that passes TODAY by asserting the broken
-behaviour — any fix must flip that test consciously. French version:
-[`../fr/known-issues.md`](../fr/known-issues.md).*
+*Discovered during the 2026-07 characterisation campaign and
+**RESOLVED on 2026-07-17**: the three fixes landed together and their
+pinning tests were flipped in conscience — each now guards the repair
+(`test_update_walks_the_chain_to_success`,
+`test_update_primed_resumes_and_completes`,
+`test_button_post_valid_selection`,
+`test_construction_leaves_the_operation_classes_untouched`). The
+causal chains below are kept as the historical record. French
+version: [`../fr/known-issues.md`](../fr/known-issues.md).*
 
 ## 1. `Wizard.update()` cannot run (two failure modes)
 

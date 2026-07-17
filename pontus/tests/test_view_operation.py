@@ -105,21 +105,29 @@ class TestWizard(FunctionalTests):
                       True)
         self.assertIs(wizard.transitionsinstances['a->c'].isdefault, True)
 
-    def test_update_unprimed_dies_on_final_cleanup(self):
-        """No session key: the chain WALKS to the end, then the final
-        unconditional ``session.__delitem__`` raises ``KeyError`` —
-        plain steps never wrote the key. Latent bug #1, pinned.
+    def test_update_walks_the_chain_to_success(self):
+        """FIXED (2026-07-17, was latent bug #1): the final cleanup is
+        now tolerant (``session.pop(key, None)``) — the chain walks to
+        the end and the wizard closes on the success redirect.
         """
         wizard = ChainWizard(self.app, self.request)
-        self.assertRaises(KeyError, wizard.update)
+        result = wizard.update()
+        self.assertIs(result['view'], wizard.nodes['b'])
+        self.assertIs(wizard.finished_successfully, True)
+        self.assertNotIn(STEPID + wizard.viewid, self.request.session)
 
-    def test_update_primed_resume_is_broken(self):
-        """Primed session: the resume branch reads the nonexistent
-        ``viewsinstances`` and raises. Latent bug #2, pinned.
+    def test_update_primed_resumes_and_completes(self):
+        """FIXED (2026-07-17, was latent bug #2): the resume branch now
+        reads ``self.nodes`` — the mirror of the constructor — and the
+        primed wizard resumes from the stored step to completion.
         """
         wizard = ChainWizard(self.app, self.request)
         self.request.session[STEPID + wizard.viewid] = 'a'
-        self.assertRaises(AttributeError, wizard.update)
+        result = wizard.update()
+        # resumes at 'a' and walks to the terminal step
+        self.assertIs(result['view'], wizard.nodes['b'])
+        self.assertIs(wizard.finished_successfully, True)
+        self.assertNotIn(STEPID + wizard.viewid, self.request.session)
 
     def test_progression_math(self):
         wizard = ChainWizard(self.app, self.request)

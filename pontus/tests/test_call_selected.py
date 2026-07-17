@@ -12,9 +12,9 @@ Characterisation in the functional harness. Pinned contracts:
   for basic views, ``MergedFormsView`` when ``IFormView``), keyed by
   the underscored title, with one deform button per target
   (name = underscored title, title = capitalised);
-- ``_init_children`` MUTATES the shared operation CLASSES
-  (``CallView.title``/``views`` are overwritten globally) — a design
-  smell pinned here and restored in ``tearDown``;
+- ``_init_children`` builds a per-target SUBCLASS of the operation
+  classes (fixed 2026-07-17: the shared classes are no longer
+  mutated);
 - the base ``ViewOperation`` protocol CALLS ``contexts()`` and stores
   the result on the instance (a method, not a property);
 - the selection widget renders each context through ``get_view``;
@@ -23,7 +23,9 @@ Characterisation in the functional harness. Pinned contracts:
 - the ``__viewid__`` round-trip delegates end to end: the target
   behaviour executes once per selected context;
 - a malformed selection post lands in the validation-failure branch:
-  nothing executes and the re-rendered form is flagged ``isactive``.
+  nothing executes and the re-rendered form is flagged ``isactive``;
+- a VALID button selection completes end to end (fixed 2026-07-17:
+  the validated set is consumed as such).
 """
 from dace.objectofcollaboration.object import Object
 
@@ -57,7 +59,6 @@ class TestCallSelectedContextsViews(FunctionalTests):
 
     def setUp(self):
         super(TestCallSelectedContextsViews, self).setUp()
-        self._saved_titles = (CallView.title, MergedFormsView.title)
         self.request.validationA = True
         self.request.viewexecuted = []
         self.obj_a = SelObject(title='sel_a')
@@ -65,11 +66,6 @@ class TestCallSelectedContextsViews(FunctionalTests):
         self.app['sel_a'] = self.obj_a
         self.app['sel_b'] = self.obj_b
         self.request._batch_contexts = [self.obj_a, self.obj_b]
-
-    def tearDown(self):
-        # _init_children mutates the shared classes: restore them
-        CallView.title, MergedFormsView.title = self._saved_titles
-        super(TestCallSelectedContextsViews, self).tearDown()
 
     def test_construction_routes_and_buttons(self):
         batch = Batch(self.app, self.request)
@@ -81,11 +77,19 @@ class TestCallSelectedContextsViews(FunctionalTests):
         self.assertEqual([(b.name, b.title) for b in form.buttons],
                          [('ViewA', 'Viewa'), ('FormView_A', 'Formview a')])
 
-    def test_construction_mutates_the_operation_classes(self):
-        Batch(self.app, self.request)
-        # pinned design smell: class-level overwrite of shared classes
-        self.assertEqual(CallView.title, 'ViewA')
-        self.assertEqual(MergedFormsView.title, 'FormView A')
+    def test_construction_leaves_the_operation_classes_untouched(self):
+        """FIXED (2026-07-17, was the pinned design smell): the
+        children are per-target subclasses — the shared operation
+        classes are no longer mutated."""
+        titles_before = (CallView.title, MergedFormsView.title)
+        batch = Batch(self.app, self.request)
+        self.assertEqual((CallView.title, MergedFormsView.title),
+                         titles_before)
+        # the children still carry their target configuration
+        self.assertEqual(batch.validated_children['ViewA'].title,
+                         'ViewA')
+        self.assertEqual(batch.validated_children['FormView_A'].title,
+                         'FormView A')
 
     def test_contexts_protocol_is_a_call(self):
         batch = Batch(self.app, self.request)
@@ -149,14 +153,10 @@ class TestCallSelectedContextsViews(FunctionalTests):
         item = result['coordinates'][batch.coordinates][0]
         self.assertIs(item.get('isactive'), True)
 
-    def test_button_post_valid_selection_hits_the_set_bug(self):
-        """Latent bug #3, pinned: a VALID button selection dies on
-        ``validated['items'].values()`` — modern ``colander.Set``
-        deserializes to a set (the era library plausibly answered a
-        dict, hence ``.values()``). The direct-selection path has
-        therefore never completed on this stack; only the
-        ``__viewid__`` round-trip works. A fix must flip this test.
-        """
+    def test_button_post_valid_selection(self):
+        """FIXED (2026-07-17, was latent bug #3): the validated
+        selection is consumed as a set OR a mapping — the direct
+        button path now completes end to end."""
         batch = Batch(self.app, self.request)
         form, _ = batch._build_form()
         form.formid = batch.viewid + '_' + form.formid
@@ -168,8 +168,11 @@ class TestCallSelectedContextsViews(FunctionalTests):
             'checkbox': str(get_oid(self.obj_a)),
             '__end__': 'items:sequence',
         }
-        self.assertRaises(AttributeError, batch.update)
-        self.assertEqual(self.request.viewexecuted, [])
+        result = batch.update()
+        self.assertEqual(batch.validated_items, [self.obj_a])
+        self.assertEqual(self.request.viewexecuted, ['behaviorA'])
+        self.assertIs(batch.finished_successfully, True)
+        self.assertIsInstance(result, dict)
 
     def test_getcontextsoids_format(self):
         batch = Batch(self.app, self.request)

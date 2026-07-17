@@ -144,3 +144,11 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   the campaign figures; CHANGES consolidates T2/T2b/T2c; the three
   latent bugs get their bilingual `known-issues.md` (causal chains and
   the tests any fix must flip); architecture points to it.
+
+- **The three latent bugs are repaired, their tests flipped in
+  conscience.** Wizard.update runs on both paths (resume via
+  `self.nodes`, tolerant final `session.pop`); the validated button
+  selection is consumed as set or mapping (the direct path completes
+  on both stacks); `_init_children` builds per-target subclasses (no
+  shared-class mutation). Suite 39/39; known-issues.md becomes the
+  historical record.

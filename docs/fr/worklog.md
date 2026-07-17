@@ -155,3 +155,11 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   les trois bugs latents reçoivent leur `known-issues.md` bilingue
   (chaînes causales et tests à retourner par toute correction) ;
   l'architecture pointe dessus.
+
+- **Les trois bugs latents sont réparés, leurs tests retournés en
+  conscience.** Wizard.update tourne sur ses deux chemins (reprise via
+  `self.nodes`, `session.pop` final tolérant) ; la sélection validée
+  par bouton se consomme en set ou en mapping (le chemin direct
+  aboutit sur les deux piles) ; `_init_children` bâtit des
+  sous-classes par cible (plus de mutation des classes partagées).
+  Suite 39/39 ; known-issues.md devient la mémoire historique.

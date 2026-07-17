@@ -11,7 +11,8 @@ certified legacy stack (tag `legacy-golden-master`) and on
 **Python 3.12** (deform 3, colander 2, Chameleon 4 — phase 3 / M2).
 The characterisation campaign brought the suite from 8 to **39 tests**
 (coverage 63 % → 79 %) and uncovered **three latent bugs** in the
-composition machinery, pinned as-is: see
+composition machinery — **all three fixed on 2026-07-17**, their
+pinning tests flipped in conscience: see
 [`docs/en/known-issues.md`](docs/en/known-issues.md), the
 [roadmap](#roadmap--planned-updates) below and `CHANGES.md`.
 
