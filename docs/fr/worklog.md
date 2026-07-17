@@ -93,3 +93,24 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   `py312`, job CI `py312-tests` (dace installé depuis git d'abord),
   job legacy épinglé sur le tag `legacy-golden-master`. Le buildout de
   KuneAgi épingle déjà pontus au SHA certifié.
+
+- **T2 (premier lot) : la ménagerie de widgets est épinglée** — 11
+  tests dans le harnais fonctionnel (les oids se résolvent par
+  l'objectmap, le renderer deform est câblé par l'app). Couverture :
+  widget.py **38 % → 75 %** ; total pontus 63 % → 70 % ; suite 19/19.
+  Contrats épinglés : la famille Select résout les oid-chaînes postées
+  en OBJETS (les autres chaînes passent ; ``multiple=True`` est
+  obligatoire en deform 3 pour les listes ; liste vide → ``null``) ;
+  RadioChoice simple prend le PREMIER d'une liste postée ;
+  CheckboxChoice répond toujours un tuple ; FileWidget collecte son
+  tmpstore sur le formulaire racine et répond
+  ``{'__objectoid__': oid}`` quand seule la référence est postée ;
+  les flottants de recadrage d'ImageWidget ont pour défauts x/y 10.0,
+  r 0.0, aires 100.0 ; SequenceWidget conserve les sous-champs
+  parentés, et une faute de niveau widget chez un enfant SE PROPAGE
+  telle quelle (pas d'agrégation sur ce chemin deform 3 —
+  ``sequence_fields`` ne garde que les succès) ; ``Length`` lève des
+  messages semi-interpolés ('$3'/'$5' : str.format mange les
+  accolades de ``${min}`` et laisse le dollar) ; les templates lisent
+  ``field.widget.*`` donc serialize exige le câblage canonique
+  widget-sur-schéma.

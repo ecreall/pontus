@@ -21,3 +21,7 @@ var/
 # git apply / merge leftovers
 *.rej
 *.orig
+
+# coverage artifacts
+.coverage
+htmlcov/

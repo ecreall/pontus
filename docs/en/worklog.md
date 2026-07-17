@@ -87,3 +87,21 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   tox `py312`, CI `py312-tests` job (dace installed from git first),
   legacy job pinned to the `legacy-golden-master` tag. KuneAgi's
   buildout already pins pontus at the certified SHA.
+
+- **T2 (first batch): the widget menagerie is pinned** — 11 tests in
+  the functional harness (oids resolve through the objectmap, the
+  deform renderer is app-wired). Coverage: widget.py **38 % → 75 %**;
+  pontus total 63 % → 70 %; suite 19/19. Pinned contracts: the Select
+  family resolves posted oid-strings to OBJECTS (other strings pass
+  through; ``multiple=True`` is deform-3-mandatory for list pstructs;
+  an empty list is ``null``); single RadioChoice takes the FIRST of a
+  posted list; CheckboxChoice always answers a tuple; FileWidget
+  collects its tmpstore on the root form and answers
+  ``{'__objectoid__': oid}`` when only the reference was posted;
+  ImageWidget's crop floats default to x/y 10.0, r 0.0, areas 100.0;
+  SequenceWidget keeps parented subfields, and a widget-level child
+  failure PROPAGATES as-is (no aggregation on this deform-3 path —
+  ``sequence_fields`` keeps only the successes); ``Length`` raises
+  half-interpolated messages ('$3'/'$5': str.format eats the braces of
+  ``${min}`` and leaves the dollar); templates read ``field.widget.*``
+  so serialize requires the canonical schema-widget wiring.
