@@ -146,3 +146,10 @@ La liaison *classe d'action → classe de vue* est déclarée par l'**applicatio
 | widgets conscients des oids et ressources | `widget.py` |
 | fichiers, images, variantes | `file/` |
 | dérivation de schémas | `schema.py` |
+
+## Contrats testés et problèmes connus (07/2026)
+
+La campagne de caractérisation a épinglé les contrats des widgets et
+la machinerie de composition (39 tests, couverture 79 %). Trois bugs
+latents de `view_operation.py` sont documentés — comportement épinglé
+tel quel — dans [`known-issues.md`](known-issues.md).

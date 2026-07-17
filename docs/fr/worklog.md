@@ -149,3 +149,9 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   échappés sinon), et la branche d'échec de validation (drapeau
   `isactive`). 10 tests ; view_operation.py **68 % → 79 %** ; total
   pontus **79 %** (63 % au départ de la campagne) ; suite 39/39.
+
+- **Rafraîchissement documentaire.** Le README énonce la réalité
+  bi-pile et les chiffres de campagne ; CHANGES consolide T2/T2b/T2c ;
+  les trois bugs latents reçoivent leur `known-issues.md` bilingue
+  (chaînes causales et tests à retourner par toute correction) ;
+  l'architecture pointe dessus.

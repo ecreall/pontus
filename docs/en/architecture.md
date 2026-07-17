@@ -146,3 +146,10 @@ The binding *action class → view class* is declared by the **host application*
 | oid-aware widgets & resources | `widget.py` |
 | files, images, variants | `file/` |
 | schema derivation | `schema.py` |
+
+## Tested contracts and known issues (2026-07)
+
+The characterisation campaign pinned the widget contracts and the
+composition machinery (39 tests, coverage 79 %). Three latent bugs in
+`view_operation.py` are documented — behaviour pinned as-is — in
+[`known-issues.md`](known-issues.md).

@@ -6,7 +6,14 @@ Pontus is an application programming interface built upon the [Pyramid](https://
 
 This repository is a **maintained fork** of [`ecreall/pontus`](https://github.com/ecreall/pontus) (original development by Ecréall, 2014–2018), forked in July 2026 and maintained by Michaël Launay ([Logikascium](https://github.com/michaellaunay)). Ecréall's intellectual property was acquired by Logikascium in 2024; the license is unchanged: **AGPL v3+**.
 
-This fork is part of the modernisation effort of the [Nova-Ideo](https://github.com/ecreall/nova-ideo) / [KuneAgi](https://github.com/ecreall/KuneAgi) participatory-innovation platform. The `master` branch currently reflects the **legacy state** of the library (Python 3.6-era stack); see the [roadmap](#roadmap--planned-updates) below and `CHANGES.md`.
+This fork is part of the modernisation effort of the [Nova-Ideo](https://github.com/ecreall/nova-ideo) / [KuneAgi](https://github.com/ecreall/KuneAgi) participatory-innovation platform. The `master` branch is **dual-stack**: the library runs on the
+certified legacy stack (tag `legacy-golden-master`) and on
+**Python 3.12** (deform 3, colander 2, Chameleon 4 — phase 3 / M2).
+The characterisation campaign brought the suite from 8 to **39 tests**
+(coverage 63 % → 79 %) and uncovered **three latent bugs** in the
+composition machinery, pinned as-is: see
+[`docs/en/known-issues.md`](docs/en/known-issues.md), the
+[roadmap](#roadmap--planned-updates) below and `CHANGES.md`.
 
 ## Features
 

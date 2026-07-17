@@ -1,6 +1,19 @@
 # Changelog
 
 ## Unreleased
+### Characterisation campaign T2/T2b/T2c — 2026-07-16
+- The suite grows from 8 to 39 tests (coverage 63 % → 79 %;
+  `widget.py` 38 % → 75 %, `view_operation.py` 51 % → 79 %).
+- Widget contracts pinned (oid resolution to objects, deform-3
+  `multiple=True` requirement, tmpstore collection on the root form,
+  crop defaults, half-interpolated `Length` messages, child-failure
+  propagation in sequences).
+- **Three latent bugs discovered and pinned as-is** (their tests must
+  be flipped consciously by any fix) — see `docs/en/known-issues.md`:
+  `Wizard.update()` broken on both of its paths, and the
+  `CallSelectedContextsViews` direct button selection dying on
+  `set.values()`.
+
 
 ### Phase 3 / M2 — 2026-07-16 (Python 3.12)
 

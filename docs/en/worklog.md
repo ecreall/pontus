@@ -139,3 +139,8 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   otherwise), and the validation-failure branch (`isactive` flag).
   10 tests; view_operation.py **68 % → 79 %**; pontus total **79 %**
   (was 63 % at campaign start); suite 39/39.
+
+- **Documentation refresh.** README states the dual-stack reality and
+  the campaign figures; CHANGES consolidates T2/T2b/T2c; the three
+  latent bugs get their bilingual `known-issues.md` (causal chains and
+  the tests any fix must flip); architecture points to it.
