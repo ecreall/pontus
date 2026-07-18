@@ -14,10 +14,10 @@ IndexViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
                         u"Certaines conditions ne sont pas encore satisfaites."]
 IndexViewErrorSolutions = [u"Contactez l'administrateur..."]
 
-MutltipleViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour accéder à l'ensemble des informations demandées."
-MutltipleViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
+MultipleViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour accéder à l'ensemble des informations demandées."
+MultipleViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
                             u"Certaines conditions ne sont pas encore satisfaites."]
-MutltipleViewErrorSolutions = [u"Contactez l'administrateur..."]
+MultipleViewErrorSolutions = [u"Contactez l'administrateur..."]
 
 CallViewErrorPrincipalmessage = u"Vous n'avez pas les droits suffisants pour appliquer l'action suivante aux informations demandées."
 CallViewErrorCildrenNotValidatedmessage = u"Certaines informations n'ont pas été prises en compte!"
@@ -30,3 +30,8 @@ BehaviorViewErrorCauses = [u"Vous ne disposez pas des rôles nécessaires.",
                         u"Certaines conditions ne sont pas encore satisfaites.",
                         u"L'action est vérouiée par un autre utilisateur."]
 BehaviorViewErrorSolutions = [u"Contactez l'administrateur..."]
+
+# Backward-compatibility aliases (historical typos, renamed 2026-07-17)
+MutltipleViewErrorPrincipalmessage = MultipleViewErrorPrincipalmessage
+MutltipleViewErrorCauses = MultipleViewErrorCauses
+MutltipleViewErrorSolutions = MultipleViewErrorSolutions

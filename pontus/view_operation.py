@@ -39,8 +39,8 @@ from pontus.interfaces import IFormView
 from pontus.resources import (
         CallViewErrorPrincipalmessage,
         CallViewViewErrorCauses,
-        MutltipleViewErrorPrincipalmessage,
-        MutltipleViewErrorCauses,
+        MultipleViewErrorPrincipalmessage,
+        MultipleViewErrorCauses,
         CallViewErrorCildrenNotValidatedmessage)
 from pontus.core import STEPID, Step
 
@@ -349,7 +349,7 @@ class MultipleView(MultipleViewsOperation):
         if not self.validated_children and \
            not self.include_failed_views:
             error = ViewError()
-            error.principalmessage = MutltipleViewErrorPrincipalmessage
+            error.principalmessage = MultipleViewErrorPrincipalmessage
             causes = set()
             for viewinstance, er in self.errors:
                 causes.update(er.causes)
@@ -366,8 +366,8 @@ class MultipleView(MultipleViewsOperation):
 
         if not result:
             error = ViewError()
-            error.principalmessage = MutltipleViewErrorPrincipalmessage
-            error.causes = MutltipleViewErrorCauses
+            error.principalmessage = MultipleViewErrorPrincipalmessage
+            error.causes = MultipleViewErrorCauses
             raise error
 
         if not isinstance(result, dict):

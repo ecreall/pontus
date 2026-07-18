@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+### Rename — 2026-07-17
+- The ``Mutltiple*`` error-message constants become ``Multiple*``
+  (nothing persisted); backward-compatibility aliases are kept.
+
 ### Fix — 2026-07-17: the three latent bugs are repaired
 - `Wizard.update()` runs on both of its paths: the resume branch reads
   `self.nodes` (the constructor's mirror) instead of the phantom

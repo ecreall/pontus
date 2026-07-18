@@ -163,3 +163,7 @@ English version: [`../en/worklog.md`](../en/worklog.md).
   aboutit sur les deux piles) ; `_init_children` bâtit des
   sous-classes par cible (plus de mutation des classes partagées).
   Suite 39/39 ; known-issues.md devient la mémoire historique.
+
+- **Fenêtre des renommages.** Les constantes de messages `Mutltiple*`
+  deviennent `Multiple*` (chaînes de module — rien de persisté) ; des
+  alias de compatibilité gardent les noms historiques importables.

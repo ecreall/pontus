@@ -152,3 +152,7 @@ Version française : [`../fr/worklog.md`](../fr/worklog.md).
   on both stacks); `_init_children` builds per-target subclasses (no
   shared-class mutation). Suite 39/39; known-issues.md becomes the
   historical record.
+
+- **Rename window.** The `Mutltiple*` error-message constants become
+  `Multiple*` (module-level strings — nothing persisted);
+  backward-compatibility aliases keep the historical names importable.
